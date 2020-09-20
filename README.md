@@ -17,5 +17,5 @@ Atmospheric mixed-layer model for subtropical stratocumulus clouds and their res
 [bors-img]: https://bors.tech/images/badge_small.svg
 [bors-url]: https://app.bors.tech/repositories/27166
 
-[travis-img]: https://travis-ci.org/claresinger/MixedLayerModel.jl.svg?branch=master
-[travis-url]: https://travis-ci.org/claresinger/MixedLayerModel.jl
+[travis-img]: https://travis-ci.com/claresinger/MixedLayerModel.jl.svg?branch=master
+[travis-url]: https://travis-ci.com/claresinger/MixedLayerModel.jl

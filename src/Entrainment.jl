@@ -5,7 +5,7 @@ using ..Thermodynamics
 using ..SurfaceFluxes
 using ..Radiation
 
-export we
+export we, fixed, enBal, bflux
 
 ###########
 # create structure for ent_type

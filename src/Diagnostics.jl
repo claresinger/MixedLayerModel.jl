@@ -3,6 +3,7 @@ module Diagnostics
 using ..Thermodynamics
 using ..SurfaceFluxes
 using ..TopFluxes
+using ..Entrainment
 
 export calc_bflux
 

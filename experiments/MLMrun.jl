@@ -1,12 +1,9 @@
-module MLMrun
-
-include("Definitions.jl")
+include("../src/Definitions.jl")
 using DifferentialEquations
-using ..Thermodynamics
-using ..SurfaceFluxes
-using ..Radiation
-using ..Entrainment
-using ..MLMODE
+
+using MixedLayerModel.Thermodynamics
+using MixedLayerModel.Radiation
+using MixedLayerModel.MLMODE
 
 function run(params, print=false)    
     z0 = 0.0;
@@ -52,6 +49,4 @@ function run_with_output(params)
     println();
     
     return u0, uf, par
-end
-
 end

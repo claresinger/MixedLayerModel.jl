@@ -12,6 +12,9 @@ makedocs(
     clean = false,
     pages = Any[
         "Home" => "index.md"
+        "Mixed Layer Theory" => "theory.md"
+        "Thermodynamics" => "thermo.md"
+        "Radiation" => "radiation.md"
         "APIs" => "library.md"
     ]
 )

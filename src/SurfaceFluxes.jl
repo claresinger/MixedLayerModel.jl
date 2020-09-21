@@ -1,7 +1,9 @@
 module SurfaceFluxes
 
+include("Definitions.jl")
 using ..Thermodynamics
 
+export flux_type, varFlux, fixFlux
 export H_0, Q_0, calc_SHF, calc_LHF
 
 ## create type for surface fluxes
@@ -55,7 +57,7 @@ end
 """
 function Q_0(u, p, ftype::fixFlux)
     zi, hM, qM, SST = u;
-    Q0 = p.LHF / (rho_ref(SST) * L0);
+    Q0 = p.LHF / (ρref(SST) * L0);
     return Q0
 end
 

@@ -1,5 +1,6 @@
 module TopFluxes
 
+include("Definitions.jl")
 using ..Entrainment
 
 export H_zi, Q_zi

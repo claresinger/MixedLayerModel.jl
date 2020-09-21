@@ -1,5 +1,7 @@
 module MLMODE
 
+include("Definitions.jl")
+using ..Thermodynamics
 using ..Entrainment
 using ..Radiation
 using ..SurfaceFluxes

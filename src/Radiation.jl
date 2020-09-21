@@ -1,8 +1,9 @@
 module Radiation
 
+include("Definitions.jl")
 using ..Thermodynamics
 
-export calc_surf_RAD, calc_cloud_RAD
+export calc_surf_RAD, calc_cloud_RAD, atmos_emissivity
 
 """
     calculate net SW and LW radiation at the surface

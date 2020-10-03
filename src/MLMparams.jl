@@ -6,7 +6,7 @@ using MixedLayerModel.Entrainment
 using MixedLayerModel.Radiation
 using MixedLayerModel.SurfaceFluxes
 
-@with_kw mutable struct interact_surf_params
+@with_kw mutable struct basic_params
     SST0::Real = 290.0; # (K)
     dSST::Real = 0.0; # (K/day)
 

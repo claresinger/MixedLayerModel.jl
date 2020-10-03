@@ -1,4 +1,4 @@
-module MLMODE
+module MLMode
 
 include("Definitions.jl")
 using ..Thermodynamics
@@ -24,7 +24,7 @@ end
 """
 function dhMdt(u, p)
     zi, hM, qM, SST = u;
-    ΔR = calc_cloud_RAD(u,p);
+    ΔR = calc_cloud_RAD(u,p,p.rtype);
     H0 = H_0(u, p, p.ftype);
     Hzi = H_zi(u, p);
     dEdz = 1/zi * (Hzi - H0 + ΔR/ρref(SST));

@@ -6,6 +6,7 @@ include("Definitions.jl")
 export ρref, pres, q_sat, q_v, q_l, temp, rho
 export RH, theta
 export calc_LWP, calc_LCL
+export calc_qft0
 
 """
     calculate reference density given temperature
@@ -146,6 +147,22 @@ function calc_LCL(zi, hM, qtM)
         end
     end
     return zb
+end
+
+"""
+    calculate the initial free-tropospheric humidity given
+    ft RH, ft humidity lapse rate, initial ft dry static energy, 
+    and ft dry static energy lapse rate
+"""
+function calc_qft0(RHft, Gamma_q, sft0, Gamma_s)
+    zft = 900.0;
+    qft(x) = x + Gamma_q * zft;
+    hft(x) = Cp * (sft0 + Gamma_s * zft) + L0 * qft(x);
+    Tft(x) = temp(zft, hft(x), qft(x));
+    f(x) = x .- q_sat(zft, Tft(x)) .* RHft;
+    qft0 = find_zero(f, (0.0,0.1), Bisection());
+    qft0 = qft0 - Gamma_q * zft;
+    return qft0
 end
 
 end

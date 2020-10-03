@@ -27,7 +27,7 @@ end
 # entrainment velocity obtained via energy balance requirement
 function we(u, p, etype::enBal)
     zi, hM, qM, SST = u;
-    ΔR = calc_cloud_RAD(u,p);
+    ΔR = calc_cloud_RAD(u,p,p.rtype);
 
     # calculate change in s_vl across inversion
     hft = h_ft(zi, p);

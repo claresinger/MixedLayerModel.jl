@@ -1,18 +1,20 @@
-include("../src/Definitions.jl")
 using DifferentialEquations
 
+include("Definitions.jl")
 using MixedLayerModel.Thermodynamics
 using MixedLayerModel.Radiation
-using MixedLayerModel.MLMODE
+using MixedLayerModel.MLMode
 
-function run(params, print=false)    
+function run(params, print=false)
+    params.qft0 = calc_qft0(params.RHft, params.Gamma_q, params.sft0, params.Gamma_s);
+    
     z0 = 0.0;
     qtM0 = params.RHsurf * q_sat(z0, params.SST0);
     hM0 = Cp * (params.SST0 - 2.0) + L0 * qtM0;
     
     zi0 = 900.0
     u0 = [zi0, hM0, qtM0, params.SST0];
-    
+
     prob = SteadyStateProblem(mlm, u0, params);
     tspan = 3600.0 * 24.0 * 100.0;
     tol = 1e-6;
@@ -45,7 +47,7 @@ function run_with_output(params)
     println("LHF = ", calc_LHF(uf,par)," (W/m2)");
     println("SHF = ", calc_SHF(uf,par)," (W/m2)");
     println("LWP = ", calc_LWP(zi,hM,qM)*1000.0," (g/m^2)");
-    println("ΔR = ", calc_cloud_RAD(uf,par)," (W/m^2)");
+    println("ΔR = ", calc_cloud_RAD(uf,par,par.rtype)," (W/m^2)");
     println();
     
     return u0, uf, par

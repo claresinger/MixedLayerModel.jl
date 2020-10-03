@@ -3,7 +3,15 @@ module Radiation
 include("Definitions.jl")
 using ..Thermodynamics
 
+export rad_type, varRad, fixRad
 export calc_surf_RAD, calc_cloud_RAD, atmos_emissivity
+
+## create type for radiation
+## one where ΔR is prescribed
+## one where ΔR is calculated from LWP and cloud top temperature
+abstract type rad_type end
+struct varRad <: rad_type end
+struct fixRad <: rad_type end
 
 """
     calculate net SW and LW radiation at the surface
@@ -34,7 +42,15 @@ end
     calculate the net OLR at cloud-top based on CO2
     this is the 3-layer atmosphere model
 """
-function calc_cloud_RAD(u,p)
+function calc_cloud_RAD(u,p,rtype::fixRad)
+    return p.ΔR
+end
+
+"""
+    calculate the net OLR at cloud-top based on CO2
+    this is the 3-layer atmosphere model
+"""
+function calc_cloud_RAD(u,p,rtype::varRad)
     zi, hM, qM, SST = u;
     Tct = temp(zi,hM,qM);
     Ta = Tct - 5.0;

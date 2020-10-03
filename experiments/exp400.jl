@@ -1,5 +1,5 @@
-include("MLMparams.jl")
-include("MLMrun.jl")
+include("../src/MLMparams.jl")
+include("../src/MLMrun.jl")
 
 ###
 # run to equilibrium in base state with 400 ppm CO2

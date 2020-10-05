@@ -1,17 +1,16 @@
-module Entrainment
+# include("SurfaceFluxes.jl")
+# include("Radiation.jl")
 
-include("Definitions.jl")
-using ..Thermodynamics
-using ..SurfaceFluxes
-using ..Radiation
+# include("Definitions.jl")
+# using ..Thermodynamics
+# using ..SurfaceFluxes
+# using ..Radiation
 
-export ent_type, fixed, enBal, bflux
-export we
+# export ent_type, fixed, enBal, bflux
+# export we
 
 ###########
 # create structure for ent_type
-# can add as many definitions for entrainment as you like!
-# multiple dispatch is such a great thing. yay Julia!
 ###########
 abstract type ent_type end
 struct fixed <: ent_type end
@@ -71,6 +70,4 @@ function we(u, p, etype::bflux)
     α = (2.5 * p.A) / (zi * Ds_vli);
     w = α*I0 / (1 - α*I1)
     return w
-end
-
 end

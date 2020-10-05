@@ -1,10 +1,10 @@
-module Radiation
+# include("Thermodynamics.jl")
 
-include("Definitions.jl")
-using ..Thermodynamics
+# include("Definitions.jl")
+# using ..Thermodynamics
 
-export rad_type, varRad, fixRad
-export calc_surf_RAD, calc_cloud_RAD, atmos_emissivity
+# export rad_type, varRad, fixRad
+# export calc_surf_RAD, calc_cloud_RAD, atmos_emissivity
 
 ## create type for radiation
 ## one where ΔR is prescribed
@@ -106,6 +106,4 @@ function cloud_emissivity_down(LWP)
     a0_down = 0.158; # m^2/g
     ϵc_down = 1 - exp(-a0_down * LWP); 
     return ϵc_down
-end
-
 end

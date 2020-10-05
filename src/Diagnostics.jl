@@ -1,11 +1,9 @@
-module Diagnostics
+# using ..Thermodynamics
+# using ..SurfaceFluxes
+# using ..TopFluxes
+# using ..Entrainment
 
-using ..Thermodynamics
-using ..SurfaceFluxes
-using ..TopFluxes
-using ..Entrainment
-
-export calc_bflux
+# export calc_bflux
 
 # calculate the buoyancy flux for plotting
 function calc_bflux(u, p, z1, z2, z3, etype::bflux)
@@ -28,6 +26,4 @@ function calc_bflux(u, p, z1, z2, z3, etype::bflux)
     bflux = wsv_z * (g / Cp / Tsurf);
     
     return bflux
-end
-
 end

@@ -1,9 +1,9 @@
-module TopFluxes
+# include("Entrainment.jl")
 
-include("Definitions.jl")
-using ..Entrainment
+# include("Definitions.jl")
+# using ..Entrainment
 
-export H_zi, Q_zi
+# export H_zi, Q_zi
 
 # define H(zi) function
 function H_zi(u, p)
@@ -19,6 +19,4 @@ function Q_zi(u, p)
     qft = q_ft(zi, p);
     Qzi = - we(u, p, p.etype) * (qft - qM);
     return Qzi
-end
-
 end

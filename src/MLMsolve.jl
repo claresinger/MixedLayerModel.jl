@@ -1,9 +1,9 @@
-using DifferentialEquations
+# using DifferentialEquations
 
-include("Definitions.jl")
-using MixedLayerModel.Thermodynamics
-using MixedLayerModel.Radiation
-using MixedLayerModel.MLMode
+# include("Definitions.jl")
+# using MixedLayerModel.Thermodynamics
+# using MixedLayerModel.Radiation
+# using MixedLayerModel.MLMode
 
 function run(params, print=false)
     params.qft0 = calc_qft0(params.RHft, params.Gamma_q, params.sft0, params.Gamma_s);

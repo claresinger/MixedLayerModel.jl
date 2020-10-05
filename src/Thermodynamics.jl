@@ -1,12 +1,10 @@
-module Thermodynamics
+# using Roots
 
-using Roots
-include("Definitions.jl")
-
-export ρref, pres, q_sat, q_v, q_l, temp, rho
-export RH, theta
-export calc_LWP, calc_LCL
-export calc_qft0
+# include("Definitions.jl")
+# export ρref, pres, q_sat, q_v, q_l, temp, rho
+# export RH, theta
+# export calc_LWP, calc_LCL
+# export calc_qft0
 
 """
     calculate reference density given temperature
@@ -163,6 +161,4 @@ function calc_qft0(RHft, Gamma_q, sft0, Gamma_s)
     qft0 = find_zero(f, (0.0,0.1), Bisection());
     qft0 = qft0 - Gamma_q * zft;
     return qft0
-end
-
 end

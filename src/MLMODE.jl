@@ -1,13 +1,13 @@
-module MLMode
+# include("TopFluxes.jl")
 
-include("Definitions.jl")
-using ..Thermodynamics
-using ..Entrainment
-using ..Radiation
-using ..SurfaceFluxes
-using ..TopFluxes
+# include("Definitions.jl")
+# using ..Thermodynamics
+# using ..Entrainment
+# using ..Radiation
+# using ..SurfaceFluxes
+# using ..TopFluxes
 
-export mlm
+# export mlm
 
 """
     evolution of inversion height, zi
@@ -70,6 +70,4 @@ function mlm(du, u, p, t)
     du[2] = dhMdt(u, p)
     du[3] = dqMdt(u, p)
     du[4] = dSSTdt(u, p)
-end
-
 end

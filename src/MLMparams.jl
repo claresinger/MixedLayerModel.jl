@@ -21,6 +21,9 @@ export basic_params
     V::Real = 10.0; # m/s
     CTh::Real = 8e-4;
     CTq::Real = 8e-4;
+
+    LHF::Real = 90.0; # (W/m^2)
+    SHF::Real = 5.0; # (W/m^2)
     
     Hw::Real = 1.0;
     OHU::Real = 10.0;

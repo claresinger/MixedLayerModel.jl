@@ -177,13 +177,8 @@ function get_phi(u, p, phi, stepz, maxz)
     elseif phi == "cf"
         x = ceil.(q_l(z,T,qt)) * 100.0; # -> %
     elseif phi == "bflux"                                                                           
-        zb = LCL(zi,hM,qM);
-        z = collect(0:stepz:maxz);
-        z1 = z[z .< zb];
-        z2 = intersect(z[z .>= zb], z[z .< zi];)
-        z3 = z[z .>= zi];
-        
-        bflux = calc_bflux(u,p,z1,z2,z3,p.etype);                            
+        zarr = collect(0:stepz:maxz);
+        bflux = calc_bflux(u,p,zarr,p.etype);                            
         x = bflux * 1e4; # m^2/s^3 -> 10^-4 m^2/s^3
     else
         print("error: no option for phi == "+phi)

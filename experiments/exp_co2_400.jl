@@ -1,6 +1,4 @@
-include("../src/Radiation.jl")
-include("../src/MLMparams.jl")
-include("../src/MLMrun.jl")
+using MixedLayerModel
 
 ###
 # run to equilibrium in base state with 400 ppm CO2

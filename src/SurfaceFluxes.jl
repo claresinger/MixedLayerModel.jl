@@ -1,10 +1,5 @@
-# include("Thermodynamics.jl")
-
-# include("Definitions.jl")
-# using ..Thermodynamics
-
-# export flux_type, varFlux, fixFlux
-# export H_0, Q_0, calc_SHF, calc_LHF
+export flux_type, varFlux, fixFlux
+export H_0, Q_0, calc_SHF, calc_LHF
 
 ## create type for surface fluxes
 ## one where SHF and LHF are calculated interactively from bulk aerodynamic formula

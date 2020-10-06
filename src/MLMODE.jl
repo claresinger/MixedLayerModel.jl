@@ -1,15 +1,8 @@
-# include("TopFluxes.jl")
-
-# include("Definitions.jl")
-# using ..Thermodynamics
-# using ..Entrainment
-# using ..Radiation
-# using ..SurfaceFluxes
-# using ..TopFluxes
-
-# export mlm
+export mlm
 
 """
+    dzidt(u, p)
+
     evolution of inversion height, zi
     balance between entrainment and subsidence
 """
@@ -19,12 +12,14 @@ function dzidt(u, p)
 end
 
 """
+    dhMdt(u, p) 
+
     evolution of mixed-layer enthalpy, hM
     negative of the vertical energy flux
 """
 function dhMdt(u, p)
     zi, hM, qM, SST = u;
-    ΔR = calc_cloud_RAD(u,p,p.rtype);
+    ΔR = calc_cloudtop_RAD(u,p,p.rtype);
     H0 = H_0(u, p, p.ftype);
     Hzi = H_zi(u, p);
     dEdz = 1/zi * (Hzi - H0 + ΔR/ρref(SST));
@@ -33,6 +28,8 @@ function dhMdt(u, p)
 end
 
 """
+    dqMdt(u, p)
+
     evolution of mixed-layer total water specific humidity, qM
     negative of the vertical water flux
 """
@@ -46,6 +43,8 @@ function dqMdt(u, p)
 end
 
 """
+    dSSTdt(u, p)
+
     define dSSTdz() function
     close surface energy budge
 """
@@ -63,6 +62,8 @@ function dSSTdt(u, p)
 end
 
 """
+    mlm(du, u, p, t)    
+
     define the coupled ODE
 """
 function mlm(du, u, p, t)

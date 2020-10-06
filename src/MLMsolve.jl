@@ -1,10 +1,10 @@
-# using DifferentialEquations
+export run, run_with_output
 
-# include("Definitions.jl")
-# using MixedLayerModel.Thermodynamics
-# using MixedLayerModel.Radiation
-# using MixedLayerModel.MLMode
+"""
+    run(params, print=false)
 
+    run MLM simulation with given parameters
+"""
 function run(params, print=false)
     params.qft0 = calc_qft0(params.RHft, params.Gamma_q, params.sft0, params.Gamma_s);
     
@@ -29,6 +29,11 @@ function run(params, print=false)
     return u0, uf, params
 end
 
+"""
+    run_with_output(params)
+
+    run MLM simulation and print output for debugging
+"""
 function run_with_output(params)
     u0, uf, par = run(params, true);
     
@@ -47,7 +52,7 @@ function run_with_output(params)
     println("LHF = ", calc_LHF(uf,par)," (W/m2)");
     println("SHF = ", calc_SHF(uf,par)," (W/m2)");
     println("LWP = ", calc_LWP(zi,hM,qM)*1000.0," (g/m^2)");
-    println("ΔR = ", calc_cloud_RAD(uf,par,par.rtype)," (W/m^2)");
+    println("ΔR = ", calc_cloudtop_RAD(uf,par,par.rtype)," (W/m^2)");
     println();
     
     return u0, uf, par

@@ -1,14 +1,21 @@
-# using ..Thermodynamics
-# using ..SurfaceFluxes
-# using ..TopFluxes
-# using ..Entrainment
+export calc_bflux
 
-# export calc_bflux
+"""
+    calc_bflux(u, p, zarr, etype::bflux)
 
-# calculate the buoyancy flux for plotting
-function calc_bflux(u, p, z1, z2, z3, etype::bflux)
+    u is the state vector [zi, hM, qM, SST]
+    p is the parameter object
+    zarr is an array of altitudes from 0 to some maxz > zi
+
+    calculates the buoyancy flux for plotting
+"""
+function calc_bflux(u, p, zarr, etype::bflux)
     zi,hM,qM,SST = u;
     zb = calc_LCL(zi,hM,qM);
+
+    z1 = zarr[zarr .< zb];
+    z2 = intersect(zarr[zarr .>= zb], zarr[zarr .< zi];)
+    z3 = zarr[zarr .>= zi];
                                                                                         
     H0 = H_0(u, p, p.ftype);
     Q0 = Q_0(u, p, p.ftype);

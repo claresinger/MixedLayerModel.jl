@@ -1,10 +1,4 @@
-# using Parameters
-# using Roots
-
-# using MixedLayerModel.Thermodynamics
-# using MixedLayerModel.Entrainment
-# using MixedLayerModel.Radiation
-# using MixedLayerModel.SurfaceFluxes
+export basic_params
 
 @with_kw mutable struct basic_params
     SST0::Real = 290.0; # (K)

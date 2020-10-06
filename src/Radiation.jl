@@ -1,10 +1,5 @@
-# include("Thermodynamics.jl")
-
-# include("Definitions.jl")
-# using ..Thermodynamics
-
-# export rad_type, varRad, fixRad
-# export calc_surf_RAD, calc_cloud_RAD, atmos_emissivity
+export rad_type, varRad, fixRad
+export calc_surf_RAD, calc_cloudtop_RAD
 
 ## create type for radiation
 ## one where ΔR is prescribed
@@ -26,7 +21,7 @@ function calc_surf_RAD(u,p)
     SW_net = (1-αc) * (1-αs) * S_subtr;
 
     # longwave calculation
-    ϵc_down = cloud_emissivity_down(LWP);
+    ϵc_down = cloud_emissivity(LWP);
     zb = calc_LCL(zi,hM,qM);
     zc = (zi+zb)/2.0;
     Tc = temp(zc,hM,qM);
@@ -42,7 +37,7 @@ end
     calculate the net OLR at cloud-top based on CO2
     this is the 3-layer atmosphere model
 """
-function calc_cloud_RAD(u,p,rtype::fixRad)
+function calc_cloudtop_RAD(u,p,rtype::fixRad)
     return p.ΔR
 end
 
@@ -50,14 +45,14 @@ end
     calculate the net OLR at cloud-top based on CO2
     this is the 3-layer atmosphere model
 """
-function calc_cloud_RAD(u,p,rtype::varRad)
+function calc_cloudtop_RAD(u,p,rtype::varRad)
     zi, hM, qM, SST = u;
     Tct = temp(zi,hM,qM);
     Ta = Tct - 5.0;
     ϵa = atmos_emissivity(p);
     
     LWP = calc_LWP(zi, hM, qM)*1000.0; # kg/m^2 \to g/m^2
-    ϵc_up = cloud_emissivity_up(LWP);
+    ϵc_up = cloud_emissivity(LWP);
     
     ΔR = ϵc_up * σ_SB * Tct^4 - ϵa * σ_SB * Ta^4;
     return ΔR
@@ -83,27 +78,40 @@ end
     this yields reasonable ΔR values of order 50 W/m^2 for current temps
 """
 function atmos_emissivity(p)
-    #ϵa = exp(-1/p.CO2+1/400.0)*0.8;
     ϵa = log(p.CO2)/log(400.0)*0.8;
     return ϵa
 end
 
 """
-    emissivity of the cloud given LWP in g/m^2
-    emissivity up from Stephens 1978 part 2. eq 15 and 16.
+    cloud_emissivity(LWP)
+
+    emissivity of the cloud as a function of LWP
+    ϵ = 1 - exp(-a0 * LWP) with a0 = 0.15 m^2/given
+
+    based on Stephens 1978 part II: eq 15 and 16
 """
-function cloud_emissivity_up(LWP)
-    a0_up = 0.13; # m^2/g
-    ϵc_up = 1 - exp(-a0_up * LWP); 
-    return ϵc_up
+function cloud_emissivity(LWP)
+    a0 = 0.15; # m^2/g
+    ϵc = 1 - exp(-a0 * LWP); 
+    return ϵc
 end
 
-"""
-    emissivity of the cloud given LWP in g/m^2
-    emissivity down from Stephens 1978 part 2. eq 15 and 16.
-"""
-function cloud_emissivity_down(LWP)
-    a0_down = 0.158; # m^2/g
-    ϵc_down = 1 - exp(-a0_down * LWP); 
-    return ϵc_down
-end
+# """
+#     emissivity of the cloud given LWP in g/m^2
+#     emissivity up from Stephens 1978 part 2. eq 15 and 16.
+# """
+# function cloud_emissivity_up(LWP)
+#     a0_up = 0.13; # m^2/g
+#     ϵc_up = 1 - exp(-a0_up * LWP); 
+#     return ϵc_up
+# end
+
+# """
+#     emissivity of the cloud given LWP in g/m^2
+#     emissivity down from Stephens 1978 part 2. eq 15 and 16.
+# """
+# function cloud_emissivity_down(LWP)
+#     a0_down = 0.158; # m^2/g
+#     ϵc_down = 1 - exp(-a0_down * LWP); 
+#     return ϵc_down
+# end

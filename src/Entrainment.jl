@@ -1,13 +1,5 @@
-# include("SurfaceFluxes.jl")
-# include("Radiation.jl")
-
-# include("Definitions.jl")
-# using ..Thermodynamics
-# using ..SurfaceFluxes
-# using ..Radiation
-
-# export ent_type, fixed, enBal, bflux
-# export we
+export ent_type, fixed, enBal, bflux
+export we
 
 ###########
 # create structure for ent_type
@@ -17,41 +9,53 @@ struct fixed <: ent_type end
 struct enBal <: ent_type end
 struct bflux <: ent_type end
 
-# fixed entrainment velocity
+"""
+    we(u, p, etype::fixed)
+
+    fixed entrainment velocity of 1.5 mm/s
+""" 
 function we(u, p, etype::fixed)
     w = 0.0015; # 1.5 mm/s
     return w
 end
 
-# entrainment velocity obtained via energy balance requirement
+"""
+    we(u, p, etype::enBal)
+
+    entrainment velocity obtained via energy balance requirement
+    w = ΔR / (Δs_vli * ρref)
+"""
 function we(u, p, etype::enBal)
     zi, hM, qM, SST = u;
-    ΔR = calc_cloud_RAD(u,p,p.rtype);
+    ΔR = calc_cloudtop_RAD(u,p,p.rtype);
 
     # calculate change in s_vl across inversion
     hft = h_ft(zi, p);
     qft = q_ft(zi, p);
-    Ds_vli = (hft - hM) - μ*L0*(qft - qM);
+    Δs_vli = (hft - hM) - μ*L0*(qft - qM);
 
     f = ΔR / rho_ref(SST);
 
     # calculate entrianment rate
-    w = (f/Ds_vli);
+    w = (f/Δs_vli);
     return w
 end
 
-# buoyancy flux entrainment velocity
-# without radiation
+"""
+    we(u, p, etype::bflux)
+
+    entrainment velocity based on buoyancy flux
+    without radiation
+    
+    integral is calculated analytically
+"""
 function we(u, p, etype::bflux)
     zi, hM, qM, SST = u;
     
-    # calculate change in s_v across inversion
+    # calculate change in s_vl across inversion
     hft = h_ft(zi, p);
     qft = q_ft(zi, p);
-
-    svlft = hft - μ*L0*qft;
-    svlM = hM - μ*L0*qM;
-    Ds_vli = svlft - svlM;
+    Δs_vli = (hft - hM) - μ*L0*(qft - qM);
 
     # calculate sv flux <w'sv'>(z) = f0(z) + we*f1(z)
     # split into two terms I0, I1 where Ii = \integral fi(z) dz
@@ -67,7 +71,7 @@ function we(u, p, etype::bflux)
     B1 = β*(hft - hM) - ϵ*L0*(qft - qM);
     I1 = A1 * (-(zb^2)/(2*zi)) + B1 * ((-zi^2 + zb^2)/(2*zi));
     
-    α = (2.5 * p.A) / (zi * Ds_vli);
+    α = (2.5 * p.A) / (zi * Δs_vli);
     w = α*I0 / (1 - α*I1)
     return w
 end

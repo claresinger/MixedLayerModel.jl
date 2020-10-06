@@ -1,11 +1,11 @@
-# include("Entrainment.jl")
+export H_zi, Q_zi
 
-# include("Definitions.jl")
-# using ..Entrainment
+"""
+    H_zi(u, p)
 
-# export H_zi, Q_zi
-
-# define H(zi) function
+    enthalpy flux into the mixed-layer from above at z=zi
+    H_zi = -we * (hft - hM)
+"""
 function H_zi(u, p)
     zi, hM, qM, SST = u;
     hft = h_ft(zi, p);
@@ -13,10 +13,37 @@ function H_zi(u, p)
     return Hzi
 end
 
-# define Q(zi) function
+"""
+    Q_zi(u, p)
+
+    moisture flux into the mixed-layer from above at z=zi
+    Q_zi = -we * (qft - qM)
+"""
 function Q_zi(u, p)
     zi, hM, qM, SST = u;
     qft = q_ft(zi, p);
     Qzi = - we(u, p, p.etype) * (qft - qM);
     return Qzi
+end
+
+"""
+    q_ft(z, p)
+
+    defines qt+(z) in free troposphere -- given Gamma_q
+"""
+function q_ft(z, p)
+    qft = p.qft0 .+ p.Gamma_q .* z
+    qft = max.(qft, 2e-3)
+    return qft
+end
+
+"""
+    h_ft(z, p)
+
+    defines h+(z) in free troposphere -- given Gamma_s and Gamma_q
+"""
+function h_ft(z, p)
+    sft = p.sft0 .+ p.Gamma_s .* z
+    hft = sft .* Cp .+ L0 .* q_ft(z, p)
+    return hft
 end

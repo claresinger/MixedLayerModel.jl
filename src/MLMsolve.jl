@@ -5,7 +5,7 @@ export run, run_with_output
 
     run MLM simulation with given parameters
 """
-function run(params, print=false)
+function run(params)
     params.qft0 = calc_qft0(params.RHft, params.Gamma_q, params.sft0, params.Gamma_s);
     
     z0 = 0.0;
@@ -22,38 +22,33 @@ function run(params, print=false)
     sol = solve(prob, DynamicSS(Rosenbrock23(autodiff=false);abstol=tol,reltol=0.0,tspan=tspan));
     uf = sol.u;
     
-    if print
-        println(sol.retcode);
-    end
-
-    return u0, uf, params
+    return u0, uf, params, sol
 end
 
 """
     run_with_output(params)
 
-    run MLM simulation and print output for debugging
+    run MLM simulation and print output to file
 """
-function run_with_output(params)
-    u0, uf, par = run(params, true);
-    
-    println("CO2: ",par.CO2);
-    println("u0: ",u0);
-    println("uf: ",uf);
-    
+function run_with_output(params, filename="default.txt")
+    u0, uf, par, sol = run(params);
     du = zeros(4);
     mlm(du, uf, par, 0.0);
-    println("du/u: ", du ./ uf);
     zi,hM,qM,SST = uf;
     
-    println("we = ", we(uf,par,par.etype)*1000, " (mm/s)");
-    println("zc = ", zi - calc_LCL(zi,hM,qM)," (m)");
-    println("RH0 = ", RH(0.0,hM,qM)*100.0," (%)");
-    println("LHF = ", calc_LHF(uf,par)," (W/m2)");
-    println("SHF = ", calc_SHF(uf,par)," (W/m2)");
-    println("LWP = ", calc_LWP(zi,hM,qM)*1000.0," (g/m^2)");
-    println("ΔR = ", calc_cloudtop_RAD(uf,par,par.rtype)," (W/m^2)");
-    println();
-    
+    filename = string("experiments/output/",filename)
+    open(filename, "a") do io
+        write(io, string(sol.retcode,"\n"))
+        write(io, string("u0: ",u0,"\n"))
+        write(io, string("uf: ",uf,"\n"))
+        write(io, string("du/u: ", du ./ uf,"\n"))
+        write(io, string("we = ", we(uf,par,par.etype)*1000, " (mm/s)\n"))
+        write(io, string("zc = ", zi - calc_LCL(zi,hM,qM)," (m)\n"))
+        write(io, string("RH0 = ", RH(0.0,hM,qM)*100.0," (%)\n"))
+        write(io, string("LHF = ", calc_LHF(uf,par)," (W/m2)\n"))
+        write(io, string("SHF = ", calc_SHF(uf,par)," (W/m2)\n"))
+        write(io, string("dR = ", calc_cloudtop_RAD(uf,par,par.rtype)," (W/m^2)\n"))
+    end;
+
     return u0, uf, par
 end

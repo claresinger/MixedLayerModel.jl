@@ -1,3 +1,4 @@
+experiments/output/
 docs/build/
 *.cov
 *.ipynb_checkpoints/

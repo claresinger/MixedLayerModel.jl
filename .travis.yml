@@ -5,14 +5,8 @@ os:
   - linux
 julia:
   - 1.5
-  - nightly
 notifications:
   email: false
-
-# comment the following lines to disallow failures on nightly julia
-matrix:
-  allow_failures:
-  - julia: nightly
 
 codecov: true
 

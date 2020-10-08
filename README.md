@@ -1,6 +1,7 @@
 # MixedLayerModel.jl
 Atmospheric mixed-layer model for subtropical stratocumulus clouds and their response to increasing CO2
 
+|||
 |---------------------:|:----------------------------------------------|
 | **Documentation**    | [![latest][docs-dev-img]][docs-dev-url]       |
 | **Travis Build**     | [![travis][travis-img]][travis-url]           |

@@ -1,4 +1,4 @@
-export calc_bflux
+export calc_bflux, calc_OHU
 
 """
     calc_bflux(u, p, zarr, etype::bflux)
@@ -33,4 +33,30 @@ function calc_bflux(u, p, zarr, etype::bflux)
     bflux = wsv_z * (g / Cp / Tsurf);
     
     return bflux
+end
+
+"""
+    calc_OHU(u, p, p.stype::fixSST())
+
+    u is the state vector [zi, hM, qM, SST]
+    p is the parameter object
+
+    calculates the ocean heat uptake as the residual 
+    between the radiative fluxes and the LHF + SHF
+"""
+function calc_OHU(u, p, p.stype::fixSST)
+    OHU = calc_surf_RAD(u,p) - calc_SHF(u,p) - calc_LHF(u,p);
+    return OHU
+end
+
+"""
+    calc_OHU(u, p)
+
+    u is the state vector [zi, hM, qM, SST]
+    p is the parameter object
+
+    returns p.OHU
+"""
+function calc_OHU(u, p, p.stype::varSST)
+    return p.OHU
 end

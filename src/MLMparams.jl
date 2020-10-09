@@ -2,7 +2,6 @@ export basic_params
 
 @with_kw mutable struct basic_params
     SST0::Real = 290.0; # (K)
-    dSST::Real = 0.0; # (K/day)
 
     CO2::Real = 400; # (ppm)
     ΔR::Real = 80; # (W/m2)
@@ -31,6 +30,7 @@ export basic_params
     etype::ent_type = bflux();
     ftype::flux_type = varFlux();
     rtype::rad_type = fixRad();
+    stype::sst_type = fixSST();
 end
 
 # @with_kw mutable struct dycoms_params

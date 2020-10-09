@@ -1,4 +1,12 @@
+export sst_type, fixSST, varSST
 export mlm
+
+## create type for surface energy balance
+## one where SST is fixed
+## one where SST evolves according to an energy budget
+abstract type sst_type end
+struct fixSST <: sst_type end
+struct varSST <: sst_type end
 
 """
     dzidt(u, p)
@@ -46,18 +54,24 @@ end
     dSSTdt(u, p)
 
     define dSSTdz() function
-    close surface energy budge
+    defined as 0 for fixSST()
 """
-function dSSTdt(u, p)
-    if p.dSST == 0
-        x = 0
-    else
-        RAD = calc_surf_RAD(u,p);
-        SHF = calc_SHF(u, p);
-        LHF = calc_LHF(u, p);   
-        c = ρw * Cw * p.Hw;
-        x = (1/c) * (RAD - SHF - LHF - p.OHU);
-    end
+function dSSTdt(u, p, p.stype::fixSST())
+    return 0
+end
+
+"""
+    dSSTdt(u, p)
+
+    define dSSTdz() function
+    close surface energy budge for varSST()
+"""
+function dSSTdt(u, p, p.stype::varSST())
+    RAD = calc_surf_RAD(u,p);
+    SHF = calc_SHF(u, p);
+    LHF = calc_LHF(u, p);   
+    c = ρw * Cw * p.Hw;
+    x = (1/c) * (RAD - SHF - LHF - p.OHU);
     return x
 end
 

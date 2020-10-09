@@ -11,16 +11,10 @@ end;
 par = basic_params();
 par.rtype = varRad();
 par.CO2 = 400.0;
-u0, uf = run_with_output(par, filename);
-OHU = calc_surf_RAD(uf,par) - calc_SHF(uf,par) - calc_LHF(uf,par);
-open(string("experiments/output/",filename), "a") do io
-    write(io, string("OHU: ",OHU," (W/m^2)\n\n"))
-end;
+u0, uf = run(par, filename);
 
-# now increase CO2 and check
-par = basic_params();
-par.rtype = varRad();
+# set OHU, increase CO2, let SST evolve and check cloud changes
+par.OHU = calc_OHU(uf, par, par.stype);
 par.CO2 = 600.0;
-par.dSST = 1.0;
-par.OHU = OHU;
-u0, uf = run_with_output(par, filename);
+par.stype = varSST();
+u0, uf = run_from_init(uf, par, filename);

@@ -54,9 +54,9 @@ end
     dSSTdt(u, p)
 
     define dSSTdz() function
-    defined as 0 for fixSST()
+    defined as 0 for fixSST
 """
-function dSSTdt(u, p, p.stype::fixSST())
+function dSSTdt(u, p, stype::fixSST)
     return 0
 end
 
@@ -64,9 +64,9 @@ end
     dSSTdt(u, p)
 
     define dSSTdz() function
-    close surface energy budge for varSST()
+    close surface energy budge for varSST
 """
-function dSSTdt(u, p, p.stype::varSST())
+function dSSTdt(u, p, stype::varSST)
     RAD = calc_surf_RAD(u,p);
     SHF = calc_SHF(u, p);
     LHF = calc_LHF(u, p);   
@@ -84,5 +84,5 @@ function mlm(du, u, p, t)
     du[1] = dzidt(u, p)
     du[2] = dhMdt(u, p)
     du[3] = dqMdt(u, p)
-    du[4] = dSSTdt(u, p)
+    du[4] = dSSTdt(u, p, p.stype)
 end

@@ -79,6 +79,10 @@ end
     mlm(du, u, p, t)    
 
     define the coupled ODE
+      dzi/dt = D*zi - we
+      dhM/dt = -dE/dz = 1/zi * (Hzi - H0 + dR/rho)
+      dqM/dt = -dW/dz = 1/zi * (Qzi - Q0)
+      dSST/dt = 1/c * (SWnet - LWnet - SHF - LHF - OHU)
 """
 function mlm(du, u, p, t)
     du[1] = dzidt(u, p)

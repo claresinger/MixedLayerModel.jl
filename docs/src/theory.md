@@ -5,12 +5,13 @@
 ## Cloud-top entrainment
 There are two choices for the entrainment parameterization in this mixed-layer model.
 
-### Energy balance entrainment
+***Energy balance entrainment***  
+
 The first assumes that the entrainment velocity is such as to satisfy a steady-state energy balance.
 
 ``w_e = \frac{\Delta R / \rho_{ref}}{\Delta_i s_{vl}}``
 
-### Buoyancy flux entrainment
+***Buoyancy flux entrainment***
 This alternative described by Bretherton and Wyant (1997) as the ''minimal'' model calculates the entrainment velocity as being proportional to the average sub-cloud buoyancy flux and inversely proportional to the buoyancy jump across the inversion.
 
 ``w_e = \frac{2.5 A \overline{\langle w' s_v' \rangle}}{\Delta_i s_v}``

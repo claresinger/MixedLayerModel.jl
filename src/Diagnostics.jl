@@ -36,7 +36,7 @@ function calc_bflux(u, p, zarr, etype::bflux)
 end
 
 """
-    calc_OHU(u, p, p.stype::fixSST())
+    calc_OHU(u, p, p.stype::fixSST)
 
     u is the state vector [zi, hM, qM, SST]
     p is the parameter object
@@ -50,7 +50,7 @@ function calc_OHU(u, p, stype::fixSST)
 end
 
 """
-    calc_OHU(u, p)
+    calc_OHU(u, p, p.stype::varSST)
 
     u is the state vector [zi, hM, qM, SST]
     p is the parameter object

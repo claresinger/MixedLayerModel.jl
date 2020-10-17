@@ -51,12 +51,6 @@ version = "0.15.15"
 [[Base64]]
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
 
-[[BinDeps]]
-deps = ["Libdl", "Pkg", "SHA", "URIParser", "Unicode"]
-git-tree-sha1 = "46cf2c1668ad07aba5a9d331bdeea994a1f13856"
-uuid = "9e28174c-4ba2-5203-b857-d8d62c4213ee"
-version = "1.0.1"
-
 [[BinaryProvider]]
 deps = ["Libdl", "Logging", "SHA"]
 git-tree-sha1 = "ecdec412a9abc8db54c0efc5548c64dfce072058"
@@ -412,12 +406,6 @@ deps = ["MLStyle", "NameResolution"]
 git-tree-sha1 = "e0fcfa0a2f6122fbe13603764c5310dde00c5593"
 uuid = "b14d175d-62b4-44ba-8fb7-3064adc8c3ec"
 version = "0.2.3"
-
-[[LSODA]]
-deps = ["BinDeps", "Compat", "DiffEqBase", "Libdl", "LinearAlgebra", "Parameters", "Printf"]
-git-tree-sha1 = "74fe75f91cd40cbcd20f21eb1e46513e066e1ef3"
-uuid = "7f56f5a3-f504-529b-bc02-0b1fe5e64312"
-version = "0.6.2"
 
 [[LaTeXStrings]]
 git-tree-sha1 = "de44b395389b84fd681394d4e8d39ef14e3a2ea8"
@@ -914,12 +902,6 @@ deps = ["Test"]
 git-tree-sha1 = "8d0d7a3fe2f30d6a7f833a5f19f7c7a5b396eae6"
 uuid = "a2a6695c-b41b-5b7d-aed9-dbfdeacea5d7"
 version = "0.3.0"
-
-[[URIParser]]
-deps = ["Unicode"]
-git-tree-sha1 = "53a9f49546b8d2dd2e688d216421d050c9a31d0d"
-uuid = "30578b45-9adc-5946-b283-645ec420af67"
-version = "0.4.1"
 
 [[UUIDs]]
 deps = ["Random", "SHA"]

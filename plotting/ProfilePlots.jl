@@ -3,7 +3,7 @@
 ###########
 using PyPlot
 using LaTeXStrings
-include("EntrainmentDefs.jl")
+include("../src/Entrainment.jl")
 
 ###########
 # functions

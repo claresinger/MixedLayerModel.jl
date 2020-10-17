@@ -1,4 +1,5 @@
 experiments/output/
 docs/build/
+plotting/figures/
 *.cov
 *.ipynb_checkpoints/

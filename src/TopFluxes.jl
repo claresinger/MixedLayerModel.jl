@@ -1,4 +1,4 @@
-export H_zi, Q_zi
+export h_ft, q_ft, H_zi, Q_zi
 
 """
     H_zi(u, p)

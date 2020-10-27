@@ -8,9 +8,10 @@ The surface energy budget equation can be written as,
 We call the first four terms ``RAD`` and can write them as
 
 ```math
-\begin{align} 
+\begin{aligned} 
     RAD &= SW^{down} + LW^{down} - SW^{up} - LW^{up} \\ 
     &= (1 - \alpha_{cloud})(1 - \alpha_{ocean}) \frac{S_0}{4} + \epsilon_{cloud} \sigma T(z_b)^4 - \sigma SST^4
+\end{aligned}
 ```
 
 We then need to define the cloud albedo and cloud emissivity.

@@ -11,12 +11,12 @@ The two thermodynamic quantities (``\psi``) we use are ``h = C_p T + gz + L_v q_
 The prognostic equation for inversion height is found by vertically integrating the continuity equation. The sea surface temperature (SST) is found by a enforcing a closed surface energy budget.
 
 ```math
-\begin{align} 
+\begin{aligned} 
     \frac{dz_i}{dt} &= w_e - Dz_i \\ 
     z_i \frac{dh_M}{dt} &= V (h_0 - h_{M}) + w_e (h_+ - h_{M}) - \Delta R / \rho \\ 
     z_i \frac{dq_{tM}}{dt} &= V (q_{t0} - q_{tM}) + w_e (q_{t+} - q_{tM}) \\ 
     C \frac{dSST}{dt} &= (1-\alpha) \frac{S_0}{4} - LW_{net} - \rho V (h_0 - h_M) - OHU 
-\end{align}
+\end{aligned}
 ```
 
 In this model we neglect precipitation (``\Delta F_{q_t} = 0``).

@@ -7,26 +7,30 @@ The surface energy budget equation can be written as,
 
 We call the first four terms ``RAD`` and can write them as
 
-``RAD = SW^{down} + LW^{down} - SW^{up} - LW^{up} = (1 - \alpha_{cloud})(1 - \alpha_{ocean}) \frac{S_0}{4} + \epsilon_{cloud} \sigma T(z_b)^4 - \sigma SST^4``
+```math
+\begin{align} 
+    RAD &= SW^{down} + LW^{down} - SW^{up} - LW^{up} \\ 
+    &= (1 - \alpha_{cloud})(1 - \alpha_{ocean}) \frac{S_0}{4} + \epsilon_{cloud} \sigma T(z_b)^4 - \sigma SST^4
+```
 
 We then need to define the cloud albedo and cloud emissivity.
 
 ### Cloud shortwave albedo
-``\alpha_{cloud} = 1 - \frac{LWP_{1/2}}{LWP_{1/2} + LWP}``
+``\alpha_{cloud} = 1 - \frac{L_{1/2}}{L_{1/2} + LWP}``
 
-where ``LWP_{1/2}`` is the LWP value such that ``\alpha_{cloud} = 0.5``.
+where ``L_{1/2}`` is the LWP value such that ``\alpha_{cloud} = 0.5``.
 
 ### Cloud longwave emissivity 
-``\epsilon_{cloud} = 1 - \exp(-LWP/LWP_0)``
+``\epsilon_{cloud} = 1 - \exp(-LWP/L_\tau)``
 
-where ``LWP_0 = 7`` g/m``^2`` is the ``lifetime.''
+where ``LWP_\tau = 7`` g/m``^2`` is the optical thickness of the cloud.
 
 ## Cloud-top longwave cooling 
 The amount of longwave cooling at the cloud top is dependent on the infrared energy radiating up from the cloud and the infrared energy radiating back down from higher in the atmosphere.
 
-``\Delta R = \epsilon_{cloud} \sigma T(z_i)^4 - \epsilon_{a} \sigma T(z_a)^4``
+``\Delta R = \epsilon_{cloud} \sigma T(z_i)^4 - \sigma T_{eff}^4``
 
-### Atmospheric longwave emissivity
-``\epsilon = 0.8 \frac{\log(CO_2)}{\log(400)}``
+### Effective emissions temperature of downwelling longwave radiation to cloud-top
+``T_{eff} = a_0 + a_1 \ln \left( \frac{CO_2}{400} \right) = 263.5 + 10.8 \ln \left( \frac{CO_2}{400} \right)``
 
-This is an empirical fit. 
+This is an empirical fit to the LES results from Schneider et al. (2019). 

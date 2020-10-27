@@ -13,8 +13,9 @@ makedocs(
     pages = Any[
         "Home" => "index.md"
         "Mixed Layer Theory" => "theory.md"
-        "Thermodynamics" => "thermo.md"
+        "Entrainment" => "entrainment.md"
         "Radiation" => "radiation.md"
+        "Thermodynamics" => "thermo.md"
         "APIs" => "library.md"
     ]
 )

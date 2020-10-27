@@ -34,27 +34,29 @@ function calc_surf_RAD(u,p)
 end
 
 """
-    calculate the net OLR at cloud-top based on CO2
-    this is the 3-layer atmosphere model
+    returns the prescribed cloud-top radiative cooling ΔR
 """
 function calc_cloudtop_RAD(u,p,rtype::fixRad)
     return p.ΔR
 end
 
 """
-    calculate the net OLR at cloud-top based on CO2
-    this is the 3-layer atmosphere model
+    calculate the net ΔR at cloud-top based on CO2
+    balance between upwelling and downwelling longwave
+    downwelling longwave is based on an effective temperature
+    which is empirically fit to LES
+
+    gives ΔR ≈ 80 W/m2 for 400 ppm CO2
 """
 function calc_cloudtop_RAD(u,p,rtype::varRad)
     zi, hM, qM, SST = u;
     Tct = temp(zi,hM,qM);
-    Ta = Tct - 5.0;
-    ϵa = atmos_emissivity(p);
-    
-    LWP = calc_LWP(zi, hM, qM)*1000.0; # kg/m^2 \to g/m^2
+    LWP = calc_LWP(zi, hM, qM)*1e3; # kg/m^2 \to g/m^2
     ϵc_up = cloud_emissivity(LWP);
     
-    ΔR = ϵc_up * σ_SB * Tct^4 - ϵa * σ_SB * Ta^4;
+    Teff = 263.5 + 10.8*log(p.CO2/400.0);
+    
+    ΔR = ϵc_up * σ_SB * Tct^4 - σ_SB * Teff^4;
     return ΔR
 end
 
@@ -73,16 +75,6 @@ function cloud_albedo(LWP)
 end
 
 """
-    emissivity of the atmosphere given a concentration of CO2 in ppm
-    function chosen to have eps=0.8 for 400ppm and 0.9 for 800ppm
-    this yields reasonable ΔR values of order 50 W/m^2 for current temps
-"""
-function atmos_emissivity(p)
-    ϵa = log(p.CO2)/log(400.0)*0.8;
-    return ϵa
-end
-
-"""
     cloud_emissivity(LWP)
 
     emissivity of the cloud as a function of LWP
@@ -95,23 +87,3 @@ function cloud_emissivity(LWP)
     ϵc = 1 - exp(-a0 * LWP); 
     return ϵc
 end
-
-# """
-#     emissivity of the cloud given LWP in g/m^2
-#     emissivity up from Stephens 1978 part 2. eq 15 and 16.
-# """
-# function cloud_emissivity_up(LWP)
-#     a0_up = 0.13; # m^2/g
-#     ϵc_up = 1 - exp(-a0_up * LWP); 
-#     return ϵc_up
-# end
-
-# """
-#     emissivity of the cloud given LWP in g/m^2
-#     emissivity down from Stephens 1978 part 2. eq 15 and 16.
-# """
-# function cloud_emissivity_down(LWP)
-#     a0_down = 0.158; # m^2/g
-#     ϵc_down = 1 - exp(-a0_down * LWP); 
-#     return ϵc_down
-# end

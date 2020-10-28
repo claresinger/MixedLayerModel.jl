@@ -3,6 +3,7 @@ using FileIO
 
 # define OHU from 400 ppm simulation
 par = basic_params();
+par.etype = enBal();
 par.rtype = varRad();
 u0, sol = run_mlm(par);
 

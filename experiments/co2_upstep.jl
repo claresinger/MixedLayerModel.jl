@@ -14,6 +14,7 @@ OHU = output["OHU"];
 par = basic_params();
 par.OHU = OHU;
 par.CO2 = newCO2;
+par.etype = enBal();
 par.rtype = varRad();
 par.stype = varSST();
 u0, sol = run_mlm_from_init(u0, par);

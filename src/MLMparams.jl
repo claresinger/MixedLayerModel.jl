@@ -10,7 +10,7 @@ export basic_params
     
     RHft::Real = 0.25;
     Gamma_q::Real = -3e-6; # (kg/kg/m)
-    sft0::Real = 297; # (K)
+    sft0::Real = 297; # (K) #297
     Gamma_s::Real = 5e-3; # (K/m)
     qft0::Real = 0.0; # (kg/kg)
     

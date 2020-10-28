@@ -13,6 +13,7 @@ OHU = output["OHU"];
 # set OHU, increase CO2, let SST evolve and check cloud changes
 par = basic_params();
 par.CO2 = newCO2;
+par.etype = enBal();
 par.rtype = varRad();
 u0, sol = run_mlm_from_init(u0, par);
 

@@ -12,10 +12,10 @@ struct bflux <: ent_type end
 """
     we(u, p, etype::fixed)
 
-    fixed entrainment velocity of 1.5 mm/s
+    fixed entrainment velocity of 7 mm/s
 """ 
 function we(u, p, etype::fixed)
-    w = 0.0015; # 1.5 mm/s
+    w = 0.007; # 7 mm/s
     return w
 end
 
@@ -34,7 +34,7 @@ function we(u, p, etype::enBal)
     qft = q_ft(zi, p);
     Δs_vli = (hft - hM) - μ*L0*(qft - qM);
 
-    f = ΔR / rho_ref(SST);
+    f = ΔR / ρref(SST);
 
     # calculate entrianment rate
     w = (f/Δs_vli);

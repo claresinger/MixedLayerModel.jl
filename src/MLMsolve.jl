@@ -13,12 +13,12 @@ function run_mlm(params)
     qtM0 = params.RHsurf * q_sat(z0, params.SST0);
     hM0 = Cp * (params.SST0 - 2.0) + L0 * qtM0;
     
-    zi0 = 900.0
+    zi0 = 1200.0
     u0 = [zi0, hM0, qtM0, params.SST0];
 
     prob = SteadyStateProblem(mlm, u0, params);
-    tspan = 3600.0 * 24.0 * 100.0;
-    tol = 1e-6;   
+    tspan = 3600.0 * 24.0 * 1000.0;
+    tol = 1e-6;
 
     sol = solve(prob, DynamicSS(Rosenbrock23(autodiff=false);abstol=tol,reltol=0.0,tspan=tspan));
     #sol = solve(prob, DynamicSS(Rosenbrock23(autodiff=false);abstol=1e-10,reltol=1e-10,tspan=tspan));

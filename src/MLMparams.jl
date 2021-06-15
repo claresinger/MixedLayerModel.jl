@@ -14,6 +14,7 @@ export basic_params
     Gamma_s::Real = 5e-3; # (K/m)
     qft0::Real = 0.0; # (kg/kg)
     
+    a::Real = 0.8;
     A::Real = 2.0;
     
     RHsurf::Real = 0.80;

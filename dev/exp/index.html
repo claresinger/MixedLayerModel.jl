@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Running an experiment · MixedLayerModel.jl</title><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit">MixedLayerModel.jl</span></div><form class="docs-search" action="../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li><a class="tocitem" href="../theory/">Mixed Layer Theory</a></li><li class="is-active"><a class="tocitem" href>Running an experiment</a></li><li><a class="tocitem" href="../results/">Results</a></li><li><a class="tocitem" href="../library/">APIs</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Running an experiment</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Running an experiment</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/claresinger/MixedLayerModel.jl/blob/master/docs/src/exp.md" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="Running-an-experiment"><a class="docs-heading-anchor" href="#Running-an-experiment">Running an experiment</a><a id="Running-an-experiment-1"></a><a class="docs-heading-anchor-permalink" href="#Running-an-experiment" title="Permalink"></a></h1><p>First use the MLM to calculate the steady-state clouds given an atmosphere with 400 ppm CO_2. Save this result to a file. In this example we use the energy balance entrainment parameterization and have interactive radiation, but fixed sea-surface temperatures.</p><pre><code class="language-julia">using MixedLayerModel
+using FileIO
+
+# run simulation with 400 ppm CO2
+par = basic_params();
+par.etype = enBal();
+par.rtype = varRad();
+u0, sol = run_mlm(par);
+
+# get output
+code = sol.retcode;
+println(code);
+uf = sol.u;
+du = zeros(4);
+mlm(du, uf, par, 0.0);
+zi,hM,qM,SST = uf;
+zb = calc_LCL(zi,hM,qM);
+
+# save output
+output = Dict(&quot;code&quot; =&gt; code, &quot;p&quot;=&gt;par, &quot;u0&quot; =&gt; u0, &quot;uf&quot; =&gt; uf, &quot;du/u&quot; =&gt; du./uf, 
+&quot;we&quot; =&gt; we(uf,par,par.etype), &quot;zb&quot; =&gt; zb, &quot;zc&quot; =&gt; zi-zb,
+&quot;RHsurf&quot; =&gt; RH(0.0, hM, qM), &quot;LHF&quot; =&gt; calc_LHF(uf,par), &quot;SHF&quot; =&gt; calc_SHF(uf,par),
+&quot;ΔR&quot; =&gt; calc_cloudtop_RAD(uf,par,par.rtype), &quot;OHU&quot; =&gt; calc_OHU(uf,par,par.stype))
+path = &quot;experiments/output/exp_name/&quot;;
+save(path*&quot;co2_400.jld2&quot;, output)</code></pre><p>Now we can load in the results from the 400 ppm simulation and use the calculated steady-state to initialize a new simulation with 800 ppm CO_2. In this example we still have fixed SSTs. </p><pre><code class="language-julia">using MixedLayerModel
+using FileIO
+
+# load initial condition from file
+path = &quot;experiments/output/exp_name/&quot;;
+output = load(path*&quot;co2_400.jld2&quot;);
+u0 = output[&quot;uf&quot;];
+
+# run experiment now with 800 ppm CO2
+par = basic_params();
+newCO2 = 800.0;
+par.CO2 = newCO2;
+par.etype = enBal();
+par.rtype = varRad();
+u0, sol = run_mlm_from_init(u0, par);
+
+# get output
+code = sol.retcode;
+println(code);
+uf = sol.u;
+du = zeros(4);
+mlm(du, uf, par, 0.0);
+zi,hM,qM,SST = uf;
+zb = calc_LCL(zi,hM,qM);
+
+# save output
+output = Dict(&quot;code&quot; =&gt; code, &quot;p&quot; =&gt; par, &quot;u0&quot; =&gt; u0, &quot;uf&quot; =&gt; uf, &quot;du/u&quot; =&gt; du./uf, 
+&quot;we&quot; =&gt; we(uf,par,par.etype), &quot;zb&quot; =&gt; zb, &quot;zc&quot; =&gt; zi-zb,
+&quot;RHsurf&quot; =&gt; RH(0.0, hM, qM), &quot;LHF&quot; =&gt; calc_LHF(uf,par), &quot;SHF&quot; =&gt; calc_SHF(uf,par),
+&quot;ΔR&quot; =&gt; calc_cloudtop_RAD(uf,par,par.rtype), &quot;OHU&quot; =&gt; calc_OHU(uf,par,par.stype))
+save(path*&quot;co2_upstep_fixSST_&quot;*string(Int(newCO2))*&quot;.jld2&quot;, output)</code></pre><p>Instead if we want to allow SSTs to change interactively, then we can set the ocean heat uptake (OHU) to the value defined by the 400 ppm simulation. Also be sure to switch to <span>$varSST()$</span> mode.</p><pre><code class="language-julia">using MixedLayerModel
+using FileIO
+
+# load initial condition from file
+path = &quot;experiments/output/exp_name/&quot;;
+output = load(path*&quot;co2_400.jld2&quot;);
+u0 = output[&quot;uf&quot;];
+OHU = output[&quot;OHU&quot;];
+
+# run experiment now with 800 ppm CO2
+par = basic_params();
+newCO2 = 800.0;
+par.CO2 = newCO2;
+par.OHU = OHU;
+par.etype = enBal();
+par.rtype = varRad();
+par.stype = varSST();
+u0, sol = run_mlm_from_init(u0, par);
+
+# get output
+code = sol.retcode;
+println(code);
+uf = sol.u;
+du = zeros(4);
+mlm(du, uf, par, 0.0);
+zi,hM,qM,SST = uf;
+zb = calc_LCL(zi,hM,qM);
+
+# save output
+output = Dict(&quot;code&quot; =&gt; code, &quot;p&quot; =&gt; par, &quot;u0&quot; =&gt; u0, &quot;uf&quot; =&gt; uf, &quot;du/u&quot; =&gt; du./uf, 
+&quot;we&quot; =&gt; we(uf,par,par.etype), &quot;zb&quot; =&gt; zb, &quot;zc&quot; =&gt; zi-zb,
+&quot;RHsurf&quot; =&gt; RH(0.0, hM, qM), &quot;LHF&quot; =&gt; calc_LHF(uf,par), &quot;SHF&quot; =&gt; calc_SHF(uf,par),
+&quot;ΔR&quot; =&gt; calc_cloudtop_RAD(uf,par,par.rtype), &quot;OHU&quot; =&gt; calc_OHU(uf,par,par.stype))
+save(path*&quot;co2_upstep_&quot;*string(Int(newCO2))*&quot;.jld2&quot;, output)</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../theory/">« Mixed Layer Theory</a><a class="docs-footer-nextpage" href="../results/">Results »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Wednesday 16 June 2021 18:38">Wednesday 16 June 2021</span>. Using Julia version 1.5.4.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

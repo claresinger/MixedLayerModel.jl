@@ -3,6 +3,7 @@ module MixedLayerModel
 using Roots
 using Parameters
 using DifferentialEquations
+using Sundials
 
 include("Definitions.jl")
 include("Thermodynamics.jl")

@@ -17,7 +17,7 @@ export basic_params
     a::Real = 0.8;
     A::Real = 2.0;
     
-    RHsurf::Real = 0.80;
+    RHsurf::Real = 0.70;
     V::Real = 10.0; # m/s
     CTh::Real = 8e-4;
     CTq::Real = 8e-4;
@@ -28,9 +28,9 @@ export basic_params
     Hw::Real = 1.0;
     OHU::Real = 10.0;
     
-    etype::ent_type = bflux();
+    etype::ent_type = enBal();
     ftype::flux_type = varFlux();
-    rtype::rad_type = fixRad();
+    rtype::rad_type = varRad();
     stype::sst_type = fixSST();
 end
 

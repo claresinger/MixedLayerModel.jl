@@ -18,14 +18,14 @@ function run_mlm(params)
 
     prob = SteadyStateProblem(mlm, u0, params);
     tspan = 3600.0 * 24.0 * 30.0;
-    tol = 1e-6;
+    tol = 1e-9;
 
     @time begin
         # println("rootfind");
         # sol = solve(prob, SSRootfind());
 
         println("euler, dt=4 hrs");
-        sol = solve(prob, DynamicSS(Euler(); abstol=tol, reltol=0.0, tspan=tspan), dt=3600.0*4);
+        sol = solve(prob, DynamicSS(Euler(); abstol=0.0, reltol=tol, tspan=tspan), dt=3600.0*4, progress=true, progress_steps=30);
 
         # println("tsit5");
         # sol = solve(prob,DynamicSS(Tsit5()))
@@ -35,7 +35,9 @@ function run_mlm(params)
         # sol = solve(prob, DynamicSS(Rosenbrock23(autodiff=false); abstol=tol, reltol=0.0, tspan=tspan));
         
         # println("cvode_bdf");
-        # sol = solve(prob, DynamicSS(CVODE_BDF(); abstol=tol, reltol=0.0), dt=1.0);
+        # dt = 0.1;
+        # println("dt=",dt);
+        # sol = solve(prob, DynamicSS(CVODE_BDF(); abstol=tol, reltol=0.0), dt=dt);
     end
 
     return u0, sol
@@ -52,10 +54,27 @@ function run_mlm_from_init(u0, params, filename="default.txt")
     params.qft0 = calc_qft0(params.RHft, params.Gamma_q, params.sft0, params.Gamma_s);
 
     prob = SteadyStateProblem(mlm, u0, params);
-    tspan = 3600.0 * 24.0 * 10.0;
-    tol = 1e-6;
-    
-    sol = solve(prob, DynamicSS(Rosenbrock23(autodiff=false);abstol=tol,reltol=0.0,tspan=tspan));
+    tspan = 3600.0 * 24.0 * 60.0;
+    tol = 1e-9;
+
+    @time begin
+        # println("rootfind");
+        # sol = solve(prob, SSRootfind());
+
+        println("euler");
+        mins = 10.0;
+        println("dt=",mins," mins")
+        sol = solve(prob, DynamicSS(Euler(); abstol=0.0, reltol=tol, tspan=tspan), dt=60.0*mins, progress=true, progress_steps=30);
+
+        # println("tsit5");
+        # sol = solve(prob, DynamicSS(Tsit5(); abstol=0.0, reltol=tol, tspan=tspan));
+
+        # println("rosenbrock23");
+        # sol = solve(prob, DynamicSS(Rosenbrock23(autodiff=false); abstol=0.0, reltol=tol, tspan=tspan));
+        
+        # println("cvode_bdf");
+        # sol = solve(prob, DynamicSS(CVODE_BDF(); abstol=0.0, reltol=tol), dt=3600.0, progress=true, progress_steps=30);
+    end
 
     return u0, sol
 end

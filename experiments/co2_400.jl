@@ -14,6 +14,8 @@ du = zeros(4);
 mlm(du, uf, par, 0.0);
 zi,hM,qM,SST = uf;
 zb = calc_LCL(zi,hM,qM);
+println(uf);
+println(du);
 
 output = Dict("code" => code, "p"=>par, "u0" => u0, "uf" => uf, "du/u" => du./uf, 
 "we" => we(uf,par,par.etype), "zb" => zb, "zc" => zi-zb,

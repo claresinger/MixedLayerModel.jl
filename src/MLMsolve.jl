@@ -7,7 +7,7 @@ export run_mlm, run_mlm_from_init
     and save output to file
 """
 function run_mlm(params)
-    params.qft0 = calc_qft0(params.RHft, params.Gamma_q, params.sft0, params.Gamma_s);
+    #params.qft0 = calc_qft0(params.RHft, params.Gamma_q, params.sft0, params.Gamma_s);
     
     z0 = 0.0;
     qtM0 = params.RHsurf * q_sat(z0, params.SST0);
@@ -51,7 +51,7 @@ end
     and save output to file
 """
 function run_mlm_from_init(u0, params, filename="default.txt")
-    params.qft0 = calc_qft0(params.RHft, params.Gamma_q, params.sft0, params.Gamma_s);
+    #params.qft0 = calc_qft0(params.RHft, params.Gamma_q, params.sft0, params.Gamma_s);
 
     prob = SteadyStateProblem(mlm, u0, params);
     tspan = 3600.0 * 24.0 * 60.0;
@@ -62,9 +62,9 @@ function run_mlm_from_init(u0, params, filename="default.txt")
         # sol = solve(prob, SSRootfind());
 
         println("euler");
-        mins = 10.0;
-        println("dt=",mins," mins")
-        sol = solve(prob, DynamicSS(Euler(); abstol=0.0, reltol=tol, tspan=tspan), dt=60.0*mins, progress=true, progress_steps=30);
+        hrs = 0.5;
+        println("dt=",hrs," hours")
+        sol = solve(prob, DynamicSS(Euler(); abstol=0.0, reltol=tol, tspan=tspan), dt=3600.0*hrs, progress=true, progress_steps=30);
 
         # println("tsit5");
         # sol = solve(prob, DynamicSS(Tsit5(); abstol=0.0, reltol=tol, tspan=tspan));

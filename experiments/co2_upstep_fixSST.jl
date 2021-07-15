@@ -6,7 +6,7 @@ newCO2 = parse(Float64,ARGS[1]);
 println(newCO2);
 
 # load initial condition from file
-path = "experiments/output/Sally1.2/";
+path = "experiments/output/bflux_les_inv/";
 output = load(path*"co2_400.jld2");
 u0 = output["uf"];
 OHU = output["OHU"];
@@ -14,11 +14,9 @@ OHU = output["OHU"];
 # set OHU, increase CO2, let SST evolve and check cloud changes
 par = basic_params();
 par.CO2 = newCO2;
-par.etype = Sally();
-par.a = 1.2;
+par.etype = bflux();
 par.rtype = varRad();
 u0, sol = run_mlm_from_init(u0, par);
-
 code = sol.retcode;
 println(code);
 
@@ -27,6 +25,8 @@ du = zeros(4);
 mlm(du, uf, par, 0.0);
 zi,hM,qM,SST = uf;
 zb = calc_LCL(zi,hM,qM);
+println(uf);
+println(du);
 
 output = Dict("code" => code, "p" => par, "u0" => u0, "uf" => uf, "du/u" => du./uf, 
 "we" => we(uf,par,par.etype), "zb" => zb, "zc" => zi-zb,

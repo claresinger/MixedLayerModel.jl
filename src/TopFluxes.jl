@@ -1,4 +1,14 @@
-export h_ft, q_ft, H_zi, Q_zi
+export h_ft, q_ft, hjump, qjump, H_zi, Q_zi
+
+function hjump(p)
+    hj = -6.07 * p.CO2 + 157.0; # m^2/s^2
+    return hj
+end
+
+function qjump(p)
+    qj = -2.19e-6 * p.CO2 - 4.04e-3; # kg/kg
+    return qj
+end
 
 """
     H_zi(u, p)
@@ -8,8 +18,9 @@ export h_ft, q_ft, H_zi, Q_zi
 """
 function H_zi(u, p)
     zi, hM, qM, SST = u;
-    hft = h_ft(zi, p);
-    Hzi = -we(u, p, p.etype) * (hft - hM);
+    #hj = h_ft(zi, p) - hM;
+    hj = hjump(p);
+    Hzi = -we(u, p, p.etype) * hj;
     return Hzi
 end
 
@@ -21,8 +32,9 @@ end
 """
 function Q_zi(u, p)
     zi, hM, qM, SST = u;
-    qft = q_ft(zi, p);
-    Qzi = - we(u, p, p.etype) * (qft - qM);
+    #qj = q_ft(zi, p) - qM;
+    qj = qjump(p);
+    Qzi = - we(u, p, p.etype) * qj;
     return Qzi
 end
 

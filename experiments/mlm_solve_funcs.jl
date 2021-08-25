@@ -5,7 +5,7 @@
     and save output to file
 """
 function run_mlm(params; dt=3600.0*5.0, tspan=(0.0,3600.0*24.0*10.0))
-    params.qft0 = calc_qft0(params.RHft, params.Gamma_q, params.sft0, params.Gamma_s);
+    #params.qft0 = calc_qft0(params.RHft, params.Gamma_q, params.sft0, params.Gamma_s);
     
     z0 = 0.0;
     qtM0 = params.RHsurf * q_sat(z0, params.SST0);
@@ -31,7 +31,7 @@ end
     and save output to file
 """
 function run_mlm_from_init(u0, params; dt=3600.0*5.0, tspan=(0.0,3600.0*24.0*10.0))
-    params.qft0 = calc_qft0(params.RHft, params.Gamma_q, params.sft0, params.Gamma_s);
+    #params.qft0 = calc_qft0(params.RHft, params.Gamma_q, params.sft0, params.Gamma_s);
 
     prob = ODEProblem(mlm, u0, tspan, params);
 
@@ -49,7 +49,7 @@ end
     and save output to file
 """
 function run_mlm_ss(params; dt=3600.0*5.0, tspan=3600.0*24.0*10.0)
-    params.qft0 = calc_qft0(params.RHft, params.Gamma_q, params.sft0, params.Gamma_s);
+    #params.qft0 = calc_qft0(params.RHft, params.Gamma_q, params.sft0, params.Gamma_s);
     
     z0 = 0.0;
     qtM0 = params.RHsurf * q_sat(z0, params.SST0);
@@ -92,7 +92,7 @@ end
     and save output to file
 """
 function run_mlm_ss_from_init(u0, params; dt=3600.0*5.0, tspan=3600.0*24.0*10.0)
-    params.qft0 = calc_qft0(params.RHft, params.Gamma_q, params.sft0, params.Gamma_s);
+    #params.qft0 = calc_qft0(params.RHft, params.Gamma_q, params.sft0, params.Gamma_s);
 
     prob = SteadyStateProblem(mlm, u0, params);
     tol = 1e-9;

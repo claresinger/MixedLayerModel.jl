@@ -6,21 +6,20 @@ newCO2 = parse(Float64,ARGS[1]);
 println(newCO2);
 
 # load initial condition from file
-path = "experiments/output/test_deep_ocean/";
+path = "experiments/output/bflux_les_inv_0.1/";
 output = load(path*"co2_400.jld2");
 u0 = output["uf"];
 OHU = output["OHU"];
 
 # set OHU, increase CO2, let SST evolve and check cloud changes
 par = basic_params();
-par.Hw = 10;
+par.Hw = 0.1;
 par.OHU = OHU;
 par.CO2 = newCO2;
-par.etype = enBal();
+par.etype = bflux();
 par.rtype = varRad();
 par.stype = varSST();
 u0, sol = run_mlm_from_init(u0, par);
-
 code = sol.retcode;
 println(code);
 
@@ -29,6 +28,8 @@ du = zeros(4);
 mlm(du, uf, par, 0.0);
 zi,hM,qM,SST = uf;
 zb = calc_LCL(zi,hM,qM);
+println(uf);
+println(du);
 
 output = Dict("code" => code, "p" => par, "u0" => u0, "uf" => uf, "du/u" => du./uf, 
 "we" => we(uf,par,par.etype), "zb" => zb, "zc" => zi-zb,

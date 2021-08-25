@@ -43,13 +43,6 @@ Private = false
 Pages   = ["MLMode.jl"]
 ```
 
-## MLM solve
-```@autodocs
-Modules = [MixedLayerModel]
-Private = false
-Pages   = ["MLMsolve.jl"]
-```
-
 ## Diagnostics
 ```@autodocs
 Modules = [MixedLayerModel]

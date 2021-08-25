@@ -1,6 +1,6 @@
 experiments/output/
+experiments/figures/
 docs/build/
-*figures/
 *.cov
 *.ipynb_checkpoints/
 *.nc

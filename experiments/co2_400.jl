@@ -1,10 +1,14 @@
 using MixedLayerModel
 using FileIO
+using DifferentialEquations
+using Sundials
+
+include("mlm_solve_funcs.jl")
 
 # define OHU from 400 ppm simulation
 par = basic_params();
 par.etype = bflux();
-u0, sol = run_mlm(par);
+u0, sol = run_mlm_ss(par);
 code = sol.retcode;
 println(code);
 

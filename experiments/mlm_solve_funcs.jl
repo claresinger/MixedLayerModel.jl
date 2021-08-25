@@ -4,7 +4,7 @@
     run MLM simulation with given parameters
     and save output to file
 """
-function run_mlm(params)
+function run_mlm(params, dt=3600.0*5.0, tspan=(0.0,3600.0*24.0*10.0))
     params.qft0 = calc_qft0(params.RHft, params.Gamma_q, params.sft0, params.Gamma_s);
     
     z0 = 0.0;
@@ -13,14 +13,30 @@ function run_mlm(params)
     
     zi0 = 1200.0
     u0 = [zi0, hM0, qtM0, params.SST0];
-
-    prob = ODEProblem(mlm, u0, params);
-    tspan = 3600.0 * 24.0 * 30.0;
-    tol = 1e-9;
+        
+    prob = ODEProblem(mlm, u0, tspan, params);
 
     @time begin
-        println("euler, dt=4 hrs");
-        sol = solve(prob, Euler(), dt=3600.0*4, progress=true, progress_steps=30);
+        sol = solve(prob, Euler(), dt=dt, progress=true, progress_steps=10);
+    end
+
+    return u0, sol
+end
+
+"""
+    run_mlm_from_init(u0, params, filename="default.txt")
+
+    run MLM simulation with given parameters
+    from initial state u0
+    and save output to file
+"""
+function run_mlm_from_init(u0, params, dt=3600.0*5.0, tspan=(0.0,3600.0*24.0*10.0), filename="default.txt")
+    params.qft0 = calc_qft0(params.RHft, params.Gamma_q, params.sft0, params.Gamma_s);
+
+    prob = ODEProblem(mlm, u0, tspan, params);
+
+    @time begin
+        sol = solve(prob, Euler(), dt=dt, progress=true, progress_steps=10);
     end
 
     return u0, sol

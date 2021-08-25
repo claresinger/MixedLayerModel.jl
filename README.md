@@ -10,4 +10,4 @@ Atmospheric mixed-layer model for subtropical stratocumulus clouds and their res
 [docs-dev-url]: https://claresinger.github.io/MixedLayerModel.jl/dev/
 
 [travis-img]: https://app.travis-ci.com/claresinger/MixedLayerModel.jl.svg?token=GYiVb6nzDErzsryN18TL&branch=main
-[travis-url]: https://travis-ci.com/claresinger/MixedLayerModel.jl
+[travis-url]: https://app.travis-ci.com/github/claresinger/MixedLayerModel.jl

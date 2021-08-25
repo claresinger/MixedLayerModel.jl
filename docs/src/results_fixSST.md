@@ -1,6 +1,6 @@
-# Running an experiment
+# MLM behavior with fixed SST
 
-First use the MLM to calculate the steady-state clouds given an atmosphere with 400 ppm CO``_2`` and fix the SST at 290 K.
+Here we initialize the MLM from the steady-state condition with 400 ppm CO``_2`` and then calculate the new equilibrium state when we perturb the CO``_2`` to 800 ppm. In this example we still have fixed SSTs. 
 ```@example
 using MixedLayerModel
 using OrdinaryDiffEq
@@ -8,14 +8,20 @@ using SteadyStateDiffEq
 using Plots
 include("../../experiments/mlm_solve_funcs.jl")
 
-# run simulation
+# run simulation, 400 ppm (steady-state)
 par = basic_params();
 par.etype = bflux();
 par.stype = fixSST();
-u0, sol = run_mlm(par);
-
-# run simulation (steady-state)
 u0, sol_ss = run_mlm_ss(par);
+uf = sol_ss.u;
+
+# run simulation, 800 ppm
+newCO2 = 800.0;
+par.CO2 = newCO2;
+u0, sol = run_mlm_from_init(uf, par);
+
+# run simulation, 800 ppm (steady-state)
+u0, sol_ss = run_mlm_ss_from_init(uf, par);
 # get output #hide
 uf = sol_ss.u; #hide
 du = zeros(4); #hide
@@ -45,6 +51,6 @@ hline!([zi], subplot=1, label=string(round(zi,digits=1))) #hide
 hline!([hM], subplot=2, label=string(round(hM,digits=1))) #hide
 hline!([qtM], subplot=3, label=string(round(qtM,digits=1))) #hide
 hline!([LWP], subplot=4, label=string(round(LWP,digits=1))) #hide
-title!("400 (ppm)", subplot=1) #hide
+title!(string(Int(newCO2))*" (ppm)", subplot=1) #hide
 xaxis!("t (days)", subplot=3) #hide
 ```

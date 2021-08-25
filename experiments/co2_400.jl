@@ -1,7 +1,5 @@
 using MixedLayerModel
 using FileIO
-using DifferentialEquations
-using Sundials
 
 include("mlm_solve_funcs.jl")
 

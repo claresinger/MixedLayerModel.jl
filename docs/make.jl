@@ -6,8 +6,10 @@ ENV["GKSwstype"] = "100"
 pages = Any[
     "Home" => "index.md"
     "Mixed Layer Theory" => "theory.md"
-    "Running an experiment" => "exp.md"
-    "Results" => "results.md"
+    "ODE Solver" => "ode_solver.md"
+    "CO``_2`` Perturbation Experiment" => "exp.md"
+    "Fixed SST Results" => "results_fixSST.md"
+    "Slab Ocean Results" => "results_slab.md"
     "APIs" => "library.md"
 ]
 
@@ -27,5 +29,7 @@ makedocs(
 
 deploydocs(
     repo = "github.com/claresinger/MixedLayerModel.jl.git",
-    target = "build"
+    target = "build",
+    push_preview = true,
+    devbranch = "main",
 )

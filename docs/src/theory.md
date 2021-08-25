@@ -6,7 +6,7 @@ The mixed-layer model (MLM) is based on the assumption that the boundary layer b
 
 The two thermodynamic quantities (``\psi``) we use are ``h = C_p T + gz + L_v q_v``, the moist static energy, and ``q_t = q_v + q_l``, the total water specific humidity. Fig. 1 shows a sketch of the profiles of moist static energy, total water specific humidity, relative humidity, and liquid water specific humidity from the surface into the free-troposphere. The cloud is indicated by the grey shading between altitudes ``z_b`` (diagnosed as the [lifting condensation level](#lifting-condensation-level-cloud-base)) and ``z_i`` where relative humidity is equal to 100%.
 
-![](../../plotting/figures/mlm-diagram-with-ql.png)
+![](../../experiments/figures/mlm-diagram-with-ql.png)
 Fig. 1. Sketch of the vertical profiles of ``\psi_1`` and ``\psi_2``. The grey shading denotes where the cloud layer is predicted to form.
 
 The temporal evolution of these is governed by a balance between turbulent fluxes at the surface and across the inversion, and a diabatic source term ``\Delta F_\psi``.

@@ -28,7 +28,7 @@ export basic_params
     Hw::Real = 1.0;
     OHU::Real = 10.0;
     
-    etype::ent_type = enBal();
+    etype::ent_type = bflux();
     ftype::flux_type = varFlux();
     rtype::rad_type = varRad();
     stype::sst_type = fixSST();

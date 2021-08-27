@@ -64,13 +64,19 @@ end
     albedo of the cloud given LWP in g/m^2
     cloud albedo from Stephens 1978 part 2. eq 1 and 7.
     backscatter β = 0.07, looked up from table 2.
+    zenith angle θ = 60° and effective radius r_e = 10 um.
 """
 function cloud_albedo(LWP)
-    sza = 60.0; # degrees
-    r_e = 10.0; # um
-    backscatter = 0.07; 
-    A = (2 * cosd(sza) * r_e)/ (3 * backscatter);
-    αc = LWP / (A + LWP); 
+    # θ = 60.0; # degrees
+    # r_e = 10.0; # um
+    # β = 0.07; 
+    # A = (2 * cosd(θ) * r_e)/ (3 * β);
+    # αc = LWP / (A + LWP); 
+
+    m = 0.795
+    Lx = 19.136
+    αc = m * (1 - Lx/(Lx+LwP));
+
     return αc
 end
 

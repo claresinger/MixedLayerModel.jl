@@ -22,9 +22,9 @@ version = "0.1.0"
 
 [[ArrayInterface]]
 deps = ["IfElse", "LinearAlgebra", "Requires", "SparseArrays", "Static"]
-git-tree-sha1 = "045ff5e1bc8c6fb1ecb28694abba0a0d55b5f4f5"
+git-tree-sha1 = "baf4ef9082070477046bd98306952292bfcb0af9"
 uuid = "4fba245c-0d91-5ea0-9b3e-6abc04ee57a9"
-version = "3.1.17"
+version = "3.1.25"
 
 [[Artifacts]]
 uuid = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
@@ -58,9 +58,9 @@ version = "1.3.0"
 
 [[CloseOpenIntervals]]
 deps = ["ArrayInterface", "Static"]
-git-tree-sha1 = "ce9c0d07ed6e1a4fecd2df6ace144cbd29ba6f37"
+git-tree-sha1 = "4fcacb5811c9e4eb6f9adde4afc0e9c4a7a92f5a"
 uuid = "fb6a15b2-703c-40df-9091-08a04967cfa9"
-version = "0.1.2"
+version = "0.1.1"
 
 [[ColorSchemes]]
 deps = ["ColorTypes", "Colors", "FixedPointNumbers", "Random"]
@@ -70,9 +70,9 @@ version = "3.14.0"
 
 [[ColorTypes]]
 deps = ["FixedPointNumbers", "Random"]
-git-tree-sha1 = "32a2b8af383f11cbb65803883837a149d10dfe8a"
+git-tree-sha1 = "024fe24d83e4a5bf5fc80501a314ce0d1aa35597"
 uuid = "3da002f7-5984-5a60-b8a6-cbb66c0b333f"
-version = "0.10.12"
+version = "0.11.0"
 
 [[Colors]]
 deps = ["ColorTypes", "FixedPointNumbers", "Reexport"]
@@ -571,9 +571,9 @@ uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
 
 [[LoopVectorization]]
 deps = ["ArrayInterface", "DocStringExtensions", "IfElse", "LinearAlgebra", "OffsetArrays", "Polyester", "Requires", "SLEEFPirates", "Static", "StrideArraysCore", "ThreadingUtilities", "UnPack", "VectorizationBase"]
-git-tree-sha1 = "dcaae6d7c8223946e2838ea97888e1db4ceb42eb"
+git-tree-sha1 = "9f23789217866ad9ecd053857ef202de5edcac4b"
 uuid = "bdcacae8-1622-11e9-2a5c-532679323890"
-version = "0.12.66"
+version = "0.12.65"
 
 [[MacroTools]]
 deps = ["Markdown", "Random"]
@@ -932,9 +932,9 @@ version = "1.6.1"
 
 [[Static]]
 deps = ["IfElse"]
-git-tree-sha1 = "2740ea27b66a41f9d213561a04573da5d3823d4b"
+git-tree-sha1 = "62701892d172a2fa41a1f829f66d2b0db94a9a63"
 uuid = "aedffcd0-7271-4cad-89d0-dc628f76c6d3"
-version = "0.2.5"
+version = "0.3.0"
 
 [[StaticArrays]]
 deps = ["LinearAlgebra", "Random", "Statistics"]
@@ -977,9 +977,9 @@ version = "0.1.18"
 
 [[StructArrays]]
 deps = ["Adapt", "DataAPI", "StaticArrays", "Tables"]
-git-tree-sha1 = "1700b86ad59348c0f9f68ddc95117071f947072d"
+git-tree-sha1 = "000e168f5cc9aded17b6999a560b7c11dda69095"
 uuid = "09ab397b-f2b6-538f-b94a-2f83cf4a842a"
-version = "0.6.1"
+version = "0.6.0"
 
 [[SuiteSparse]]
 deps = ["Libdl", "LinearAlgebra", "Serialization", "SparseArrays"]

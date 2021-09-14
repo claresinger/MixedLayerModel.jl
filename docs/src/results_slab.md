@@ -1,4 +1,4 @@
-# MLM behavior with fixed SST
+# MLM behavior with slab ocean
 
 Instead if we want to allow SSTs to change interactively, then we can set the ocean heat uptake (OHU) to the value defined by the 400 ppm simulation. Also be sure to switch to `varSST()` mode.
 ```@example

@@ -37,10 +37,10 @@ hM = getindex.(sol.u,2) * 1e-3 #hide
 qtM = getindex.(sol.u,3) * 1e3 #hide
 LWP = calc_LWP.(zi, hM*1e3, qtM*1e-3) * 1e3; #hide
 plot(size=(600,500), layout=(4,1)) #hide
-plot!(t, zi, marker="o-", legend=:topright, subplot=1, label="zi(t) [m]") #hide
-plot!(t, hM, marker="o-", legend=:topright, subplot=2, label="hM(t) [kJ/kg]") #hide
-plot!(t, qtM, marker="o-", legend=:topright, subplot=3, label="qtM(t) [g/kg]") #hide
-plot!(t, LWP, marker="o-", legend=:topright, subplot=4, label="LWP(t) [g/m2]") #hide
+plot!(t, zi, marker="o-", legend=:topleft, subplot=1, label="zi(t) [m]") #hide
+plot!(t, hM, marker="o-", legend=:topleft, subplot=2, label="hM(t) [kJ/kg]") #hide
+plot!(t, qtM, marker="o-", legend=:topleft, subplot=3, label="qtM(t) [g/kg]") #hide
+plot!(t, LWP, marker="o-", legend=:topleft, subplot=4, label="LWP(t) [g/m2]") #hide
 
 uf = sol_ss.u; #hide
 zi = uf[1]; #hide

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Slab Ocean Results · MixedLayerModel.jl</title><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.039/juliamono-regular.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.11/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../">MixedLayerModel.jl</a></span></div><form class="docs-search" action="../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li><a class="tocitem" href="../theory/">Mixed Layer Theory</a></li><li><a class="tocitem" href="../ode_solver/">ODE Solver</a></li><li><a class="tocitem" href="../exp/">CO<span>$_2$</span> Perturbation Experiment</a></li><li><a class="tocitem" href="../results_fixSST/">Fixed SST Results</a></li><li class="is-active"><a class="tocitem" href>Slab Ocean Results</a></li><li><a class="tocitem" href="../library/">APIs</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Slab Ocean Results</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Slab Ocean Results</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/claresinger/MixedLayerModel.jl/blob/master/docs/src/results_slab.md" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="MLM-behavior-with-fixed-SST"><a class="docs-heading-anchor" href="#MLM-behavior-with-fixed-SST">MLM behavior with fixed SST</a><a id="MLM-behavior-with-fixed-SST-1"></a><a class="docs-heading-anchor-permalink" href="#MLM-behavior-with-fixed-SST" title="Permalink"></a></h1><p>Instead if we want to allow SSTs to change interactively, then we can set the ocean heat uptake (OHU) to the value defined by the 400 ppm simulation. Also be sure to switch to <code>varSST()</code> mode.</p><pre><code class="language- hljs">using MixedLayerModel
+using OrdinaryDiffEq
+using SteadyStateDiffEq
+using Plots
+include(&quot;../../experiments/mlm_solve_funcs.jl&quot;)
+
+# run simulation, 400 ppm (steady-state)
+par = basic_params();
+par.etype = bflux();
+par.stype = fixSST();
+u0, sol_ss = run_mlm_ss(par);
+uf = sol_ss.u;
+OHU = calc_OHU(uf,par,par.stype);
+
+# run simulation, 800 ppm
+newCO2 = 800.0;
+par.CO2 = newCO2;
+par.OHU = OHU;
+par.stype = varSST();
+u0, sol = run_mlm_from_init(uf, par, dt=3600.0*3.0, tspan=(0.0,3600.0*24.0*15.0));
+
+# run simulation, 800 ppm (steady-state)
+u0, sol_ss = run_mlm_ss_from_init(uf, par, dt=3600.0*3.0, tspan=(0.0,3600.0*24.0*15.0));
+# get output #hide
+uf = sol_ss.u; #hide
+du = zeros(4); #hide
+mlm(du, uf, par, 0.0); #hide
+zi,hM,qM,SST = uf; #hide
+zb = calc_LCL(zi,hM,qM); #hide
+LWP = calc_LWP(zi,hM,qM); #hide
+
+# plot #hide
+t = sol.t / 3600.0 / 24.0 #hide
+zi = getindex.(sol.u,1) #hide
+hM = getindex.(sol.u,2) * 1e-3 #hide
+qtM = getindex.(sol.u,3) * 1e3 #hide
+LWP = calc_LWP.(zi, hM*1e3, qtM*1e-3) * 1e3; #hide
+plot(size=(600,500), layout=(4,1)) #hide
+plot!(t, zi, marker=&quot;o-&quot;, legend=:topleft, subplot=1, label=&quot;zi(t) [m]&quot;) #hide
+plot!(t, hM, marker=&quot;o-&quot;, legend=:topleft, subplot=2, label=&quot;hM(t) [kJ/kg]&quot;) #hide
+plot!(t, qtM, marker=&quot;o-&quot;, legend=:topleft, subplot=3, label=&quot;qtM(t) [g/kg]&quot;) #hide
+plot!(t, LWP, marker=&quot;o-&quot;, legend=:topleft, subplot=4, label=&quot;LWP(t) [g/m2]&quot;) #hide
+
+uf = sol_ss.u; #hide
+zi = uf[1]; #hide
+hM = uf[2] * 1e-3; #hide
+qtM = uf[3] * 1e3; #hide
+LWP = calc_LWP(zi, hM*1e3, qtM*1e-3) * 1e3; #hide
+hline!([zi], subplot=1, label=string(round(zi,digits=1))) #hide
+hline!([hM], subplot=2, label=string(round(hM,digits=1))) #hide
+hline!([qtM], subplot=3, label=string(round(qtM,digits=1))) #hide
+hline!([LWP], subplot=4, label=string(round(LWP,digits=1))) #hide
+title!(string(Int(newCO2))*&quot; (ppm)&quot;, subplot=1) #hide
+xaxis!(&quot;t (days)&quot;, subplot=3) #hide</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../results_fixSST/">« Fixed SST Results</a><a class="docs-footer-nextpage" href="../library/">APIs »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.5 on <span class="colophon-date" title="Tuesday 14 September 2021 00:46">Tuesday 14 September 2021</span>. Using Julia version 1.6.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

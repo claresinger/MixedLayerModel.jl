@@ -1,12 +1,14 @@
 using MixedLayerModel
 using FileIO
 
+include("mlm_solve_funcs.jl")
+
 # use command line argument to set co2
 newCO2 = parse(Float64,ARGS[1]);
 println(newCO2);
 
 # load initial condition from file
-path = "experiments/output/bflux_les_inv_0.1/";
+path = "experiments/output/new_alpha/";
 output = load(path*"co2_400.jld2");
 u0 = output["uf"];
 OHU = output["OHU"];
@@ -19,7 +21,7 @@ par.CO2 = newCO2;
 par.etype = bflux();
 par.rtype = varRad();
 par.stype = varSST();
-u0, sol = run_mlm_from_init(u0, par);
+u0, sol = run_mlm_ss_from_init(u0, par, dt=3600.0*2.0, tspan=3600.0*24.0*20.0);
 code = sol.retcode;
 println(code);
 

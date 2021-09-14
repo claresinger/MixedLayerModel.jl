@@ -3,10 +3,13 @@ using FileIO
 
 include("mlm_solve_funcs.jl")
 
+# define path to save file (which experiment are you running?)
+path = "experiments/output/new_alpha/";
+
 # define OHU from 400 ppm simulation
 par = basic_params();
 par.etype = bflux();
-u0, sol = run_mlm_ss(par);
+u0, sol = run_mlm_ss(par, dt=3600.0*3.0, tspan=(0.0,3600.0*24.0*15.0));
 code = sol.retcode;
 println(code);
 
@@ -22,5 +25,4 @@ output = Dict("code" => code, "p"=>par, "u0" => u0, "uf" => uf, "du/u" => du./uf
 "we" => we(uf,par,par.etype), "zb" => zb, "zc" => zi-zb,
 "RHsurf" => RH(0.0, hM, qM), "LHF" => calc_LHF(uf,par), "SHF" => calc_SHF(uf,par),
 "ΔR" => calc_cloudtop_RAD(uf,par,par.rtype), "OHU" => calc_OHU(uf,par,par.stype));
-path = "experiments/output/bflux_les_inv/";
 save(path*"co2_400.jld2", output);

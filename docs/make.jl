@@ -32,4 +32,6 @@ deploydocs(
     target = "build",
     push_preview = true,
     devbranch = "main",
+    versions = ["dev" => "dev", "v#.#.#"],
+    forcepush = true,
 )

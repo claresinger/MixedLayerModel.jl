@@ -75,7 +75,7 @@ function cloud_albedo(LWP)
 
     m = 0.795
     Lx = 19.136
-    αc = m * (1 - Lx/(Lx+LwP));
+    αc = m * (1 - Lx/(Lx+LWP));
 
     return αc
 end

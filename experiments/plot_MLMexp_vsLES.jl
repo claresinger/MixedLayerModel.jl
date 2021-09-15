@@ -4,8 +4,6 @@ using Plots
 using LaTeXStrings
 using MixedLayerModel
 
-gr(display_type=:inline)
-
 # plot LES
 ds = Dataset("experiments/LES_steadystate_all_upsteps.nc");
 max = 4
@@ -15,7 +13,7 @@ zb = Float64.(ds["zb"][1:max]);
 we = zi.*6e-6*1e3;
 lwp = Float64.(ds["lwp"][1:max]*1e3);
 sst = Float64.(ds["sst"][1:max]);
-lhf = ones(length(co2))*100;
+lhf = Float64.(ds["lhf"][1:max]);
 
 p1 = scatter(co2, zi, marker=:x, markersize=5, label="LES", ylabel="Inversion height, zi [m]")
 p2 = scatter(co2, zb, marker=:x, markersize=5, label="", ylabel="Cloud base, zb [m]")
@@ -25,9 +23,13 @@ p5 = scatter(co2, sst, marker=:x, markersize=5, label="", xlabel="CO2 [ppmv]", y
 p6 = scatter(co2, lhf, marker=:x, markersize=5, label="", xlabel="CO2 [ppmv]", ylabel="LHF [W/m2]")
 
 # plot MLM
-exp_path = "new_alpha/"
-co2 = [400, 500, 600, 700, 800];
-zi, zb, we, lwp, sst, lhf = zeros(length(co2)), zeros(length(co2)), zeros(length(co2)), zeros(length(co2)), zeros(length(co2)), zeros(length(co2));
+# exp_path = "new_alpha/"
+# co2 = [400, 500, 600, 700, 800];
+exp_path = "new_alpha_enBal/"
+co2 = [400, 500, 600, 700, 800, 900, 1000];
+
+zi, zb, we = zeros(length(co2)), zeros(length(co2)), zeros(length(co2));
+lwp, sst, lhf = zeros(length(co2)), zeros(length(co2)), zeros(length(co2));
 for (i, co2i) in enumerate(co2)
     if co2i == 400.0
         file = "experiments/output/"*exp_path*"co2_400.jld2"
@@ -49,6 +51,6 @@ scatter!(p5, co2, sst, marker=:o, markersize=5, label="")
 scatter!(p6, co2, lhf, marker=:o, markersize=5, label="")
 
 # save plot
-p = plot(p1,p2,p3,p4,p5,p6, layout=(2,3), size=(1000,500), dpi=300);
+p = plot(p1,p2,p3,p4,p5,p6, layout=(2,3), link=:x, size=(1000,500), dpi=300);
 mkpath("experiments/figures/"*exp_path)
-savefig(p, "experiments/figures/"*exp_path*"zi.png")
+savefig(p, "experiments/figures/"*exp_path*"steady-state.png")

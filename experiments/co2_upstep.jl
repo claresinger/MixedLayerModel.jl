@@ -1,5 +1,6 @@
 using MixedLayerModel
 using FileIO
+using Plots
 
 include("mlm_solve_funcs.jl")
 
@@ -8,7 +9,7 @@ newCO2 = parse(Float64,ARGS[1]);
 println(newCO2);
 
 # load initial condition from file
-path = "experiments/output/new_alpha/";
+path = "experiments/output/new_alpha_enBal/";
 output = load(path*"co2_400.jld2");
 u0 = output["uf"];
 OHU = output["OHU"];
@@ -18,10 +19,11 @@ par = basic_params();
 par.Hw = 0.1;
 par.OHU = OHU;
 par.CO2 = newCO2;
-par.etype = bflux();
+par.etype = enBal();
 par.rtype = varRad();
 par.stype = varSST();
-u0, sol = run_mlm_ss_from_init(u0, par, dt=3600.0*2.0, tspan=3600.0*24.0*20.0);
+dt, tmax = 4.0, 15.0;
+u0, sol = run_mlm_ss_from_init(u0, par, dt=3600.0*dt, tspan=3600.0*24.0*tmax);
 code = sol.retcode;
 println(code);
 
@@ -39,3 +41,16 @@ output = Dict("code" => code, "p" => par, "u0" => u0, "uf" => uf, "du/u" => du./
 "ΔR" => calc_cloudtop_RAD(uf,par,par.rtype), "OHU" => calc_OHU(uf,par,par.stype))
 
 save(path*"co2_upstep_"*string(Int(newCO2))*".jld2", output)
+
+u0, sol = run_mlm_from_init(uf, par, dt=3600.0*dt, tspan=(0.0,3600.0*24.0*tmax));
+t = sol.t / 3600.0 / 24.0;
+zi = getindex.(sol.u,1);
+hM = getindex.(sol.u,2) * 1e-3;
+qtM = getindex.(sol.u,3) * 1e3;
+sst = getindex.(sol.u,4);
+plot(size=(600,500), layout=(4,1), dpi=200)
+plot!(t, zi, legend=:topleft, subplot=1, label="zi(t) [m]")
+plot!(t, hM, legend=:topleft, subplot=2, label="hM(t) [kJ/kg]") 
+plot!(t, qtM, legend=:topleft, subplot=3, label="qtM(t) [g/kg]")
+plot!(t, sst, legend=:topleft, subplot=4, label="SST(t) [K]")
+savefig(replace(path, "output"=>"figures")*"sol"*string(Int(newCO2))*"_t.png")

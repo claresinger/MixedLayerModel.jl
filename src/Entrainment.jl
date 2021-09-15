@@ -31,10 +31,8 @@ function we(u, p, etype::enBal)
     ΔR = calc_cloudtop_RAD(u,p,p.rtype);
 
     # calculate change in s_vl across inversion
-    # hj = h_ft(zi, p) - hM;
-    # qj = q_ft(zi, p) - qM;
-    hj = hjump(p);
-    qj = qjump(p);
+    hj = hjump(u, p, p.fttype);
+    qj = qjump(u, p, p.fttype);
     Δs_vli = hj - μ*L0*qj;
 
     f = ΔR / ρref(SST);
@@ -55,10 +53,8 @@ function we(u, p, etype::Sally)
     ΔR = calc_cloudtop_RAD(u,p,p.rtype);
 
     # calculate change in s_vl across inversion
-    # hj = h_ft(zi, p) - hM;
-    # qj = q_ft(zi, p) - qM;
-    hj = hjump(p);
-    qj = qjump(p);
+    hj = hjump(u, p, p.fttype);
+    qj = qjump(u, p, p.fttype);
     Δs_vli = hj - μ*L0*qj;
 
     f = ΔR / ρref(SST);
@@ -80,10 +76,8 @@ function we(u, p, etype::bflux)
     zi, hM, qM, SST = u;
     
     # calculate change in s_vl across inversion
-    # hj = h_ft(zi, p) - hM;
-    # qj = q_ft(zi, p) - qM;
-    hj = hjump(p);
-    qj = qjump(p);
+    hj = hjump(u, p, p.fttype);
+    qj = qjump(u, p, p.fttype);
     Δs_vli = hj - μ*L0*qj;
 
     # calculate sv flux <w'sv'>(z) = f0(z) + we*f1(z)

@@ -10,7 +10,7 @@ include("../../experiments/mlm_solve_funcs.jl")
 
 # run simulation
 par = basic_params();
-par.etype = bflux();
+par.etype = enBal();
 par.stype = fixSST();
 u0, sol = run_mlm(par);
 

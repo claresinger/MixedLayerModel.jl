@@ -10,7 +10,7 @@ include("../../experiments/mlm_solve_funcs.jl")
 
 # run simulation, 400 ppm (steady-state)
 par = basic_params();
-par.etype = bflux();
+par.etype = enBal();
 par.stype = fixSST();
 u0, sol_ss = run_mlm_ss(par);
 uf = sol_ss.u;

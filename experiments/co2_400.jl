@@ -4,12 +4,13 @@ using FileIO
 include("mlm_solve_funcs.jl")
 
 # define path to save file (which experiment are you running?)
-path = "experiments/output/new_alpha_enBal/";
+path = "experiments/output/new_alpha_enBal_invco2/";
 
 # define OHU from 400 ppm simulation
 par = basic_params();
 par.etype = enBal();
-u0, sol = run_mlm_ss(par, dt=3600.0*3.0, tspan=3600.0*24.0*15.0);
+par.fttype = co2dep();
+u0, sol = run_mlm_ss(par, dt=3600.0*4.0, tspan=3600.0*24.0*15.0);
 code = sol.retcode;
 println(code);
 

@@ -20,6 +20,7 @@ function run_mlm(params; dt=3600.0*5.0, tspan=(0.0,3600.0*24.0*10.0))
     prob = ODEProblem(mlm, u0, tspan, params);
 
     @time begin
+        println("euler, dt="*string(dt/3600.0)*" hrs, tmax="*string(tspan[2]/3600.0/24.0)*" days");
         sol = solve(prob, Euler(), dt=dt, progress=true, progress_steps=50);
     end
 
@@ -39,6 +40,7 @@ function run_mlm_from_init(u0, params; dt=3600.0*5.0, tspan=(0.0,3600.0*24.0*10.
     prob = ODEProblem(mlm, u0, tspan, params);
 
     @time begin
+        println("euler, dt="*string(dt/3600.0)*" hrs, tmax="*string(tspan[2]/3600.0/24.0)*" days");
         sol = solve(prob, Euler(), dt=dt, progress=true, progress_steps=50);
     end
 
@@ -68,7 +70,7 @@ function run_mlm_ss(params; dt=3600.0*5.0, tspan=3600.0*24.0*10.0)
         # println("rootfind");
         # sol = solve(prob, SSRootfind());
 
-        println("euler, dt=4 hrs");
+        println("euler, dt="*string(dt/3600.0)*" hrs, tmax="*string(tspan/3600.0/24.0)*" days");
         sol = solve(prob, DynamicSS(Euler(); abstol=0.0, reltol=tol, tspan=tspan), dt=dt, progress=true, progress_steps=50);
 
         # println("tsit5");
@@ -104,7 +106,7 @@ function run_mlm_ss_from_init(u0, params; dt=3600.0*5.0, tspan=3600.0*24.0*10.0)
         # println("rootfind");
         # sol = solve(prob, SSRootfind());
 
-        println("euler");
+        println("euler, dt="*string(dt/3600.0)*" hrs, tmax="*string(tspan/3600.0/24.0)*" days");
         sol = solve(prob, DynamicSS(Euler(); abstol=0.0, reltol=tol, tspan=tspan), dt=dt, progress=true, progress_steps=50);
 
         # println("tsit5");

@@ -1,4 +1,4 @@
-# MLM behavior with fixed SST
+# MLM behavior with slab ocean
 
 Instead if we want to allow SSTs to change interactively, then we can set the ocean heat uptake (OHU) to the value defined by the 400 ppm simulation. Also be sure to switch to `varSST()` mode.
 ```@example
@@ -10,7 +10,9 @@ include("../../experiments/mlm_solve_funcs.jl")
 
 # run simulation, 400 ppm (steady-state)
 par = basic_params();
-par.etype = bflux();
+par.etype = enBal();
+par.fttype = co2dep();
+par.rtype = varRad();
 par.stype = fixSST();
 u0, sol_ss = run_mlm_ss(par);
 uf = sol_ss.u;
@@ -21,10 +23,10 @@ newCO2 = 800.0;
 par.CO2 = newCO2;
 par.OHU = OHU;
 par.stype = varSST();
-u0, sol = run_mlm_from_init(uf, par, dt=3600.0*3.0, tspan=(0.0,3600.0*24.0*15.0));
+u0, sol = run_mlm_from_init(uf, par, dt=3600.0*2.0, tspan=(0.0,3600.0*24.0*15.0));
 
 # run simulation, 800 ppm (steady-state)
-u0, sol_ss = run_mlm_ss_from_init(uf, par, dt=3600.0*3.0, tspan=(0.0,3600.0*24.0*15.0));
+u0, sol_ss = run_mlm_ss_from_init(uf, par, dt=3600.0*2.0, tspan=3600.0*24.0*15.0);
 # get output #hide
 uf = sol_ss.u; #hide
 du = zeros(4); #hide

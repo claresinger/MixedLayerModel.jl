@@ -70,11 +70,22 @@ We then need to define the cloud albedo and cloud emissivity.
 ``\alpha_{cloud} = 1 - \frac{L_{1/2}}{L_{1/2} + LWP}``
 
 where ``L_{1/2}`` is the [liquid water path (LWP)](#liquid-water-path) value such that ``\alpha_{cloud} = 0.5``.
+This is based on [Stephens (1978b)](https://doi.org/10.1175/1520-0469(1978)035<2123:RPIEWC>2.0.CO;2) equations 1 and 7. 
+We can write ``L_{1/2} = \frac{2 \mu r_e}{3 \beta}`` where ``\mu = \cos\theta`` is the cosine of the solar zenith angle, 
+``r_e`` is the droplet effective radius, and ``\beta`` is the backscatter coefficient.
+We take ``\beta = 0.07`` from Table 2, ``\theta = 60^\circ``, and ``r_e = 10`` ``\mu``m, which yields a value of ``L_{1/2} \approx 71`` g/m``^2``.
+
+Alternatively, the cloud albedo can be parameterized empirically based on the LES results from [Schneider et al. (2019)](https://doi.org/10.1038/s41561-019-0310-1) as,
+
+``\alpha_{cloud} = a \left( 1 - \frac{L_{1/2}}{L_{1/2} + LWP} \right)``
+
+where ``a = 0.795`` and ``L_{1/2} = 19.136`` g/m``^2``.
 
 #### Cloud longwave emissivity 
 ``\epsilon_{cloud} = 1 - \exp(-LWP/L_\tau)``
 
 where ``LWP_\tau = 7`` g/m``^2`` is the optical thickness of the cloud.
+This is based on [Stephens (1978b)](https://doi.org/10.1175/1520-0469(1978)035<2123:RPIEWC>2.0.CO;2) equations 15 and 16, taking an intermediate value of the parameter ``a_0 = 0.15``.
 
 ### Cloud-top longwave cooling 
 The amount of longwave cooling at the cloud top is dependent on the infrared energy radiating up from the cloud and the infrared energy radiating back down from higher in the atmosphere.

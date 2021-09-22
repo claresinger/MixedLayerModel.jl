@@ -11,6 +11,8 @@ include("../../experiments/mlm_solve_funcs.jl")
 # run simulation
 par = basic_params();
 par.etype = enBal();
+par.fttype = co2dep();
+par.rtype = varRad();
 par.stype = fixSST();
 u0, sol = run_mlm(par);
 

@@ -9,10 +9,18 @@ newCO2 = parse(Float64,ARGS[1]);
 println(newCO2);
 
 # load initial condition from file
-path = "experiments/output/new_alpha_enBal_invco2/";
-output = load(path*"co2_400.jld2");
+path = "experiments/output/enBal_restart/";
+restarttry = path*"co2_upstep_"*string(Int(newCO2-200))*".jld2";
+if isfile(restarttry)
+    output = load(restarttry);
+    println("found file with CO2 = "*string(Int(newCO2-200)));
+else
+    output = load(path*"co2_400.jld2");
+    println("no file with CO2 = "*string(Int(newCO2-200)));
+end
 u0 = output["uf"];
 OHU = output["OHU"];
+println("restarting from CO2 = "*string(output["p"].CO2));
 
 # set OHU, increase CO2, let SST evolve and check cloud changes
 par = basic_params();
@@ -44,7 +52,7 @@ output = Dict("code" => code, "p" => par, "u0" => u0, "uf" => uf, "du/u" => du./
 save(path*"co2_upstep_"*string(Int(newCO2))*".jld2", output)
 
 ENV["GKSwstype"]="nul"
-u0, sol = run_mlm_from_init(uf, par, dt=3600.0*dt, tspan=(0.0,3600.0*24.0*tmax));
+u0, sol = run_mlm_from_init(u0, par, dt=3600.0*dt, tspan=(0.0,3600.0*24.0*tmax));
 t = sol.t / 3600.0 / 24.0;
 zi = getindex.(sol.u,1);
 hM = getindex.(sol.u,2) * 1e-3;

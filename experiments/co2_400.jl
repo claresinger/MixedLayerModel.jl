@@ -4,7 +4,7 @@ using FileIO
 include("mlm_solve_funcs.jl")
 
 # define path to save file (which experiment are you running?)
-path = "experiments/output/new_alpha_enBal_invco2/";
+path = "experiments/output/enBal_restart/";
 
 # define OHU from 400 ppm simulation
 par = basic_params();

@@ -9,13 +9,13 @@ newCO2 = parse(Float64,ARGS[1]);
 println(newCO2);
 
 # load initial condition from file
-path = "experiments/output/new_alpha_enBal_invco2/";
+path = "experiments/output/test_cloudfrac/";
 output = load(path*"co2_400.jld2");
 u0 = output["uf"];
 OHU = output["OHU"];
 
 # set OHU, increase CO2, let SST evolve and check cloud changes
-par = basic_params();
+par = upCO2();
 par.Hw = 0.1;
 par.OHU = OHU;
 par.CO2 = newCO2;
@@ -29,10 +29,10 @@ code = sol.retcode;
 println(code);
 
 uf = sol.u;
-du = zeros(4);
+du = zeros(5);
 mlm(du, uf, par, 0.0);
 zi,hM,qM,SST = uf;
-zb = calc_LCL(zi,hM,qM);
+zb = calc_LCL(uf);
 println(uf);
 println(du);
 
@@ -44,16 +44,23 @@ output = Dict("code" => code, "p" => par, "u0" => u0, "uf" => uf, "du/u" => du./
 save(path*"co2_upstep_"*string(Int(newCO2))*".jld2", output)
 
 ENV["GKSwstype"]="nul"
-u0, sol = run_mlm_from_init(uf, par, dt=3600.0*dt, tspan=(0.0,3600.0*24.0*tmax));
+u0, sol = run_mlm_from_init(u0, par, dt=3600.0*dt, tspan=(0.0,3600.0*24.0*tmax));
 t = sol.t / 3600.0 / 24.0;
 zi = getindex.(sol.u,1);
 hM = getindex.(sol.u,2) * 1e-3;
 qtM = getindex.(sol.u,3) * 1e3;
 sst = getindex.(sol.u,4);
-plot(size=(600,500), layout=(4,1), dpi=200);
-plot!(t, zi, legend=:topleft, subplot=1, label="zi(t) [m]");
-plot!(t, hM, legend=:topleft, subplot=2, label="hM(t) [kJ/kg]"); 
-plot!(t, qtM, legend=:topleft, subplot=3, label="qtM(t) [g/kg]");
-plot!(t, sst, legend=:topleft, subplot=4, label="SST(t) [K]");
-mkpath(replace(path, "output"=>"figures"));;
+cf = getindex.(sol.u,5) * 1e2;
+S = zeros(length(t));
+for (i,si) in enumerate(S)
+    S[i] = calc_S(sol.u[i], par);
+end
+plot(size=(600,800), layout=(6,1), dpi=200, left_margin = 5Plots.mm);
+plot!(t, zi, legend=false, subplot=1, ylabel="zi [m]");
+plot!(t, hM, legend=false, subplot=2, ylabel="hM [kJ/kg]"); 
+plot!(t, qtM, legend=false, subplot=3, ylabel="qtM [g/kg]");
+plot!(t, sst, legend=false, subplot=4, ylabel="SST [K]");
+plot!(t, cf, legend=false, subplot=5, ylabel="CF [%]");
+plot!(t, S, legend=false, subplot=6, ylabel="S [-]", xlabel="time [days]");
+mkpath(replace(path, "output"=>"figures"));
 savefig(replace(path, "output"=>"figures")*"sol"*string(Int(newCO2))*"_t.png");

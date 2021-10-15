@@ -12,17 +12,17 @@ struct fixRad <: rad_type end
     calculate net SW and LW radiation at the surface
 """
 function calc_surf_RAD(u,p)
-    zi, hM, qM, SST = u;
+    zi, hM, qM, SST, CF = u;
 
     # shortwave calculation
-    LWP = calc_LWP(zi, hM, qM)*1000.0; # kg/m^2 \to g/m^2
-    αc = cloud_albedo(LWP);
+    LWP = incloud_LWP(u)*1000.0; # kg/m^2 \to g/m^2
+    αc = cloud_albedo(LWP, CF);
     αs = 0.1; # surface albedo of ocean water
     SW_net = (1-αc) * (1-αs) * S_subtr;
 
     # longwave calculation
-    ϵc_down = cloud_emissivity(LWP);
-    zb = calc_LCL(zi,hM,qM);
+    ϵc_down = cloud_emissivity(LWP, CF);
+    zb = calc_LCL(u);
     zc = (zi+zb)/2.0;
     Tc = temp(zc,hM,qM);
     LW_down = σ_SB * Tc^4;
@@ -49,10 +49,10 @@ end
     gives ΔR ≈ 80 W/m2 for 400 ppm CO2
 """
 function calc_cloudtop_RAD(u,p,rtype::varRad)
-    zi, hM, qM, SST = u;
+    zi, hM, qM, SST, CF = u;
     Tct = temp(zi,hM,qM);
-    LWP = calc_LWP(zi, hM, qM)*1e3; # kg/m^2 \to g/m^2
-    ϵc_up = cloud_emissivity(LWP);
+    LWP = incloud_LWP(u)*1e3; # kg/m^2 \to g/m^2
+    ϵc_up = cloud_emissivity(LWP, CF);
     
     Teff = 263.5 + 10.8*log(p.CO2/400.0);
     
@@ -66,7 +66,7 @@ end
     backscatter β = 0.07, looked up from table 2.
     zenith angle θ = 60° and effective radius r_e = 10 um.
 """
-function cloud_albedo(LWP)
+function cloud_albedo(LWP, CF)
     # θ = 60.0; # degrees
     # r_e = 10.0; # um
     # β = 0.07; 
@@ -76,7 +76,7 @@ function cloud_albedo(LWP)
     m = 0.795
     Lx = 19.136
     αc = m * (1 - Lx/(Lx+LWP));
-
+    αc = αc * CF;
     return αc
 end
 
@@ -88,8 +88,9 @@ end
 
     based on Stephens 1978 part II: eq 15 and 16
 """
-function cloud_emissivity(LWP)
+function cloud_emissivity(LWP, CF)
     a0 = 0.15; # m^2/g
     ϵc = 1 - exp(-a0 * LWP); 
+    ϵc = ϵc * CF;
     return ϵc
 end

@@ -3,15 +3,15 @@ export calc_bflux, calc_OHU
 """
     calc_bflux(u, p, zarr, etype::bflux)
 
-    u is the state vector [zi, hM, qM, SST]
+    u is the state vector [zi, hM, qM, SST, CF]
     p is the parameter object
     zarr is an array of altitudes from 0 to some maxz > zi
 
     calculates the buoyancy flux for plotting
 """
 function calc_bflux(u, p, zarr, etype::bflux)
-    zi,hM,qM,SST = u;
-    zb = calc_LCL(zi,hM,qM);
+    zi, hM, qM, SST, CF = u;
+    zb = calc_LCL(u);
 
     z1 = zarr[zarr .< zb];
     z2 = intersect(zarr[zarr .>= zb], zarr[zarr .< zi];)
@@ -38,7 +38,7 @@ end
 """
     calc_OHU(u, p, p.stype::fixSST)
 
-    u is the state vector [zi, hM, qM, SST]
+    u is the state vector [zi, hM, qM, SST, CF]
     p is the parameter object
 
     calculates the ocean heat uptake as the residual 
@@ -52,7 +52,7 @@ end
 """
     calc_OHU(u, p, p.stype::varSST)
 
-    u is the state vector [zi, hM, qM, SST]
+    u is the state vector [zi, hM, qM, SST, CF]
     p is the parameter object
 
     returns p.OHU

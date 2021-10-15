@@ -1,6 +1,6 @@
 export ρref, pres, q_sat, q_v, q_l, temp, rho
 export RH, theta
-export calc_LWP, calc_LCL
+export incloud_LWP, calc_LCL
 export calc_qft0
 
 """
@@ -109,11 +109,13 @@ function theta(z,h,qt)
 end
 
 """
-    calc_LCL(zi, hM, qtM)
+    calc_LCL(u)
 
     calculate the lifiting condensation level
 """
-function calc_LCL(zi, hM, qtM)
+function calc_LCL(u)
+    zi, hM, qtM, SST, CF = u;
+
     zb = zi;
     try
         f(z) = qtM - q_sat(z,temp(z,hM,qtM));
@@ -131,12 +133,14 @@ function calc_LCL(zi, hM, qtM)
 end
 
 """
-    calc_LWP(zi, hM, qtM)
+    incloud_LWP(u)
 
-    calulcate the liquid water path
+    calulcate the in-cloud liquid water path
 """
-function calc_LWP(zi, hM, qtM)
-    zb = calc_LCL(zi, hM, qtM);
+function incloud_LWP(u)
+    zi, hM, qtM, SST, CF = u;
+
+    zb = calc_LCL(u);
     x = 0.0;
     dz = 1.0;
     for z in collect(zb:dz:zi)

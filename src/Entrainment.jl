@@ -27,7 +27,7 @@ end
     w = ΔR / (Δs_vli * ρref)
 """
 function we(u, p, etype::enBal)
-    zi, hM, qM, SST = u;
+    zi, hM, qM, SST, CF = u;
     ΔR = calc_cloudtop_RAD(u,p,p.rtype);
 
     # calculate change in s_vl across inversion
@@ -49,7 +49,7 @@ end
     w = a * ΔR / (Δs_vli * ρref)
 """
 function we(u, p, etype::Sally)
-    zi, hM, qM, SST = u;
+    zi, hM, qM, SST, CF = u;
     ΔR = calc_cloudtop_RAD(u,p,p.rtype);
 
     # calculate change in s_vl across inversion
@@ -84,7 +84,7 @@ function we(u, p, etype::bflux)
     # split into two terms I0, I1 where Ii = \integral fi(z) dz
     H0 = H_0(u, p, p.ftype);
     Q0 = Q_0(u, p, p.ftype);
-    zb = calc_LCL(zi, hM, qM);
+    zb = calc_LCL(u);
 
     A0 = H0 - μ*L0*Q0;
     B0 = β*H0 - ϵ*L0*Q0;

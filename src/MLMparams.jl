@@ -40,7 +40,7 @@ export basic_params
     SHF::Real = 5.0; # (W/m^2)
     
     # slab ocean params
-    Hw::Real = 1.0;
+    Hw::Real = 0.1;
     OHU::Real = 10.0;
     
     # default types

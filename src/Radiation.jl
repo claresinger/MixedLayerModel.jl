@@ -9,6 +9,12 @@ struct varRad <: rad_type end
 struct fixRad <: rad_type end
 
 """
+"""
+function Tatmos(p)
+    return 263.5 + 10.8*log(p.CO2/400.0);
+end
+
+"""
     calculate net SW and LW radiation at the surface
 """
 function calc_surf_RAD(u,p)
@@ -21,11 +27,12 @@ function calc_surf_RAD(u,p)
     SW_net = (1-αc) * (1-αs) * S_subtr;
 
     # longwave calculation
-    ϵc_down = cloud_emissivity(LWP, CF);
+    ϵc_down = cloud_emissivity(LWP);
     zb = calc_LCL(u);
     zc = (zi+zb)/2.0;
     Tc = temp(zc,hM,qM);
-    LW_down = σ_SB * Tc^4;
+    Teff = Tatmos(p);
+    LW_down = CF * (ϵc_down * σ_SB * Tc^4) + (1-CF) * (σ_SB * Teff^4);
     LW_up = σ_SB * SST^4;
 
     # sum them up
@@ -52,11 +59,9 @@ function calc_cloudtop_RAD(u,p,rtype::varRad)
     zi, hM, qM, SST, CF = u;
     Tct = temp(zi,hM,qM);
     LWP = incloud_LWP(u)*1e3; # kg/m^2 \to g/m^2
-    ϵc_up = cloud_emissivity(LWP, CF);
-    
-    Teff = 263.5 + 10.8*log(p.CO2/400.0);
-    
-    ΔR = ϵc_up * σ_SB * Tct^4 - σ_SB * Teff^4;
+    ϵc_up = cloud_emissivity(LWP);
+    Teff = Tatmos(p);
+    ΔR = CF * (ϵc_up * σ_SB * Tct^4 - σ_SB * Teff^4);
     return ΔR
 end
 
@@ -88,9 +93,9 @@ end
 
     based on Stephens 1978 part II: eq 15 and 16
 """
-function cloud_emissivity(LWP, CF)
+function cloud_emissivity(LWP)
     a0 = 0.15; # m^2/g
     ϵc = 1 - exp(-a0 * LWP); 
-    ϵc = ϵc * CF;
+    ϵc = ϵc;
     return ϵc
 end

@@ -11,7 +11,6 @@ export upCO2, historical
     D::Real = 6.0e-6; # (1/s)
     
     # params for interactive surface fluxes
-    RHsurf::Real = 0.70;
     V::Real = 10.0; # m/s
     CTh::Real = 8e-4;
     CTq::Real = 8e-4;

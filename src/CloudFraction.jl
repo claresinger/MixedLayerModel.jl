@@ -28,12 +28,12 @@ end
 """
 function cloud_fraction(u, p)
     S = calc_S(u, p);
-    m = 5; # tunable parameter for the slope of the CF nonlinearity
-    S_min = 0.5; # minimum decoupling parameter
-    S_crit = 1.0; # tunable parameter for the halfway point of CF decrease
+    m = 10; # tunable parameter for the slope of the CF nonlinearity
+    S_crit = 0.75; # tunable parameter for the halfway point of CF decrease
     CF = 1 - 0.9 / (1 + exp(-m*(S-S_crit)));
-    if S < S_min
-        CF = 1.0
-    end
+    # S_min = 0.5; # minimum decoupling parameter
+    # if S < S_min
+    #     CF = 1.0
+    # end
     return CF
 end

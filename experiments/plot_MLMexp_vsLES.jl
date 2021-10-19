@@ -48,14 +48,29 @@ p7 = scatter(co2, lhf, marker=:x, markersize=5, label="", xlabel="CO2 [ppmv]", y
 p8 = scatter(co2, dR, marker=:x, markersize=5, label="", xlabel="CO2 [ppmv]", ylabel="dR [W/m2]")
 p9 = scatter(co2, S, marker=:x, markersize=5, label="", xlabel="CO2 [ppmv]", ylabel="Stability param., S")
 
+# p1 = scatter(co2, zi, marker=:x, color="white", markersize=5, label="", ylabel="")
+# scatter!(co2, zb, marker=:x, color="white", markersize=5, label="", ylabel="Cloud top/base [m]")
+# p2 = scatter(co2, zi-zb, marker=:x, color="white", markersize=5, label="", ylabel="Cloud depth, zc [m]")
+# p3 = scatter(co2, lwp, marker=:x, color="white", markersize=5, label="", ylabel="LWP [g/m2]")
+
+# p4 = scatter(co2, we, marker=:x, color="white", markersize=5, label="", ylabel="Entrainment, we [mm/s]")
+# p5 = scatter(co2, Δs_vli, marker=:x, color="white", markersize=5, label="", ylabel="Inv. strength [kJ/kg]")
+# p6 = scatter(co2, sst, marker=:x, color="white", markersize=5, label="", ylabel="SST [K]")
+
+# p7 = scatter(co2, lhf, marker=:x, color="white", markersize=5, label="", xlabel="CO2 [ppmv]", ylabel="LHF [W/m2]")
+# p8 = scatter(co2, dR, marker=:x, color="white", markersize=5, label="", xlabel="CO2 [ppmv]", ylabel="dR [W/m2]")
+# p9 = scatter(co2, S, marker=:x, color="white", markersize=5, label="", xlabel="CO2 [ppmv]", ylabel="Stability param., S")
+
 # plot MLM
 # exp_path = "new_alpha/"
 # co2 = [400, 500, 600, 700, 800];
 # exp_path = "new_alpha_enBal_invco2/"
 # co2 = [400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400];
+# exp_path = "enBal_restart/"
+# co2 = [400, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000, 2200, 2400, 2600, 2800, 3000];
 
-exp_path = "enBal_restart/"
-co2 = [400, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000, 2200, 2400, 2600, 2800, 3000];
+exp_path = "fix_cloudfrac/"
+co2 = [400, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000, 2400, 2800, 3000];
 
 zi, zb, we = zeros(length(co2)), zeros(length(co2)), zeros(length(co2));
 lwp, sst, lhf = zeros(length(co2)), zeros(length(co2)), zeros(length(co2));
@@ -71,7 +86,8 @@ for (i, co2i) in enumerate(co2)
     p = dat["p"];
     zii, hM, qM, ssti = uf;
     zbi = dat["zb"];
-    lwpi = calc_LWP(zii, hM, qM) * 1e3;
+    uf2 = [zii, hM, qM, ssti, 1];
+    lwpi = incloud_LWP(uf2) * 1e3;
     zi[i], zb[i], lwp[i], sst[i] = zii, zbi, lwpi, ssti;
     lhf[i], we[i], dR[i] = dat["LHF"], dat["we"]*1e3, dat["ΔR"];
     hj = hjump(uf, p, p.fttype);

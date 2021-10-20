@@ -4,6 +4,8 @@ export calc_S, cloud_fraction
     calc_S(u, p)
 
     calculates the stability parameter, s
+    also called the minimal decloupling parameter
+    in Bretherton and Wyant (1997)
     S = (LHF / ΔR) * (zc / zi)
     where zc is the cloud thickness (zi-zb)
 """
@@ -31,7 +33,7 @@ function cloud_fraction(u, p)
     m = 10; # tunable parameter for the slope of the CF nonlinearity
     S_crit = 0.75; # tunable parameter for the halfway point of CF decrease
     CF = 1 - 0.9 / (1 + exp(-m*(S-S_crit)));
-    # S_min = 0.5; # minimum decoupling parameter
+    # S_min = 1/(2*σ); # minimum decoupling parameter, ≈0.55
     # if S < S_min
     #     CF = 1.0
     # end

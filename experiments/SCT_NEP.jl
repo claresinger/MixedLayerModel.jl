@@ -20,12 +20,13 @@ par.etype = enBal();
 
 # climatology at 4 sites in NEP
 SSTs = [290.2, 293.5, 297.2, 299.5];
+Ds = [6e-6, 6e-6, 3e-6, 3e-6]; # ??????????????
 Vs = [2.7, 5.2, 8.0, 9.0];
 RHfts = [0.25, 0.21, 0.24, 0.35];
 sft0s = [308.6, 309.6, 311.4, 312.9];
 
 par.SST0 = SSTs[i]; # (K)
-par.D = 6e-6; # (1/s)
+par.D = Ds[i]; # (1/s)
 par.V = Vs[i] # m/s 
 
 par.RHft = RHfts[i]; # (-) 
@@ -33,11 +34,12 @@ par.Gamma_q = 0.0; # (kg/kg/m)
 par.sft0 = sft0s[i]; # (K) 
 par.Gamma_s = 0.0; # (K/m)
 
-dt, tmax = 2.0, 60;
+dt, tmax = 4.0, 30;
 
 # plot time series
 ENV["GKSwstype"]="nul"
-u0, sol = run_mlm_from_init(u0, par, dt=3600.0*dt, tspan=(0.0,3600.0*24.0*tmax));
+u0, sol = run_mlm(par, dt=3600.0*dt, tspan=(0.0,3600.0*24.0*tmax));
+#u0, sol = run_mlm_from_init(u0, par, dt=3600.0*dt, tspan=(0.0,3600.0*24.0*tmax));
 t = sol.t / 3600.0 / 24.0;
 zi = getindex.(sol.u,1);
 hM = getindex.(sol.u,2) * 1e-3;
@@ -63,13 +65,13 @@ plot!(t, hM, marker="o-", legend=false, subplot=2, ylabel="hM [kJ/kg]");
 plot!(t, qtM, marker="o-", legend=false, subplot=3, ylabel="qtM [g/kg]");
 plot!(t, sst, marker="o-", legend=false, subplot=4, ylabel="SST [K]");
 plot!(t, cf * 1e2, marker="o-", legend=false, subplot=5, ylabel="CF [%]");
-plot!(t, LWP * 1e3, marker="o-", legend=false, subplot=6, ylabel="LWP [g/m2]");
+plot!(t, LWP .* cf * 1e3, marker="o-", legend=false, subplot=6, ylabel="LWP [g/m2]");
 plot!(t, LHF, marker="o-", legend=false, subplot=7, ylabel="LHF [W/m2]");
 plot!(t, ΔR, marker="o-", legend=false, subplot=8, ylabel="ΔR [W/m2]");
 plot!(t, (zi .- zb) ./ zi, marker="o-", legend=false, subplot=9, ylabel="zc/zi [-]", xlabel="time [days]");
 plot!(t, S, marker="o-", legend=false, subplot=10, ylabel="S [-]", xlabel="time [days]");
 mkpath(replace(path, "output"=>"figures"));
-savefig(replace(path, "output"=>"figures")*"sol"*string(i))*"_t.png");
+savefig(replace(path, "output"=>"figures")*"sol"*string(i)*"_t.png");
 
 ## save steady-state solution
 uf = sol.u[end];

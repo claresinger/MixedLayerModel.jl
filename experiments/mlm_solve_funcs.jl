@@ -1,8 +1,8 @@
 using OrdinaryDiffEq
 using SteadyStateDiffEq
 
-steptol = 1e-5;
-termtol = 1e-9;
+# steptol = 1e-5;
+# termtol = 1e-9;
 
 steptol = 1e-3;
 termtol = 1e-6;
@@ -19,12 +19,16 @@ function run_mlm(params; dt=3600.0*5.0, tspan=(0.0,3600.0*24.0*10.0))
     params.qft0 = calc_qft0(params.RHft, params.Gamma_q, params.sft0, params.Gamma_s)
     qtM0 = RHsurf * q_sat(0.0, params.SST0);
     hM0 = MixedLayerModel.Cp * params.SST0 + MixedLayerModel.L0 * qtM0;
-    zi0 = 1100.0;
+    #zi0 = 1100.0;
+    #CF0 = 1.0;
+    zi0 = 1200.0;
     CF0 = 1.0;
     u0 = [zi0, hM0, qtM0, params.SST0, CF0]; 
     prob = ODEProblem(mlm, u0, tspan, params);
 
     @time begin
+        # println("Euler");
+        # sol = solve(prob, Euler(), abstol=0.0, reltol=steptol, dt=dt);
         println("Rodas5");
         sol = solve(prob, Rodas5(), abstol=0.0, reltol=steptol, dt=dt);
     end

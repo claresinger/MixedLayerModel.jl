@@ -5,7 +5,7 @@ using Plots
 include("mlm_solve_funcs.jl")
 
 # define path to save file (which experiment are you running?)
-path = "experiments/output/fix_cloudfrac/";
+path = "experiments/output/const_surf_LW/";
 
 # define OHU from 400 ppm simulation
 par = upCO2();

@@ -9,18 +9,18 @@ newCO2 = parse(Float64,ARGS[1]);
 println(newCO2);
 
 # load initial condition from file
-path = "experiments/output/fix_cloudfrac/";
-restarttry = path*"co2_upstep_"*string(Int(newCO2-200))*".jld2";
-restarttry2 = path*"co2_upstep_"*string(Int(newCO2-400))*".jld2";
-if isfile(restarttry)
-    output = load(restarttry);
-    println("found file with CO2 = "*string(Int(newCO2-200)));
+path = "experiments/output/const_surf_LW/";
+restarttry1 = path*"co2_upstep_"*string(Int(newCO2-100))*".jld2";
+restarttry2 = path*"co2_upstep_"*string(Int(newCO2-200))*".jld2";
+restarttry3 = path*"co2_upstep_"*string(Int(newCO2-400))*".jld2";
+if isfile(restarttry1)
+    output = load(restarttry1);
 elseif isfile(restarttry2)
     output = load(restarttry2);
-    println("found file with CO2 = "*string(Int(newCO2-400)));
+elseif isfile(restarttry3)
+    output = load(restarttry3);
 else
     output = load(path*"co2_400.jld2");
-    println("no file with CO2 = "*string(Int(newCO2-200)));
 end
 u0 = output["uf"];
 OHU = output["OHU"];

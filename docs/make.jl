@@ -8,8 +8,8 @@ pages = Any[
     "Mixed Layer Theory" => "theory.md"
     "ODE Solver" => "ode_solver.md"
     "CO``_2`` Perturbation Experiment" => "exp.md"
-    "Fixed SST Results" => "results_fixSST.md"
-    "Slab Ocean Results" => "results_slab.md"
+    # "Fixed SST Results" => "results_fixSST.md"
+    # "Slab Ocean Results" => "results_slab.md"
     "APIs" => "library.md"
 ]
 

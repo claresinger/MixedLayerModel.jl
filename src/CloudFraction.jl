@@ -25,14 +25,15 @@ end
     calculates the cloud fraction 
     inspired by Chung et al 2012
     uses a logistic function to smoothly interpolate between 
-    100% and 10% cloud fraction based on the value of the
+    100% and 20% cloud fraction based on the value of the
     stability parameter
 """
 function cloud_fraction(u, p)
     S = calc_S(u, p);
     m = 10; # tunable parameter for the slope of the CF nonlinearity
-    S_crit = 0.75; # tunable parameter for the halfway point of CF decrease
-    CF = 1 - 0.9 / (1 + exp(-m*(S-S_crit)));
+    S_crit = 0.7; # tunable parameter for the halfway point of CF decrease
+    CF = 1 - 0.8 / (1 + exp(-m*(S-S_crit)));
+    
     # S_min = 1/(2*σ); # minimum decoupling parameter, ≈0.55
     # if S < S_min
     #     CF = 1.0

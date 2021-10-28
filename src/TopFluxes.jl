@@ -54,6 +54,7 @@ end
 """
     qjump(u, p, p.fttype::fixedFT)
     defines qt+(z) in free troposphere -- given Gamma_q
+    minimum value of qft of 2 g/kg
 """
 function qjump(u, p, fttype::fixedFT)
     zi, hM, qM, SST, CF = u;

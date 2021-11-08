@@ -86,7 +86,7 @@ plot!(t, hM, marker="o-", legend=false, subplot=2, ylabel="hM [kJ/kg]");
 plot!(t, qtM, marker="o-", legend=false, subplot=3, ylabel="qtM [g/kg]");
 plot!(t, sst, marker="o-", legend=false, subplot=4, ylabel="SST [K]");
 plot!(t, cf * 1e2, marker="o-", legend=false, subplot=5, ylabel="CF [%]");
-plot!(t, LWP * 1e3, marker="o-", legend=false, subplot=6, ylabel="LWP [g/m2]");
+plot!(t, LWP * cf * 1e3, marker="o-", legend=false, subplot=6, ylabel="LWP [g/m2]");
 plot!(t, LHF, marker="o-", legend=false, subplot=7, ylabel="LHF [W/m2]");
 plot!(t, ΔR, marker="o-", legend=false, subplot=8, ylabel="ΔR [W/m2]");
 plot!(t, (zi .- zb) ./ zi, marker="o-", legend=false, subplot=9, ylabel="zc/zi [-]", xlabel="time [days]");

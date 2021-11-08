@@ -69,11 +69,11 @@ p9 = scatter(co2, S, marker=:x, markersize=5, label="", xlabel="CO2 [ppmv]", yla
 # exp_path = "enBal_restart/"
 # co2 = [400, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000, 2200, 2400, 2600, 2800, 3000];
 
-exp_path = "fix_cloudfrac/"
-co2 = [400, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000, 2400, 2800, 3000];
+exp_path = "const_surf_LW/"
+co2 = [400, 800, 1000, 1100, 1200, 1300, 1400];
 
 zi, zb, we = zeros(length(co2)), zeros(length(co2)), zeros(length(co2));
-lwp, sst, lhf = zeros(length(co2)), zeros(length(co2)), zeros(length(co2));
+cf, lwp, sst, lhf = zeros(length(co2)), zeros(length(co2)), zeros(length(co2)), zeros(length(co2));
 dR, Δs_vli = zeros(length(co2)), zeros(length(co2));
 for (i, co2i) in enumerate(co2)
     if co2i == 400.0
@@ -84,15 +84,21 @@ for (i, co2i) in enumerate(co2)
     dat = load(file);
     uf = dat["uf"];
     p = dat["p"];
-    zii, hM, qM, ssti = uf;
+    zii, hM, qM, ssti, cfi = uf;
+    #zii, hM, qM, ssti = uf;
     zbi = dat["zb"];
-    uf2 = [zii, hM, qM, ssti, 1];
-    lwpi = incloud_LWP(uf2) * 1e3;
-    zi[i], zb[i], lwp[i], sst[i] = zii, zbi, lwpi, ssti;
+    zi[i], zb[i], sst[i] = zii, zbi, ssti;
     lhf[i], we[i], dR[i] = dat["LHF"], dat["we"]*1e3, dat["ΔR"];
     hj = hjump(uf, p, p.fttype);
     qj = qjump(uf, p, p.fttype);
     Δs_vli[i] = (hj - μ*L0*qj)*1e-3;
+    
+    # uf = [zii, hM, qM, ssti, 1];
+    # cf[i] = 1;
+    # lwp[i] = incloud_LWP(uf) * 1e3;
+
+    cf[i] = cfi;
+    lwp[i] = incloud_LWP(uf) * 1e3;
 end
 S = (lhf./dR).*((zi.-zb)./zi);
 
@@ -100,7 +106,7 @@ ms = 4
 scatter!(p1, co2, zi, marker=:circle, color=2, markersize=ms, markerstrokewidth=0, label="MLM with slab ocean")
 scatter!(p1, co2, zb, marker=:circle, color="red", markersize=ms, markerstrokewidth=0, label="")
 scatter!(p2, co2, zi-zb, marker=:circle, markersize=ms, markerstrokewidth=0, label="")
-scatter!(p3, co2, lwp, marker=:circle, markersize=ms, markerstrokewidth=0, label="")
+scatter!(p3, co2, lwp .* cf, marker=:circle, markersize=ms, markerstrokewidth=0, label="")
 
 scatter!(p4, co2, we, marker=:circle, markersize=ms, markerstrokewidth=0, label="")
 scatter!(p5, co2, Δs_vli, marker=:circle, markersize=ms, markerstrokewidth=0, label="")

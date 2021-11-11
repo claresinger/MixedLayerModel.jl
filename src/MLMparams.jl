@@ -1,4 +1,4 @@
-export upCO2, historical
+export upCO2, climatology
 
 @with_kw mutable struct upCO2
     # fixed SST for 400ppm
@@ -27,7 +27,7 @@ export upCO2, historical
     fttype::ft_type = sstdep();
 end
 
-@with_kw mutable struct historical
+@with_kw mutable struct climatology
     # fixed SST for 400ppm
     SST0::Real = 290.0; # (K)
 
@@ -45,7 +45,6 @@ end
     qft0::Real = 0.0; # (kg/kg)
     
     # params for interactive surface fluxes
-    RHsurf::Real = 0.70;
     V::Real = 10.0; # m/s
     CTh::Real = 8e-4;
     CTq::Real = 8e-4;

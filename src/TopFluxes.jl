@@ -71,7 +71,8 @@ end
 function hjump(u, p, fttype::fixedFT)
     zi, hM, qM, SST, CF = u;
     sft = p.sft0 .+ p.Gamma_s .* zi;
-    hft = sft .* Cp .+ L0 .* q_ft(u, p, p.fttype);
+    qft = qjump(u, p, p.fttype) + qM;
+    hft = Cp .* sft .+ L0 .* qft;
     hj = hft - hM;
     return hj
 end

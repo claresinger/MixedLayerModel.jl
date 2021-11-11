@@ -26,7 +26,7 @@ end
     negative of the vertical energy flux
 """
 function dhMdt(u, p)
-    zi, hM, qM, SST = u;
+    zi, hM, qM, SST, CF = u;
     ΔR = calc_cloudtop_RAD(u,p,p.rtype);
     H0 = H_0(u, p, p.ftype);
     Hzi = H_zi(u, p);
@@ -42,7 +42,7 @@ end
     negative of the vertical water flux
 """
 function dqMdt(u, p)
-    zi, hM, qM, SST = u;
+    zi, hM, qM, SST, CF = u;
     Q0 = Q_0(u, p, p.ftype);
     Qzi = Q_zi(u, p);
     dWdz = (1/zi) * (Qzi - Q0);
@@ -53,7 +53,6 @@ end
 """
     dSSTdt(u, p)
 
-    define dSSTdz() function
     defined as 0 for fixSST
 """
 function dSSTdt(u, p, stype::fixSST)
@@ -63,7 +62,6 @@ end
 """
     dSSTdt(u, p)
 
-    define dSSTdz() function
     close surface energy budge for varSST
 """
 function dSSTdt(u, p, stype::varSST)
@@ -72,7 +70,23 @@ function dSSTdt(u, p, stype::varSST)
     LHF = calc_LHF(u, p);   
     c = ρw * Cw * p.Hw;
     x = (1/c) * (RAD - SHF - LHF - p.OHU);
-    return x
+    
+    zi, hM, qM, SST, CF = u;
+    τ_SST = 3600.0*24.0*1.0;
+    y = (p.SST0 - SST) / τ_SST;
+    return (x + y)
+end
+
+"""
+    calculation cloud fraction 
+    determined as a logistic function of S, the stability parameter
+"""
+function dCFdt(u, p)
+    zi, hM, qM, SST, CF = u;
+    CFnew = cloud_fraction(u, p);
+    τ_CF = 3600.0*24.0*1.0; # 1 days; cloud fraction adjustment timescale [seconds]
+    dCFdt = (CFnew - CF) / τ_CF;
+    return dCFdt
 end
 
 """
@@ -89,4 +103,5 @@ function mlm(du, u, p, t)
     du[2] = dhMdt(u, p)
     du[3] = dqMdt(u, p)
     du[4] = dSSTdt(u, p, p.stype)
+    du[5] = dCFdt(u, p)
 end

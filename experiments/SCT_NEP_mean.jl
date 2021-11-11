@@ -4,63 +4,28 @@ using Plots
 
 include("mlm_solve_funcs.jl")
 
-# use command line argument to set co2
-newCO2 = parse(Float64,ARGS[1]);
-println(newCO2);
+# define path to save file (which experiment are you running?)
+path = "experiments/output/SCT_NEP/";
 
-# load initial condition from file
-path = "experiments/output/dampSST/";
-restarttry1 = path*"co2_upstep_"*string(Int(newCO2-100))*".jld2";
-restarttry2 = path*"co2_upstep_"*string(Int(newCO2-200))*".jld2";
-restarttry3 = path*"co2_upstep_"*string(Int(newCO2-400))*".jld2";
-if isfile(restarttry1)
-    output = load(restarttry1);
-elseif isfile(restarttry2)
-    output = load(restarttry2);
-elseif isfile(restarttry3)
-    output = load(restarttry3);
-else
-    output = load(path*"co2_400.jld2");
-end
-u0 = output["uf"];
-OHU = output["OHU"];
-println("restarting from CO2 = "*string(output["p"].CO2));
-
-# set OHU, increase CO2, let SST evolve and check cloud changes
-par = upCO2();
-par.Hw = 0.1;
-par.OHU = OHU;
-par.CO2 = newCO2;
+# run simulation with NEP mean parameters to generate initial condition
+par = climatology();
 par.etype = enBal();
-par.fttype = co2dep();
-par.rtype = varRad();
-par.stype = varSST();
-dt, tmax = 2.0, 30;
 
-# u0, sol = run_mlm_ss_from_init(u0, par, dt=3600.0*dt, tspan=3600.0*24.0*tmax);
-# code = sol.retcode;
-# println(code);
+par.SST0 = 295.5; # (K)
+par.D = 6e-6; # (1/s)
+par.V = 6.5 # m/s
 
-# uf = sol.u;
-# du = zeros(5);
-# mlm(du, uf, par, 0.0);
-# zi,hM,qM,SST = uf;
-# zb = calc_LCL(uf);
-# println(uf);
-# println(du);
+par.RHft = 0.27; # (-)
+par.Gamma_q = 0.0; # (kg/kg/m)
+par.sft0 = 310; # (K)
+par.Gamma_s = 0.0; # (K/m)
 
-# output = Dict("code" => code, "p" => par, "u0" => u0, "uf" => uf, "du/u" => du./uf, 
-# "we" => we(uf,par,par.etype), "zb" => zb, "zc" => zi-zb,
-# "RHsurf" => RH(0.0, hM, qM), "LHF" => calc_LHF(uf,par), "SHF" => calc_SHF(uf,par),
-# "ΔR" => calc_cloudtop_RAD(uf,par,par.rtype), "OHU" => calc_OHU(uf,par,par.stype))
+dt = 4.0;
+tmax = 25.0;
 
-# save(path*"co2_upstep_"*string(Int(newCO2))*".jld2", output)
-
-# plot time series
+## plot time series
 ENV["GKSwstype"]="nul"
-u0, sol = run_mlm_from_init(u0, par, dt=3600.0*dt, tspan=(0.0,3600.0*24.0*tmax));
-# println(sol);
-# println(dump(sol));
+u0, sol = run_mlm(par, dt=3600.0*dt, tspan=(0.0,3600.0*24.0*tmax));
 t = sol.t / 3600.0 / 24.0;
 zi = getindex.(sol.u,1);
 hM = getindex.(sol.u,2) * 1e-3;
@@ -86,13 +51,13 @@ plot!(t, hM, marker="o-", legend=false, subplot=2, ylabel="hM [kJ/kg]");
 plot!(t, qtM, marker="o-", legend=false, subplot=3, ylabel="qtM [g/kg]");
 plot!(t, sst, marker="o-", legend=false, subplot=4, ylabel="SST [K]");
 plot!(t, cf * 1e2, marker="o-", legend=false, subplot=5, ylabel="CF [%]");
-plot!(t, LWP .* cf * 1e3, marker="o-", legend=false, subplot=6, ylabel="LWP [g/m2]");
+plot!(t, LWP * 1e3, marker="o-", legend=false, subplot=6, ylabel="LWP [g/m2]");
 plot!(t, LHF, marker="o-", legend=false, subplot=7, ylabel="LHF [W/m2]");
 plot!(t, ΔR, marker="o-", legend=false, subplot=8, ylabel="ΔR [W/m2]");
 plot!(t, (zi .- zb) ./ zi, marker="o-", legend=false, subplot=9, ylabel="zc/zi [-]", xlabel="time [days]");
 plot!(t, S, marker="o-", legend=false, subplot=10, ylabel="S [-]", xlabel="time [days]");
 mkpath(replace(path, "output"=>"figures"));
-savefig(replace(path, "output"=>"figures")*"sol"*string(Int(newCO2))*"_t.png");
+savefig(replace(path, "output"=>"figures")*"sol_mean.png");
 
 ## save steady-state solution
 uf = sol.u[end];
@@ -108,4 +73,4 @@ output = Dict("p" => par, "u0" => u0, "uf" => uf, "du/u" => du./uf,
 "RHsurf" => RH(0.0, hM, qM), "LHF" => calc_LHF(uf,par), "SHF" => calc_SHF(uf,par),
 "ΔR" => calc_cloudtop_RAD(uf,par,par.rtype), "OHU" => calc_OHU(uf,par,par.stype))
 
-save(path*"co2_upstep_"*string(Int(newCO2))*".jld2", output)
+save(path*"mean.jld2", output);

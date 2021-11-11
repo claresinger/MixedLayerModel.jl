@@ -15,7 +15,7 @@ struct fixedFT <: ft_type end
         via linear regression to LES results
 """
 function qjump(u, p, fttype::sstdep)
-    zi, hM, qM, SST = u;
+    zi, hM, qM, SST, CF = u;
     qj = p.qj_m * (SST-290) + p.qj_b; # kg/kg
     return qj
 end
@@ -26,7 +26,7 @@ end
         via linear regression to LES results
 """
 function hjump(u, p, fttype::sstdep)
-    zi, hM, qM, SST = u;
+    zi, hM, qM, SST, CF = u;
     hj = p.hj_m * (SST-290) + p.hj_b; # m^2/s^2 = J/kg
     return hj
 end
@@ -54,9 +54,10 @@ end
 """
     qjump(u, p, p.fttype::fixedFT)
     defines qt+(z) in free troposphere -- given Gamma_q
+    minimum value of qft of 2 g/kg
 """
 function qjump(u, p, fttype::fixedFT)
-    zi, hM, qM, SST = u;
+    zi, hM, qM, SST, CF = u;
     qft = p.qft0 .+ p.Gamma_q .* zi;
     qft = max.(qft, 2e-3);
     qj = qft - qM;
@@ -68,9 +69,10 @@ end
     defines h+(z) in free troposphere -- given Gamma_s and Gamma_q
 """
 function hjump(u, p, fttype::fixedFT)
-    zi, hM, qM, SST = u;
+    zi, hM, qM, SST, CF = u;
     sft = p.sft0 .+ p.Gamma_s .* zi;
-    hft = sft .* Cp .+ L0 .* q_ft(u, p, p.fttype);
+    qft = qjump(u, p, p.fttype) + qM;
+    hft = Cp .* sft .+ L0 .* qft;
     hj = hft - hM;
     return hj
 end
@@ -82,7 +84,6 @@ end
     H_zi = -we * (hft - hM)
 """
 function H_zi(u, p)
-    zi, hM, qM, SST = u;
     hj = hjump(u, p, p.fttype);
     Hzi = -we(u, p, p.etype) * hj;
     return Hzi
@@ -95,7 +96,6 @@ end
     Q_zi = -we * (qft - qM)
 """
 function Q_zi(u, p)
-    zi, hM, qM, SST = u;
     qj = qjump(u, p, p.fttype);
     Qzi = - we(u, p, p.etype) * qj;
     return Qzi

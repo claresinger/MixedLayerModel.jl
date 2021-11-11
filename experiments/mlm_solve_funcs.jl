@@ -16,12 +16,12 @@ RHsurf = 0.65;
     and save output to file
 """
 function run_mlm(params; dt=3600.0*5.0, tspan=(0.0,3600.0*24.0*10.0))
-    params.qft0 = calc_qft0(params.RHft, params.Gamma_q, params.sft0, params.Gamma_s)
+    if params.fttype == fixedFT()
+        params.qft0 = calc_qft0(params.RHft, params.Gamma_q, params.sft0, params.Gamma_s)
+    end
     qtM0 = RHsurf * q_sat(0.0, params.SST0);
     hM0 = MixedLayerModel.Cp * params.SST0 + MixedLayerModel.L0 * qtM0;
-    #zi0 = 1100.0;
-    #CF0 = 1.0;
-    zi0 = 1200.0;
+    zi0 = 1100.0;
     CF0 = 1.0;
     u0 = [zi0, hM0, qtM0, params.SST0, CF0]; 
     prob = ODEProblem(mlm, u0, tspan, params);
@@ -44,7 +44,9 @@ end
     and save output to file
 """
 function run_mlm_ss(params; dt=3600.0*5.0, tspan=3600.0*24.0*10.0)
-    params.qft0 = calc_qft0(params.RHft, params.Gamma_q, params.sft0, params.Gamma_s);
+    if params.fttype == fixedFT()
+        params.qft0 = calc_qft0(params.RHft, params.Gamma_q, params.sft0, params.Gamma_s)
+    end
     qtM0 = RHsurf * q_sat(0.0, params.SST0);
     hM0 = MixedLayerModel.Cp * params.SST0 + MixedLayerModel.L0 * qtM0; 
     zi0 = 1200.0;
@@ -68,7 +70,9 @@ end
     and save output to file
 """
 function run_mlm_from_init(u0, params; dt=3600.0*5.0, tspan=(0.0,3600.0*24.0*10.0))
-    params.qft0 = calc_qft0(params.RHft, params.Gamma_q, params.sft0, params.Gamma_s);
+    if params.fttype == fixedFT()
+        params.qft0 = calc_qft0(params.RHft, params.Gamma_q, params.sft0, params.Gamma_s)
+    end
     prob = ODEProblem(mlm, u0, tspan, params);
 
     @time begin
@@ -87,7 +91,9 @@ end
     and save output to file
 """
 function run_mlm_ss_from_init(u0, params; dt=3600.0*5.0, tspan=3600.0*24.0*10.0)
-    params.qft0 = calc_qft0(params.RHft, params.Gamma_q, params.sft0, params.Gamma_s);
+    if params.fttype == fixedFT()
+        params.qft0 = calc_qft0(params.RHft, params.Gamma_q, params.sft0, params.Gamma_s)
+    end
     prob = SteadyStateProblem(mlm, u0, params);
 
     @time begin

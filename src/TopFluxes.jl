@@ -1,4 +1,4 @@
-export sstdep, co2dep, fixedFT
+export sstdep, co2dep, fixedFT, twocol
 export hjump, qjump, H_zi, Q_zi
 
 ###########
@@ -79,34 +79,12 @@ function hjump(u, p, fttype::fixedFT)
 end
 
 """
-    trop_sst(u,p)
-"""
-function trop_sst(u, p)
-    zi, hM, qM, SST, CF = u;
-
-    T = 0.8;
-    LWP = incloud_LWP(u)*1e3; # kg/m^2 \to g/m^2
-    αc = cloud_albedo(LWP, CF);
-    α = T*CF*αc + (1-CF)*α_ocean;
-    SW_net = (1-α)*S_subtrop;
-    
-    OLR = -491.0 - 2.57*SST;
-    R_s = SW_net - OLR;
-    ΔR_s = R_s - p.R_s_400;
-    
-    AreaFrac = 0.065;
-    ΔR_t = -AreaFrac/(1-AreaFrac)*ΔR_s;
-    
-    sst_t = 301.0 - 2.4*ΔR_t;
-    return sst_t
-end
-
-"""
     qjump(u, p, p.fttype::twocol)
 """
 function qjump(u, p, fttype::twocol)
     zi, hM, qM, SST, CF = u;
-
+    SST_trop = trop_sst(u, p);
+    qft = qsat(SST_trop) * p.RHtrop;
     qj = qft - qM;
     return qj
 end
@@ -116,9 +94,11 @@ end
 """
 function hjump(u, p, fttype::twocol)
     zi, hM, qM, SST, CF = u;
-    
+    SST_trop = trop_sst(u, p);
+    Γ = Γm(SST_trop, p.RHtrop);
+    Tft = SST_trop - zi*Γ;
     qft = qjump(u, p, p.fttype) + qM;
-    hft = Cp .* sft .+ L0 .* qft;
+    hft = Cp .* Tft .+ g .* zi .+ L0 .* qft;
     hj = hft - hM;
     return hj
 end

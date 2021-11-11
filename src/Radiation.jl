@@ -1,6 +1,7 @@
 export rad_type, varRad, fixRad
 export surf_SW, surf_LW
 export calc_surf_RAD, calc_cloudtop_RAD
+export trop_sst
 
 ## create type for radiation
 ## one where ΔR is prescribed
@@ -133,4 +134,31 @@ function cloud_emissivity(LWP)
     ϵc = 1 - exp(-a0 * LWP); 
     ϵc = ϵc;
     return ϵc
+end
+
+"""
+    trop_sst(u,p)
+    1. calculates subtropical TOA net SW and OLR
+    2. calculates TOA radiative imbalance (relative to 400ppm)
+    3. translates that to tropical TOA rad. imbalance
+    4. linear relation of tropical SST on TOA imbalance
+    (step 4 is a crude approx. for full radiative transfer)
+"""
+function trop_sst(u, p)
+    zi, hM, qM, SST, CF = u;
+
+    T = 0.8;
+    LWP = incloud_LWP(u)*1e3; # kg/m^2 \to g/m^2
+    αc = cloud_albedo(LWP, CF);
+    α = T*CF*αc + (1-CF)*α_ocean;
+    SW_net = (1-α)*S_subtrop;
+    
+    OLR = -491.0 - 2.57*SST;
+    R_s = SW_net - OLR;
+    ΔR_s = R_s - p.R_s_400;
+    
+    ΔR_t = -p.AreaFrac/(1-p.AreaFrac)*ΔR_s;
+    
+    sst_t = 301.0 - 2.4*ΔR_t;
+    return sst_t
 end

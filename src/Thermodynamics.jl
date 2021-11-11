@@ -172,3 +172,12 @@ function calc_qft0(RHft, Gamma_q, sft0, Gamma_s)
     qft0 = qft0 - Gamma_q * zft;
     return qft0
 end
+
+"""
+    Γm - moist adiabat calculation
+"""
+function Γm(Tsurf, RHsurf)
+    qv = qsat(Tsurf) * RHsurf;
+    Γ = g * (1 + (L0*qv)/(Rd*Tsurf)) / (cp + (L0^2*qv)/(Rv*Tsurf^2));
+    return Γ
+end

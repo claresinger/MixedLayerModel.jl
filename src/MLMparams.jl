@@ -11,13 +11,18 @@ export upCO2, climatology
     D::Real = 6.0e-6; # (1/s)
     
     # params for interactive surface fluxes
-    V::Real = 10.0; # m/s
+    V::Real = 10.0; # (m/s)
     CTh::Real = 8e-4;
     CTq::Real = 8e-4;
     
     # slab ocean params
-    Hw::Real = 1.0;
-    OHU::Real = 10.0;
+    Hw::Real = 1.0; # (m)
+    OHU::Real = 10.0; # (W/m2)
+
+    # tropical column params
+    AreaFrac = 0.065;
+    RHtrop = 0.8;
+    R_S_400 = -10.0; # (W/m2)
     
     # default types
     etype::ent_type = enBal();
@@ -45,7 +50,7 @@ end
     qft0::Real = 0.0; # (kg/kg)
     
     # params for interactive surface fluxes
-    V::Real = 10.0; # m/s
+    V::Real = 10.0; # (m/s)
     CTh::Real = 8e-4;
     CTq::Real = 8e-4;
 

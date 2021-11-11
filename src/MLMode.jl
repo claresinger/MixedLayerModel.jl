@@ -70,7 +70,11 @@ function dSSTdt(u, p, stype::varSST)
     LHF = calc_LHF(u, p);   
     c = ρw * Cw * p.Hw;
     x = (1/c) * (RAD - SHF - LHF - p.OHU);
-    return x
+    
+    zi, hM, qM, SST, CF = u;
+    τ_SST = 3600.0*24.0*1.0;
+    y = (p.SST0 - SST) / τ_SST;
+    return (x + y)
 end
 
 """
@@ -80,7 +84,7 @@ end
 function dCFdt(u, p)
     zi, hM, qM, SST, CF = u;
     CFnew = cloud_fraction(u, p);
-    τ_CF = 3600.0*24.0*1.0; # 3 days; cloud fraction adjustment timescale [seconds]
+    τ_CF = 3600.0*24.0*1.0; # 1 days; cloud fraction adjustment timescale [seconds]
     dCFdt = (CFnew - CF) / τ_CF;
     return dCFdt
 end

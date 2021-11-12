@@ -9,7 +9,7 @@ newCO2 = parse(Float64,ARGS[1]);
 println(newCO2);
 
 # load initial condition from file
-path = "experiments/output/dampSST/";
+path = "experiments/output/twocol/";
 restarttry1 = path*"co2_upstep_"*string(Int(newCO2-100))*".jld2";
 restarttry2 = path*"co2_upstep_"*string(Int(newCO2-200))*".jld2";
 restarttry3 = path*"co2_upstep_"*string(Int(newCO2-400))*".jld2";
@@ -26,16 +26,23 @@ u0 = output["uf"];
 OHU = output["OHU"];
 println("restarting from CO2 = "*string(output["p"].CO2));
 
+# get toa net rad @ 400 ppm
+output = load(path*"co2_400.jld2");
+u400 = output["uf"];
+R_s_400 = toa_net_rad(u400);
+
 # set OHU, increase CO2, let SST evolve and check cloud changes
 par = upCO2();
 par.Hw = 0.1;
 par.OHU = OHU;
+par.R_s_400 = R_s_400;
 par.CO2 = newCO2;
 par.etype = enBal();
 par.fttype = co2dep();
 par.rtype = varRad();
 par.stype = varSST();
 dt, tmax = 2.0, 30;
+println(par.OHU, "\t", par.R_s_400);
 
 # u0, sol = run_mlm_ss_from_init(u0, par, dt=3600.0*dt, tspan=3600.0*24.0*tmax);
 # code = sol.retcode;
@@ -102,6 +109,7 @@ zi,hM,qM,SST = uf;
 zb = calc_LCL(uf);
 println(uf);
 println(du);
+println("tropical SST:  ", trop_sst(uf, par));
 
 output = Dict("p" => par, "u0" => u0, "uf" => uf, "du/u" => du./uf, 
 "we" => we(uf,par,par.etype), "zb" => zb, "zc" => zi-zb,

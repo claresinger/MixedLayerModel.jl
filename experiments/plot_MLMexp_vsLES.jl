@@ -69,8 +69,10 @@ p9 = scatter(co2, S, marker=:x, markersize=5, label="", xlabel="CO2 [ppmv]", yla
 # exp_path = "enBal_restart/"
 # co2 = [400, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000, 2200, 2400, 2600, 2800, 3000];
 
-exp_path = "dampSST/"
-co2 = [400, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000, 2200, 2400, 2600];
+# exp_path = "dampSST/"
+# co2 = [400, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000, 2200, 2400, 2600];
+exp_path = "twocol/"
+co2 = [400, 600, 800, 1000, 1200, 1600, 1800, 2000, 2200, 2400, 2500, 2600];
 
 zi, zb, we = zeros(length(co2)), zeros(length(co2)), zeros(length(co2));
 cf, lwp, sst, lhf = zeros(length(co2)), zeros(length(co2)), zeros(length(co2)), zeros(length(co2));

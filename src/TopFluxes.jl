@@ -80,12 +80,12 @@ end
 
 """
 """
-function Tft(u, p)
+function temp_ft(u, p)
     zi, hM, qM, SST, CF = u;
     SST_trop = trop_sst(u, p);
     Γ = Γm(SST_trop, p.RHtrop);
-    T = SST_trop - zi*Γ;
-    return T
+    Tft = SST_trop - zi*Γ;
+    return Tft
 end
 
 """
@@ -93,8 +93,8 @@ end
 """
 function qjump(u, p, fttype::twocol)
     zi, hM, qM, SST, CF = u;
-    T = Tft(u,p);
-    qft = q_sat(zi, T) * 0.2;
+    Tft = temp_ft(u,p);
+    qft = q_sat(zi, Tft) * 0.2;
     qj = qft - qM;
     return qj
 end
@@ -104,11 +104,11 @@ end
 """
 function hjump(u, p, fttype::twocol)
     zi, hM, qM, SST, CF = u;
-    T = Tft(u,p);
+    Tft = temp_ft(u,p);
     qft = qjump(u, p, p.fttype) + qM;
-    hft = Cp .* T .+ g .* zi .+ L0 .* qft;
+    hft = Cp .* Tft .+ g .* zi .+ L0 .* qft;
     hj = hft - hM;
-    # println(qft*1e3,"\t",T);
+    # println(qft*1e3,"\t",Tft);
     return hj
 end
 

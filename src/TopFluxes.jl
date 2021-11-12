@@ -79,12 +79,22 @@ function hjump(u, p, fttype::fixedFT)
 end
 
 """
+"""
+function Tft(u, p)
+    zi, hM, qM, SST, CF = u;
+    SST_trop = trop_sst(u, p);
+    Γ = Γm(SST_trop, p.RHtrop);
+    T = SST_trop - zi*Γ;
+    return T
+end
+
+"""
     qjump(u, p, p.fttype::twocol)
 """
 function qjump(u, p, fttype::twocol)
     zi, hM, qM, SST, CF = u;
-    SST_trop = trop_sst(u, p);
-    qft = qsat(SST_trop) * p.RHtrop;
+    T = Tft(u,p);
+    qft = q_sat(zi, T) * 0.2;
     qj = qft - qM;
     return qj
 end
@@ -94,19 +104,18 @@ end
 """
 function hjump(u, p, fttype::twocol)
     zi, hM, qM, SST, CF = u;
-    SST_trop = trop_sst(u, p);
-    Γ = Γm(SST_trop, p.RHtrop);
-    Tft = SST_trop - zi*Γ;
+    T = Tft(u,p);
     qft = qjump(u, p, p.fttype) + qM;
-    hft = Cp .* Tft .+ g .* zi .+ L0 .* qft;
+    hft = Cp .* T .+ g .* zi .+ L0 .* qft;
     hj = hft - hM;
+    # println(qft*1e3,"\t",T);
     return hj
 end
 
 """
     H_zi(u, p)
 
-    enthalpy flux into the mixed-layer from above at z=zi
+    moist enthalpy flux into the mixed-layer from above at z=zi
     H_zi = -we * (hft - hM)
 """
 function H_zi(u, p)

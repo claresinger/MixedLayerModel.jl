@@ -174,10 +174,10 @@ function calc_qft0(RHft, Gamma_q, sft0, Gamma_s)
 end
 
 """
-    Γm - moist adiabat calculation
+    Γm - moist adiabatic lapse rate calculation
 """
 function Γm(Tsurf, RHsurf)
-    qv = qsat(Tsurf) * RHsurf;
-    Γ = g * (1 + (L0*qv)/(Rd*Tsurf)) / (cp + (L0^2*qv)/(Rv*Tsurf^2));
+    qv = q_sat(0.0, Tsurf) * RHsurf;
+    Γ = g * (1 + (L0*qv)/(Rd*Tsurf)) / (Cp + (L0^2*qv)/(Rv*Tsurf^2));
     return Γ
 end

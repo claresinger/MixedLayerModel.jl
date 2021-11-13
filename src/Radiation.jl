@@ -169,19 +169,44 @@ function calc_R_s_400(u, p)
     return x
 end
 
+# """
+#     trop_sst(u,p)
+#     1. calculates subtropical TOA net SW and OLR
+#     2. calculates TOA radiative imbalance (relative to 400ppm)
+#     3. translates that to tropical TOA rad. imbalance
+#     4. linear relation of tropical SST on TOA imbalance
+#     (step 4 is a crude approx. for full radiative transfer)
+# """
+# function trop_sst(u, p)
+#     R_s = toa_net_rad(u);
+#     ΔR_s = R_s - calc_R_s_400(u, p);
+    
+#     ΔR_t = -p.AreaFrac/(1-p.AreaFrac)*ΔR_s;
+#     sst_t = 301.0 - 2.4*ΔR_t;
+#     return sst_t
+# end
+
 """
     trop_sst(u,p)
-    1. calculates subtropical TOA net SW and OLR
-    2. calculates TOA radiative imbalance (relative to 400ppm)
-    3. translates that to tropical TOA rad. imbalance
-    4. linear relation of tropical SST on TOA imbalance
-    (step 4 is a crude approx. for full radiative transfer)
 """
 function trop_sst(u, p)
     R_s = toa_net_rad(u);
     ΔR_s = R_s - calc_R_s_400(u, p);
-    
     ΔR_t = -p.AreaFrac/(1-p.AreaFrac)*ΔR_s;
-    sst_t = 301.0 - 2.4*ΔR_t;
+    
+    R_t = ΔR_t + p.R_t_400;
+    OLRt = S_trop - R_t;
+    Te = (OLRt / σ_SB)^0.25;
+    
+    RHtrop = 0.8;
+    thermo_x = log((Rd/Rv)*(e0/psurf)*RHtrop) + (L0/Rv)*(1/T0);
+    A = 1292.5;
+    B = 886.8;
+    He(Ts) = A * log(p.CO2) + B * thermo_x + B * (-L0/Rv) / Ts;
+    f(x) = x - Te - Γm(x, RHtrop)*He(x);
+    
+    Ts_guess = eltype(u)(295.0);
+    sst_t = find_zero(f, Ts_guess);
+
     return sst_t
 end

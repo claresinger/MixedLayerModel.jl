@@ -17,7 +17,8 @@ Cw = 4.19e3         # (heat capacity of water (J/kg/K)
 # definitions
 pref = 100000.0     # reference pressure (Pa = J/m^3)
 psurf = 101780.0    # surface pressure (Pa = J/m^3)
-S_subtr = 471.0     # solar flux (W/m^2)
+S_subtr = 471.0     # solar flux in subtropics (W/m^2)
+S_trop = 355.0      # solar flux in tropics (W/m2)
 α_ocean = 0.1       # surface albedo of ocean water
 
 # thermodynamic constants

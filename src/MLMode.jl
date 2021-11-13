@@ -99,6 +99,7 @@ end
       dSST/dt = 1/c * (SWnet - LWnet - SHF - LHF - OHU)
 """
 function mlm(du, u, p, t)
+    println(t);
     du[1] = dzidt(u, p)
     du[2] = dhMdt(u, p)
     du[3] = dqMdt(u, p)

@@ -9,7 +9,7 @@ newCO2 = parse(Float64,ARGS[1]);
 println(newCO2);
 
 # load initial condition from file
-path = "experiments/output/twocol/";
+path = "experiments/output/twocol_rad/";
 restarttry1 = path*"co2_upstep_"*string(Int(newCO2-100))*".jld2";
 restarttry2 = path*"co2_upstep_"*string(Int(newCO2-200))*".jld2";
 restarttry3 = path*"co2_upstep_"*string(Int(newCO2-400))*".jld2";

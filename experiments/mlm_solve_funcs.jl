@@ -33,7 +33,7 @@ function run_mlm(params; dt=3600.0*5.0, tspan=(0.0,3600.0*24.0*10.0))
         # println("Euler");
         # sol = solve(prob, Euler(), abstol=0.0, reltol=steptol, dt=dt);
         println("Rodas5");
-        sol = solve(prob, Rodas5(), abstol=0.0, reltol=steptol, dt=dt);
+        sol = solve(prob, Rodas5(), abstol=0.0, reltol=steptol);
     end
 
     return u0, sol
@@ -76,7 +76,10 @@ function run_mlm_from_init(u0, params; dt=3600.0*5.0, tspan=(0.0,3600.0*24.0*10.
     if params.fttype == fixedFT()
         params.qft0 = calc_qft0(params.RHft, params.Gamma_q, params.sft0, params.Gamma_s)
     end
-    prob = ODEProblem(mlm, u0, tspan, params);
+    prob = ODEProblem(ODEFunction(mlm, tgrad=(du, u, p, t) -> fill!(du, 0.0)), 
+            u0, 
+            tspan, 
+            params);
 
     @time begin
         println("Rodas5");

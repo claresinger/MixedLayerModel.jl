@@ -5,14 +5,14 @@ using Plots
 include("mlm_solve_funcs.jl")
 
 # define path to save file (which experiment are you running?)
-path = "experiments/output/twocol_rad/";
+path = "experiments/output/fixlapse_fixwv/";
 
 # define OHU from 400 ppm simulation
 par = upCO2();
 par.etype = enBal();
 par.fttype = twocol();
 dt = 4.0;
-tmax = 25.0;
+tmax = 15.0;
 
 # u0, sol = run_mlm_ss(par, dt=3600.0*dt, tspan=3600.0*24.0*tmax);
 # code = sol.retcode;

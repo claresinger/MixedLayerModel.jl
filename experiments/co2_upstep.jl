@@ -9,7 +9,7 @@ newCO2 = parse(Float64,ARGS[1]);
 println(newCO2);
 
 # load initial condition from file
-path = "experiments/output/twocol_rad/";
+path = "experiments/output/fixlapse_fixwv/";
 restarttry1 = path*"co2_upstep_"*string(Int(newCO2-100))*".jld2";
 restarttry2 = path*"co2_upstep_"*string(Int(newCO2-200))*".jld2";
 restarttry3 = path*"co2_upstep_"*string(Int(newCO2-400))*".jld2";
@@ -38,10 +38,11 @@ par.OHU = OHU;
 par.R_s_400 = R_s_400;
 par.CO2 = newCO2;
 par.etype = enBal();
-par.fttype = co2dep();
+par.fttype = twocol();
 par.rtype = varRad();
 par.stype = varSST();
 dt, tmax = 2.0, 30;
+# tmax = 15.0;
 println(par.OHU, "\t", par.R_s_400);
 
 # u0, sol = run_mlm_ss_from_init(u0, par, dt=3600.0*dt, tspan=3600.0*24.0*tmax);

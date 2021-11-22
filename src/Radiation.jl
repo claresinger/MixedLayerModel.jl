@@ -2,6 +2,7 @@ export rad_type, varRad, fixRad
 export surf_SW, surf_LW
 export calc_surf_RAD, calc_cloudtop_RAD
 export toa_net_rad, trop_sst
+export test_trop_sst
 
 ## create type for radiation
 ## one where ΔR is prescribed
@@ -169,44 +170,74 @@ function calc_R_s_400(u, p)
     return x
 end
 
-# """
-#     trop_sst(u,p)
-#     1. calculates subtropical TOA net SW and OLR
-#     2. calculates TOA radiative imbalance (relative to 400ppm)
-#     3. translates that to tropical TOA rad. imbalance
-#     4. linear relation of tropical SST on TOA imbalance
-#     (step 4 is a crude approx. for full radiative transfer)
-# """
-# function trop_sst(u, p)
-#     R_s = toa_net_rad(u);
-#     ΔR_s = R_s - calc_R_s_400(u, p);
-    
-#     ΔR_t = -p.AreaFrac/(1-p.AreaFrac)*ΔR_s;
-#     sst_t = 301.0 - 2.4*ΔR_t;
-#     return sst_t
-# end
-
 """
     trop_sst(u,p)
+    1. calculates subtropical TOA net SW and OLR
+    2. calculates subtropical TOA radiative imbalance (relative to 400ppm)
+    3. translates that to tropical TOA imbalance
+    4. calculates tropical emission temp from tropical OLR
+    5. calculates emission height as func of CO2 and H2O concentration
 """
 function trop_sst(u, p)
+    # net TOA imbalance
     R_s = toa_net_rad(u);
     ΔR_s = R_s - calc_R_s_400(u, p);
     ΔR_t = -p.AreaFrac/(1-p.AreaFrac)*ΔR_s;
-    
-    R_t = ΔR_t + p.R_t_400;
-    OLRt = S_trop - R_t;
-    Te = (OLRt / σ_SB)^0.25;
-    
+    # emission height parameterization
     RHtrop = 0.8;
     thermo_x = log((Rd/Rv)*(e0/psurf)*RHtrop) + (L0/Rv)*(1/T0);
     A = 1292.5;
     B = 886.8;
-    He(Ts) = A * log(p.CO2) + B * thermo_x + B * (-L0/Rv) / Ts;
-    f(x) = x - Te - Γm(x, RHtrop)*He(x);
-    
-    Ts_guess = eltype(u)(295.0);
-    sst_t = find_zero(f, Ts_guess);
-
+    He(Ts, CO2) = A * log(CO2) + B * thermo_x + B * (-L0/Rv) / Ts;
+    # 400ppm baseline temperatures, lapse rates, emission height
+    Ts400 = 300.0; # K 
+    Γm400 = Γm(Ts400, RHtrop);
+    He400 = He(Ts400, 400);
+    Te400 = Ts400 - Γm400*He400;
+    # change in emission temperature
+    ΔTe = -ΔR_t / (4*σ_SB*Te400^3);
+    # change in surface temeprature
+    ΔHe(ΔTs) = A * log(p.CO2/400) + B * (L0/Rv) / Ts400^2 * ΔTs;
+    ΔΓ(ΔTs) = Γm(Ts400+ΔTs, RHtrop) - Γm400;
+    f(ΔTs) = ΔTs - (ΔTe + ΔΓ(ΔTs)*He400 + Γm400*ΔHe(ΔTs));
+    ΔTs = find_zero(f, 1.0);
+    # absolute tropical SST
+    sst_t = Ts400 + ΔTs;
     return sst_t
+end
+
+function test_trop_sst(ΔR_s, p)
+    ΔR_t = -p.AreaFrac/(1-p.AreaFrac)*ΔR_s;
+    # println(ΔR_t);
+    println(p.CO2);
+
+    RHtrop = 0.8;
+    thermo_x = log((Rd/Rv)*(e0/psurf)*RHtrop) + (L0/Rv)*(1/T0);
+    A = 1292.5;
+    B = 886.8;
+    He(Ts, CO2) = A * log(CO2) + B * thermo_x + B * (-L0/Rv) / Ts;
+
+    # 400ppm baseline temperatures, lapse rates, emission height
+    Ts400 = 300.0; # K 
+    Γm400 = Γm(Ts400, RHtrop);
+    He400 = He(Ts400, 400);
+    Te400 = Ts400 - Γm400*He400;
+    #println(Ts400, "\t", Te400, "\t", Γm400, "\t", He400);
+
+    # change in emission temperature
+    ΔTe = -ΔR_t / (4*σ_SB*Te400^3);
+    println(ΔTe);
+    
+    # change in surface temeprature
+    ΔHe(ΔTs) = A * log(p.CO2/400) + B * (L0/Rv) / Ts400^2 * ΔTs;
+    ΔΓ(ΔTs) = Γm(Ts400+ΔTs, RHtrop) - Γm400;
+    f(ΔTs) = ΔTs - (ΔTe + ΔΓ(ΔTs)*He400 + Γm400*ΔHe(ΔTs));
+    ΔTs = find_zero(f, 1.0);
+    println(ΔTs);
+
+    #println(ΔΓ(ΔTs)*He400);
+
+    # absolute tropical SST
+    sst_t = Ts400 + ΔTs;
+    println(sst_t);
 end

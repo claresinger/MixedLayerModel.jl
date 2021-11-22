@@ -20,8 +20,9 @@ function calc_bflux(u, p, zarr, etype::bflux)
     H0 = H_0(u, p, p.ftype);
     Q0 = Q_0(u, p, p.ftype);
 
-    Hzi = H_zi(u, p);
-    Qzi = Q_zi(u, p);
+    ent = we(u, p, p.etype)
+    Hzi = H_zi(u, p, ent);
+    Qzi = Q_zi(u, p, ent);
 
     wh(z) = (1 .- z./zi) .* H0 .+ (z./zi) .* Hzi;
     wq(z) = (1 .- z./zi) .* Q0 .+ (z./zi) .* Qzi;

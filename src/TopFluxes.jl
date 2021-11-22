@@ -113,25 +113,25 @@ function hjump(u, p, fttype::twocol)
 end
 
 """
-    H_zi(u, p)
+    H_zi(u, p, ent)
 
     moist enthalpy flux into the mixed-layer from above at z=zi
     H_zi = -we * (hft - hM)
 """
-function H_zi(u, p)
+function H_zi(u, p, ent)
     hj = hjump(u, p, p.fttype);
-    Hzi = -we(u, p, p.etype) * hj;
+    Hzi = -ent * hj;
     return Hzi
 end
 
 """
-    Q_zi(u, p)
+    Q_zi(u, p, ent)
 
     moisture flux into the mixed-layer from above at z=zi
     Q_zi = -we * (qft - qM)
 """
-function Q_zi(u, p)
+function Q_zi(u, p, ent)
     qj = qjump(u, p, p.fttype);
-    Qzi = - we(u, p, p.etype) * qj;
+    Qzi = -ent * qj;
     return Qzi
 end

@@ -70,16 +70,11 @@ end
 """
 function temp(z, h, qt)
     h_act(T) = Cp .* T .+ g .* z .+ L0 .* q_v(z,T,qt);
-    f(x) = h - h_act(x);
+    f(x) = h .- h_act(x);
     
-    T_guess = 300.0;
-    T = T0;
-    try
-        T = find_zero(f, T_guess);
-    catch
-        T = T0;
-    end
-        
+    T_guess = eltype(h)(300.0);
+    T = find_zero.(f, T_guess);
+
     return T
 end
 
@@ -116,18 +111,13 @@ end
 function calc_LCL(u)
     zi, hM, qtM, SST, CF = u;
 
-    zb = zi;
-    try
-        f(z) = qtM - q_sat(z,temp(z,hM,qtM));
+    f(z) = qtM - q_sat(z,temp(z,hM,qtM));
+    if f(0) > 0
+        zb = 0.0;
+    elseif f(zi) < 0
+        zb = zi;
+    else
         zb = find_zero(f, (0.0,zi), Bisection());
-    catch
-        z0 = 0.0;
-        ql0 = q_l(z0,temp(z0, hM, qtM),qtM);
-        if ql0 > 0
-            zb = z0;
-        else
-            zb = zi;
-        end
     end
     return zb
 end

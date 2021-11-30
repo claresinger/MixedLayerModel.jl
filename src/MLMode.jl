@@ -9,42 +9,42 @@ struct fixSST <: sst_type end
 struct varSST <: sst_type end
 
 """
-    dzidt(u, p)
+    dzidt(u, p, ent)
 
     evolution of inversion height, zi
     balance between entrainment and subsidence
 """
-function dzidt(u, p)
-    dzidt = we(u, p, p.etype) - p.D*u[1]
+function dzidt(u, p, ent)
+    dzidt = ent - p.D*u[1]
     return dzidt
 end
 
 """
-    dhMdt(u, p) 
+    dhMdt(u, p, ent) 
 
     evolution of mixed-layer enthalpy, hM
     negative of the vertical energy flux
 """
-function dhMdt(u, p)
+function dhMdt(u, p, ent)
     zi, hM, qM, SST, CF = u;
     ΔR = calc_cloudtop_RAD(u,p,p.rtype);
     H0 = H_0(u, p, p.ftype);
-    Hzi = H_zi(u, p);
+    Hzi = H_zi(u, p, ent);
     dEdz = 1/zi * (Hzi - H0 + ΔR/ρref(SST));
     dhMdt = - dEdz
     return dhMdt
 end
 
 """
-    dqMdt(u, p)
+    dqMdt(u, p, ent)
 
     evolution of mixed-layer total water specific humidity, qM
     negative of the vertical water flux
 """
-function dqMdt(u, p)
+function dqMdt(u, p, ent)
     zi, hM, qM, SST, CF = u;
     Q0 = Q_0(u, p, p.ftype);
-    Qzi = Q_zi(u, p);
+    Qzi = Q_zi(u, p, ent);
     dWdz = (1/zi) * (Qzi - Q0);
     dqMdt = - dWdz
     return dqMdt
@@ -93,15 +93,16 @@ end
     mlm(du, u, p, t)    
 
     define the coupled ODE
-      dzi/dt = D*zi - we
+      dzi/dt = we - D*zi
       dhM/dt = -dE/dz = 1/zi * (Hzi - H0 + dR/rho)
       dqM/dt = -dW/dz = 1/zi * (Qzi - Q0)
       dSST/dt = 1/c * (SWnet - LWnet - SHF - LHF - OHU)
 """
 function mlm(du, u, p, t)
-    du[1] = dzidt(u, p)
-    du[2] = dhMdt(u, p)
-    du[3] = dqMdt(u, p)
+    ent = we(u, p, p.etype);
+    du[1] = dzidt(u, p, ent)
+    du[2] = dhMdt(u, p, ent)
+    du[3] = dqMdt(u, p, ent)
     du[4] = dSSTdt(u, p, p.stype)
     du[5] = dCFdt(u, p)
 end

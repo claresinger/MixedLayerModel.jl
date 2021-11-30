@@ -12,7 +12,7 @@ struct fixFlux <: flux_type end
     define surface enthalpy flux, H_surf
     using bulk aerodynamic formula
 
-    H_surf = C * V * (h0 - h+)
+    H_surf = C * V * (h0 - h)
 """
 function H_0(u, p, ftype::varFlux)
     zi, hM, qM, SST, CF = u;
@@ -35,7 +35,7 @@ end
     define surface moisture flux, Q_surf
     using bulk aerodynamic formula
 
-    Q_surf = C * V * (q0 - q+)
+    Q_surf = C * V * (q0 - q)
 """
 function Q_0(u, p, ftype::varFlux)
     zi, hM, qM, SST, CF = u;

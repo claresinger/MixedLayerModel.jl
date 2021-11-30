@@ -5,11 +5,12 @@ using Plots
 include("mlm_solve_funcs.jl")
 
 # use command line argument to set co2
-newCO2 = parse(Float64,ARGS[1]);
+# newCO2 = parse(Float64,ARGS[1]);
+newCO2 = 600.0;
 println(newCO2);
 
 # load initial condition from file
-path = "experiments/output/fixlapse_fixwv/";
+path = "experiments/output/co2dep/";
 restarttry1 = path*"co2_upstep_"*string(Int(newCO2-100))*".jld2";
 restarttry2 = path*"co2_upstep_"*string(Int(newCO2-200))*".jld2";
 restarttry3 = path*"co2_upstep_"*string(Int(newCO2-400))*".jld2";
@@ -22,6 +23,7 @@ elseif isfile(restarttry3)
 else
     output = load(path*"co2_400.jld2");
 end
+#output = load(path*"co2_upstep_"*string(Int(newCO2))*"_20day.jld2");
 u0 = output["uf"];
 OHU = output["OHU"];
 println("restarting from CO2 = "*string(output["p"].CO2));
@@ -38,11 +40,11 @@ par.OHU = OHU;
 par.R_s_400 = R_s_400;
 par.CO2 = newCO2;
 par.etype = enBal();
-par.fttype = twocol();
+par.fttype = co2dep();
 par.rtype = varRad();
 par.stype = varSST();
-dt, tmax = 2.0, 30;
-# tmax = 15.0;
+dt, tmax = 2.0, 20;
+
 println(par.OHU, "\t", par.R_s_400);
 
 # u0, sol = run_mlm_ss_from_init(u0, par, dt=3600.0*dt, tspan=3600.0*24.0*tmax);

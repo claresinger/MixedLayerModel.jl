@@ -108,7 +108,6 @@ function hjump(u, p, fttype::twocol)
     qft = qjump(u, p, p.fttype) + qM;
     hft = Cp .* Tft .+ g .* zi .+ L0 .* qft;
     hj = hft - hM;
-    # println(qft*1e3,"\t",Tft);
     return hj
 end
 

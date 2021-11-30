@@ -99,7 +99,26 @@ end
       dSST/dt = 1/c * (SWnet - LWnet - SHF - LHF - OHU)
 """
 function mlm(du, u, p, t)
-    # println(t);
+    if u[1] < 10
+        zi, hM, qM, SST, CF = u;
+        println(t / 3600.0 / 24.0);
+        println(u);
+        println(calc_LCL(u));
+        println(we(u, p, p.etype));
+        println(calc_cloudtop_RAD(u, p, p.rtype));
+        Tct = temp(zi,hM,qM);
+        LWP = incloud_LWP(u)*1e3; # kg/m^2 \to g/m^2
+        ϵc_up = cloud_emissivity(LWP);
+        Teff = Tatmos(p);
+        println(LWP, ϵc_up);
+        println(Tct, Teff);
+        println();
+        println(temp.(collect(0:50:1000), hM, qM));
+        #println(trop_sst(u, p), "\t", Γm(trop_sst(u, p), p.RHtrop), "\t",  temp_ft(u, p));
+        #println(hjump(u, p, p.fttype)+hM, "\t", qjump(u, p, p.fttype)+qM);
+        error()
+    end
+
     ent = we(u, p, p.etype);
     du[1] = dzidt(u, p, ent)
     du[2] = dhMdt(u, p, ent)

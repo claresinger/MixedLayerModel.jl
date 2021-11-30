@@ -4,38 +4,43 @@ using Plots
 
 include("mlm_solve_funcs.jl")
 
-# define path to save file (which experiment are you running?)
-path = "experiments/output/co2dep/";
+# use command line argument to set co2
+# newCO2 = parse(Float64,ARGS[1]);
+newCO2 = 1000.0;
+println(newCO2);
 
-# define OHU from 400 ppm simulation
+# load initial condition from file
+path = "experiments/output/twocol_co2/";
+#output = load(path*"co2_upstep_"*string(Int(newCO2))*".jld2");
+output = load(path*"co2_restart_"*string(Int(newCO2))*"_restart.jld2");
+u0 = output["uf"];
+OHU = output["OHU"];
+println("restarting from CO2 = "*string(output["p"].CO2));
+
+# get toa net rad @ 400 ppm
+output = load(path*"co2_400.jld2");
+u400 = output["uf"];
+R_s_400 = toa_net_rad(u400);
+
+# set OHU, increase CO2, let SST evolve and check cloud changes
 par = upCO2();
+par.Hw = 0.1;
+par.OHU = OHU;
+par.R_s_400 = R_s_400;
+par.CO2 = newCO2;
 par.etype = enBal();
-par.fttype = co2dep();
-dt = 4.0;
-tmax = 15.0;
+par.fttype = twocol();
+par.rtype = varRad();
+par.stype = varSST();
+dt, tmax = 0.05, 1.0;
 
-# u0, sol = run_mlm_ss(par, dt=3600.0*dt, tspan=3600.0*24.0*tmax);
-# code = sol.retcode;
-# println(code);
-# println(u0);
+println(par.OHU, "\t", par.R_s_400);
 
-# uf = sol.u;
-# du = zeros(5);
-# mlm(du, uf, par, 0.0);
-# zi,hM,qM,SST,CF = uf;
-# zb = calc_LCL(uf);
-# println(uf);
-# println(du);
-
-# output = Dict("code" => code, "p"=>par, "u0" => u0, "uf" => uf, "du/u" => du./uf, 
-# "we" => we(uf,par,par.etype), "zb" => zb, "zc" => zi-zb,
-# "RHsurf" => RH(0.0, hM, qM), "LHF" => calc_LHF(uf,par), "SHF" => calc_SHF(uf,par),
-# "ΔR" => calc_cloudtop_RAD(uf,par,par.rtype), "OHU" => calc_OHU(uf,par,par.stype));
-# save(path*"co2_400.jld2", output);
-
-## plot time series
+# plot time series
 ENV["GKSwstype"]="nul"
-u0, sol = run_mlm(par, dt=3600.0*dt, tspan=(0.0,3600.0*24.0*tmax));
+u0, sol = run_mlm_from_init(u0, par, dt=3600.0*dt, tspan=(0.0,3600.0*24.0*tmax));
+# println(sol);
+# println(dump(sol));
 t = sol.t / 3600.0 / 24.0;
 zi = getindex.(sol.u,1);
 hM = getindex.(sol.u,2) * 1e-3;
@@ -67,7 +72,7 @@ plot!(t, ΔR, marker="o-", legend=false, subplot=8, ylabel="ΔR [W/m2]");
 plot!(t, (zi .- zb) ./ zi, marker="o-", legend=false, subplot=9, ylabel="zc/zi [-]", xlabel="time [days]");
 plot!(t, S, marker="o-", legend=false, subplot=10, ylabel="S [-]", xlabel="time [days]");
 mkpath(replace(path, "output"=>"figures"));
-savefig(replace(path, "output"=>"figures")*"sol400_t.png");
+savefig(replace(path, "output"=>"figures")*"sol"*string(Int(newCO2))*"_t_restart2.png");
 
 ## save steady-state solution
 uf = sol.u[end];
@@ -77,10 +82,11 @@ zi,hM,qM,SST = uf;
 zb = calc_LCL(uf);
 println(uf);
 println(du);
+println("tropical SST:  ", trop_sst(uf, par));
 
 output = Dict("p" => par, "u0" => u0, "uf" => uf, "du/u" => du./uf, 
 "we" => we(uf,par,par.etype), "zb" => zb, "zc" => zi-zb,
 "RHsurf" => RH(0.0, hM, qM), "LHF" => calc_LHF(uf,par), "SHF" => calc_SHF(uf,par),
 "ΔR" => calc_cloudtop_RAD(uf,par,par.rtype), "OHU" => calc_OHU(uf,par,par.stype))
 
-save(path*"co2_400.jld2", output);
+save(path*"co2_restart_"*string(Int(newCO2))*"_restart2.jld2", output)

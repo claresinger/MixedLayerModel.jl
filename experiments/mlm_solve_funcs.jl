@@ -35,6 +35,7 @@ function run_mlm(params; dt=3600.0*5.0, tspan=(0.0,3600.0*24.0*10.0))
         println("Rodas5");
         sol = solve(prob, Rodas5(), abstol=0.0, reltol=steptol);
     end
+    println("done")
 
     return u0, sol
 end
@@ -85,6 +86,11 @@ function run_mlm_from_init(u0, params; dt=3600.0*5.0, tspan=(0.0,3600.0*24.0*10.
         println("Rodas5");
         sol = solve(prob, Rodas5(), abstol=0.0, reltol=steptol);
     end
+
+    # @time begin
+    #     println("Euler");
+    #     sol = solve(prob, Euler(), abstol=0.0, reltol=steptol, dt=dt);
+    # end
 
     return u0, sol
 end

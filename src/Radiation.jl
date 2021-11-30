@@ -4,6 +4,8 @@ export calc_surf_RAD, calc_cloudtop_RAD
 export toa_net_rad, trop_sst
 export test_trop_sst
 
+export cloud_emissivity, Tatmos
+
 ## create type for radiation
 ## one where ΔR is prescribed
 ## one where ΔR is calculated from LWP and cloud top temperature
@@ -95,10 +97,10 @@ end
 function calc_cloudtop_RAD(u,p,rtype::varRad)
     zi, hM, qM, SST, CF = u;
     Tct = temp(zi,hM,qM);
-    LWP = incloud_LWP(u)*1e3; # kg/m^2 \to g/m^2
+    LWP = incloud_LWP(u)*1e3; # kg/m^2 --> g/m^2
     ϵc_up = cloud_emissivity(LWP);
     Teff = Tatmos(p);
-    ΔR = CF * (ϵc_up * σ_SB * Tct^4 - σ_SB * Teff^4);
+    ΔR = CF * σ_SB * (ϵc_up * Tct^4 - Teff^4);
     return ΔR
 end
 
@@ -133,7 +135,6 @@ end
 function cloud_emissivity(LWP)
     a0 = 0.15; # m^2/g
     ϵc = 1 - exp(-a0 * LWP); 
-    ϵc = ϵc;
     return ϵc
 end
 
@@ -184,23 +185,44 @@ function trop_sst(u, p)
     ΔR_s = R_s - calc_R_s_400(u, p);
     ΔR_t = -p.AreaFrac/(1-p.AreaFrac)*ΔR_s;
     # emission height parameterization
-    RHtrop = 0.8;
-    thermo_x = log((Rd/Rv)*(e0/psurf)*RHtrop) + (L0/Rv)*(1/T0);
+    thermo_x = log((Rd/Rv)*(e0/psurf)*p.RHtrop) + (L0/Rv)*(1/T0);
     A = 1292.5;
     B = 886.8;
     He(Ts, CO2) = A * log(CO2) + B * thermo_x + B * (-L0/Rv) / Ts;
     # 400ppm baseline temperatures, lapse rates, emission height
     Ts400 = 300.0; # K 
-    Γm400 = Γm(Ts400, RHtrop);
+    Γm400 = Γm(Ts400, p.RHtrop);
     He400 = He(Ts400, 400);
     Te400 = Ts400 - Γm400*He400;
     # change in emission temperature
     ΔTe = -ΔR_t / (4*σ_SB*Te400^3);
-    # change in surface temeprature
-    ΔHe(ΔTs) = A * log(p.CO2/400) + B * (L0/Rv) / Ts400^2 * ΔTs;
-    ΔΓ(ΔTs) = Γm(Ts400+ΔTs, RHtrop) - Γm400;
-    f(ΔTs) = ΔTs - (ΔTe + ΔΓ(ΔTs)*He400 + Γm400*ΔHe(ΔTs));
-    ΔTs = find_zero(f, 1.0);
+    # # change in surface temeprature
+    # ΔHe(ΔTs) = A * log(p.CO2/400) + B * (L0/Rv) / Ts400^2 * ΔTs;
+    # ΔΓ(ΔTs) = Γm(Ts400+ΔTs, p.RHtrop) - Γm400;
+
+    # # no water vapor feedback or lapse rate feedback
+    # ΔHe(ΔTs) = A * log(p.CO2/400);
+    # ΔΓ(ΔTs) = 0.0;
+    
+    # f(ΔTs) = ΔTs - (ΔTe + ΔΓ(ΔTs)*He400 + Γm400*ΔHe(ΔTs));
+    # ΔTs = find_zero(f, (eltype(u)(-20.0), eltype(u)(20.0)), Bisection());
+    
+    ΔTs = 0.0;
+
+    # ΔTs = 0.0;
+    # if sign(f(-20)) == sign(f(20))
+    #     println(f(-20), "\t", f(20));
+    #     println("out of bounds");
+    #     println(u);
+    #     println(ΔTe);
+    # else
+    #     try
+    #         ΔTs = find_zero(f, (eltype(u)(-20.0), eltype(u)(20.0)), Bisection());
+    #     catch
+    #         println(f(-20), "\t", f(20));
+    #     end
+    # end
+
     # absolute tropical SST
     sst_t = Ts400 + ΔTs;
     return sst_t

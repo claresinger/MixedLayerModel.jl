@@ -30,7 +30,7 @@ export upCO2, climatology
     ftype::flux_type = varFlux();
     rtype::rad_type = varRad();
     stype::sst_type = fixSST();
-    fttype::ft_type = sstdep();
+    fttype::ft_type = co2dep();
 end
 
 @with_kw mutable struct climatology

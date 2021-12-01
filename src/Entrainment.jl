@@ -15,7 +15,7 @@ struct bflux <: ent_type end
 
     fixed entrainment velocity of 7 mm/s
 """ 
-function we(u, p, etype::fixed)
+function we(u, p, zb, etype::fixed)
     w = 0.007; # 7 mm/s
     return w
 end
@@ -26,13 +26,13 @@ end
     entrainment velocity obtained via energy balance requirement
     w = ΔR / (Δs_vli * ρref)
 """
-function we(u, p, etype::enBal)
+function we(u, p, zb, etype::enBal)
     zi, hM, qM, SST, CF = u;
-    ΔR = calc_cloudtop_RAD(u,p,p.rtype);
+    ΔR = calc_cloudtop_RAD(u, p, zb, p.rtype);
 
     # calculate change in s_vl across inversion
-    hj = hjump(u, p, p.fttype);
-    qj = qjump(u, p, p.fttype);
+    hj = hjump(u, p, zb, p.fttype);
+    qj = qjump(u, p, zb, p.fttype);
     Δs_vli = hj - μ*L0*qj;
 
     f = ΔR / ρref(SST);
@@ -48,13 +48,13 @@ end
     entrainment velocity obtained via energy balance requirement
     w = a * ΔR / (Δs_vli * ρref)
 """
-function we(u, p, etype::Sally)
+function we(u, p, zb, etype::Sally)
     zi, hM, qM, SST, CF = u;
-    ΔR = calc_cloudtop_RAD(u,p,p.rtype);
+    ΔR = calc_cloudtop_RAD(u, p, zb, p.rtype);
 
     # calculate change in s_vl across inversion
-    hj = hjump(u, p, p.fttype);
-    qj = qjump(u, p, p.fttype);
+    hj = hjump(u, p, zb, p.fttype);
+    qj = qjump(u, p, zb, p.fttype);
     Δs_vli = hj - μ*L0*qj;
 
     f = ΔR / ρref(SST);
@@ -72,12 +72,12 @@ end
     
     integral is calculated analytically
 """
-function we(u, p, etype::bflux)
+function we(u, p, zb, etype::bflux)
     zi, hM, qM, SST = u;
     
     # calculate change in s_vl across inversion
-    hj = hjump(u, p, p.fttype);
-    qj = qjump(u, p, p.fttype);
+    hj = hjump(u, p, zb, p.fttype);
+    qj = qjump(u, p, zb, p.fttype);
     Δs_vli = hj - μ*L0*qj;
 
     # calculate sv flux <w'sv'>(z) = f0(z) + we*f1(z)

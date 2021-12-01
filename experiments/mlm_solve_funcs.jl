@@ -29,12 +29,13 @@ function run_mlm(params; dt=3600.0*5.0, tspan=(0.0,3600.0*24.0*10.0))
             tspan, 
             params);
 
-    @time begin
+    println("Rodas5");
+    sol = solve(prob, Rodas5(autodiff=false), abstol=0.0, reltol=steptol, dt=dt);
+
+    # @time begin
         # println("Euler");
         # sol = solve(prob, Euler(), abstol=0.0, reltol=steptol, dt=dt);
-        println("Rodas5");
-        sol = solve(prob, Rodas5(autodiff=false), abstol=0.0, reltol=steptol, dt=dt);
-    end
+    # end
 
     return u0, sol
 end

@@ -25,11 +25,11 @@ end
     evolution of mixed-layer enthalpy, hM
     negative of the vertical energy flux
 """
-function dhMdt(u, p, ent)
+function dhMdt(u, p, ent, zb)
     zi, hM, qM, SST, CF = u;
-    ΔR = calc_cloudtop_RAD(u,p,p.rtype);
+    ΔR = calc_cloudtop_RAD(u, p, zb, p.rtype);
     H0 = H_0(u, p, p.ftype);
-    Hzi = H_zi(u, p, ent);
+    Hzi = H_zi(u, p, zb, ent);
     dhMdt = -(1/zi) * (Hzi - H0 + ΔR/ρref(SST));
     return dhMdt
 end
@@ -40,10 +40,10 @@ end
     evolution of mixed-layer total water specific humidity, qM
     negative of the vertical water flux
 """
-function dqMdt(u, p, ent)
+function dqMdt(u, p, ent, zb)
     zi, hM, qM, SST, CF = u;
     Q0 = Q_0(u, p, p.ftype);
-    Qzi = Q_zi(u, p, ent);
+    Qzi = Q_zi(u, p, zb, ent);
     dqMdt = -(1/zi) * (Qzi - Q0);
     return dqMdt
 end
@@ -53,7 +53,7 @@ end
 
     defined as 0 for fixSST
 """
-function dSSTdt(u, p, stype::fixSST)
+function dSSTdt(u, p, zb, stype::fixSST)
     return 0
 end
 
@@ -62,8 +62,8 @@ end
 
     close surface energy budge for varSST
 """
-function dSSTdt(u, p, stype::varSST)
-    RAD = calc_surf_RAD(u,p);
+function dSSTdt(u, p, zb, stype::varSST)
+    RAD = calc_surf_RAD(u, p, zb);
     SHF = calc_SHF(u, p);
     LHF = calc_LHF(u, p);   
     c = ρw * Cw * p.Hw;
@@ -79,9 +79,9 @@ end
     calculation cloud fraction 
     determined as a logistic function of S, the stability parameter
 """
-function dCFdt(u, p)
+function dCFdt(u, p, zb)
     zi, hM, qM, SST, CF = u;
-    CFnew = cloud_fraction(u, p);
+    CFnew = cloud_fraction(u, p, zb);
     τ_CF = 3600.0*24.0*1.0; # 1 days; cloud fraction adjustment timescale [seconds]
     dCFdt = (CFnew - CF) / τ_CF;
     return dCFdt
@@ -97,15 +97,16 @@ end
       dSST/dt = 1/c * (SWnet - LWnet - SHF - LHF - OHU)
 """
 function mlm(du, u, p, t)
-    if u[1] < 10
+    if u[1] < 100
         zi, hM, qM, SST, CF = u;
+        zb = calc_LCL(u);
         println(t / 3600.0 / 24.0);
         println(u);
-        println(calc_LCL(u));
-        println(we(u, p, p.etype));
-        println(calc_cloudtop_RAD(u, p, p.rtype));
+        println(zb);
+        println(we(u, p, zb, p.etype));
+        println(calc_cloudtop_RAD(u, p, zb, p.rtype));
         Tct = temp(zi,hM,qM);
-        LWP = incloud_LWP(u)*1e3; # kg/m^2 \to g/m^2
+        LWP = incloud_LWP(u, zb)*1e3; # kg/m^2 \to g/m^2
         ϵc_up = cloud_emissivity(LWP);
         Teff = Tatmos(p);
         println(LWP, ϵc_up);
@@ -114,13 +115,25 @@ function mlm(du, u, p, t)
         println(temp.(collect(0:50:1000), hM, qM));
         #println(trop_sst(u, p), "\t", Γm(trop_sst(u, p), p.RHtrop), "\t",  temp_ft(u, p));
         #println(hjump(u, p, p.fttype)+hM, "\t", qjump(u, p, p.fttype)+qM);
+    end
+
+    if u[1] < 10
         error()
     end
 
-    ent = we(u, p, p.etype);
+    try
+        zb = calc_LCL(u);
+        println(zb);
+    catch
+        println("failed to calc zb")
+        println(u);
+    end
+
+    zb = calc_LCL(u);
+    ent = we(u, p, zb, p.etype);
     du[1] = dzidt(u, p, ent)
-    du[2] = dhMdt(u, p, ent)
-    du[3] = dqMdt(u, p, ent)
-    du[4] = dSSTdt(u, p, p.stype)
-    du[5] = dCFdt(u, p)
+    du[2] = dhMdt(u, p, ent, zb)
+    du[3] = dqMdt(u, p, ent, zb)
+    du[4] = dSSTdt(u, p, zb, p.stype)
+    du[5] = dCFdt(u, p, zb)
 end

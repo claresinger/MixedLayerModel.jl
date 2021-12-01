@@ -29,11 +29,11 @@ end
 """
     net downward shortwave radiation at surface
 """
-function surf_SW(u,p)
+function surf_SW(u, p, zb)
     zi, hM, qM, SST, CF = u;
 
     # shortwave calculation
-    LWP = incloud_LWP(u)*1e3; # kg/m^2 --> g/m^2
+    LWP = incloud_LWP(u, zb)*1e3; # kg/m^2 --> g/m^2
     αc = cloud_albedo(LWP, CF);
     SW_net = (1-αc) * (1-α_ocean) * S_subtr;
     return SW_net
@@ -48,12 +48,11 @@ end
 
     now written as just a linear function of SST
 """
-function surf_LW(u,p)
+function surf_LW(u, p, zb)
     zi, hM, qM, SST, CF = u;
     
     # longwave calculation
     # ϵc_down = cloud_emissivity(LWP);
-    # zb = calc_LCL(u);
     # Tc = temp(zb,hM,qM);
     # Teff = Tatmos(p);
     # Ta = temp(zb/2.0,hM,qM);
@@ -72,9 +71,9 @@ end
 """
     calculate net SW and LW radiation at the surface
 """
-function calc_surf_RAD(u,p)
-    SW_net = surf_SW(u,p);
-    LW_net = surf_LW(u,p);
+function calc_surf_RAD(u, p, zb)
+    SW_net = surf_SW(u, p, zb);
+    LW_net = surf_LW(u, p, zb);
     RAD = SW_net + LW_net;
     return RAD
 end
@@ -82,7 +81,7 @@ end
 """
     returns the prescribed cloud-top radiative cooling ΔR
 """
-function calc_cloudtop_RAD(u,p,rtype::fixRad)
+function calc_cloudtop_RAD(u, p, zb, rtype::fixRad)
     return p.ΔR
 end
 
@@ -94,13 +93,13 @@ end
 
     gives ΔR ≈ 80 W/m2 for 400 ppm CO2
 """
-function calc_cloudtop_RAD(u,p,rtype::varRad)
+function calc_cloudtop_RAD(u, p, zb, rtype::varRad)
     zi, hM, qM, SST, CF = u;
     Tct = temp(zi,hM,qM);
-    LWP = incloud_LWP(u)*1e3; # kg/m^2 --> g/m^2
+    LWP = incloud_LWP(u, zb)*1e3; # kg/m^2 --> g/m^2
     ϵc_up = cloud_emissivity(LWP);
     Teff = Tatmos(p);
-    ΔR = CF * σ_SB * (ϵc_up * Tct^4 - Teff^4);
+    ΔR = CF * σ_SB * ϵc_up * (Tct^4 - Teff^4);
     return ΔR
 end
 
@@ -139,15 +138,15 @@ function cloud_emissivity(LWP)
 end
 
 """
-    toa_net_rad(u)
+    toa_net_rad(u, zb)
     calculates net sw and OLR at TOA
     OLR is linear func of SST based on LES
 """
-function toa_net_rad(u)
+function toa_net_rad(u, zb)
     zi, hM, qM, SST, CF = u;
 
     T = 0.8;
-    LWP = incloud_LWP(u)*1e3; # kg/m^2 \to g/m^2
+    LWP = incloud_LWP(u, zb)*1e3; # kg/m^2 \to g/m^2
     αc = cloud_albedo(LWP, CF);
     α = T*CF*αc + (1-CF)*α_ocean;
     SW_net = (1-α)*S_subtr;
@@ -158,108 +157,76 @@ function toa_net_rad(u)
 end
 
 """
-    calc_R_s_400(u,p)
-    if CO2 = 400, returns toa_net_rad
-    else returns the saved parameter value
-"""
-function calc_R_s_400(u, p)
-    if p.CO2 == 400.0
-        x = toa_net_rad(u);
-    else
-        x = p.R_s_400;
-    end
-    return x
-end
-
-"""
-    trop_sst(u,p)
+    trop_sst(u, p, zb)
     1. calculates subtropical TOA net SW and OLR
     2. calculates subtropical TOA radiative imbalance (relative to 400ppm)
     3. translates that to tropical TOA imbalance
     4. calculates tropical emission temp from tropical OLR
     5. calculates emission height as func of CO2 and H2O concentration
 """
-function trop_sst(u, p)
+function trop_sst(u, p, zb)
     # net TOA imbalance
-    R_s = toa_net_rad(u);
-    ΔR_s = R_s - calc_R_s_400(u, p);
+    if p.CO2 == 400.0
+        ΔR_s = 0.0;
+    else
+        ΔR_s = toa_net_rad(u, zb) - p.R_s_400;
+    end
     ΔR_t = -p.AreaFrac/(1-p.AreaFrac)*ΔR_s;
+    
     # emission height parameterization
     thermo_x = log((Rd/Rv)*(e0/psurf)*p.RHtrop) + (L0/Rv)*(1/T0);
     A = 1292.5;
     B = 886.8;
     He(Ts, CO2) = A * log(CO2) + B * thermo_x + B * (-L0/Rv) / Ts;
-    # 400ppm baseline temperatures, lapse rates, emission height
-    Ts400 = 300.0; # K 
-    Γm400 = Γm(Ts400, p.RHtrop);
-    He400 = He(Ts400, 400);
-    Te400 = Ts400 - Γm400*He400;
+    
     # change in emission temperature
+    Ts400 = 300.0; # K 
+    Te400 = Ts400 - Γm(Ts400, p.RHtrop)*He(Ts400, 400);
     ΔTe = -ΔR_t / (4*σ_SB*Te400^3);
-    # # change in surface temeprature
+    
+    # # water vapor and lapse rate feedback on
     # ΔHe(ΔTs) = A * log(p.CO2/400) + B * (L0/Rv) / Ts400^2 * ΔTs;
-    # ΔΓ(ΔTs) = Γm(Ts400+ΔTs, p.RHtrop) - Γm400;
+    # ΔΓ(ΔTs) = Γm(Ts400+ΔTs, p.RHtrop) - Γm(Ts400, p.RHtrop);
 
-    # # no water vapor feedback or lapse rate feedback
-    # ΔHe(ΔTs) = A * log(p.CO2/400);
-    # ΔΓ(ΔTs) = 0.0;
+    # no water vapor feedback or lapse rate feedback
+    ΔHe(ΔTs) = A * log(p.CO2/400);
+    ΔΓ(ΔTs) = 0.0;
     
-    # f(ΔTs) = ΔTs - (ΔTe + ΔΓ(ΔTs)*He400 + Γm400*ΔHe(ΔTs));
-    # ΔTs = find_zero(f, (eltype(u)(-20.0), eltype(u)(20.0)), Bisection());
+    f(ΔTs) = ΔTs - (ΔTe + ΔΓ(ΔTs)*He(Ts400, 400) + Γm(Ts400, p.RHtrop)*ΔHe(ΔTs));
+    ΔTs = find_zero(f, (-20, 20), Bisection());
     
-    ΔTs = 0.0;
-
-    # ΔTs = 0.0;
-    # if sign(f(-20)) == sign(f(20))
-    #     println(f(-20), "\t", f(20));
-    #     println("out of bounds");
-    #     println(u);
-    #     println(ΔTe);
-    # else
-    #     try
-    #         ΔTs = find_zero(f, (eltype(u)(-20.0), eltype(u)(20.0)), Bisection());
-    #     catch
-    #         println(f(-20), "\t", f(20));
-    #     end
-    # end
-
     # absolute tropical SST
     sst_t = Ts400 + ΔTs;
     return sst_t
 end
 
-function test_trop_sst(ΔR_s, p)
-    ΔR_t = -p.AreaFrac/(1-p.AreaFrac)*ΔR_s;
-    # println(ΔR_t);
-    println(p.CO2);
-
-    RHtrop = 0.8;
-    thermo_x = log((Rd/Rv)*(e0/psurf)*RHtrop) + (L0/Rv)*(1/T0);
-    A = 1292.5;
-    B = 886.8;
-    He(Ts, CO2) = A * log(CO2) + B * thermo_x + B * (-L0/Rv) / Ts;
-
-    # 400ppm baseline temperatures, lapse rates, emission height
-    Ts400 = 300.0; # K 
-    Γm400 = Γm(Ts400, RHtrop);
-    He400 = He(Ts400, 400);
-    Te400 = Ts400 - Γm400*He400;
-    #println(Ts400, "\t", Te400, "\t", Γm400, "\t", He400);
-
-    # change in emission temperature
-    ΔTe = -ΔR_t / (4*σ_SB*Te400^3);
-    println(ΔTe);
+# function test_trop_sst(ΔR_s, p)
+#     ΔR_t = -p.AreaFrac/(1-p.AreaFrac)*ΔR_s;
+#     println(p.CO2)
     
-    # change in surface temeprature
-    ΔHe(ΔTs) = A * log(p.CO2/400) + B * (L0/Rv) / Ts400^2 * ΔTs;
-    ΔΓ(ΔTs) = Γm(Ts400+ΔTs, RHtrop) - Γm400;
-    f(ΔTs) = ΔTs - (ΔTe + ΔΓ(ΔTs)*He400 + Γm400*ΔHe(ΔTs));
-    ΔTs = find_zero(f, 1.0);
-    println(ΔTs);
+#     # emission height parameterization
+#     thermo_x = log((Rd/Rv)*(e0/psurf)*p.RHtrop) + (L0/Rv)*(1/T0);
+#     A = 1292.5;
+#     B = 886.8;
+#     He(Ts, CO2) = A * log(CO2) + B * thermo_x + B * (-L0/Rv) / Ts;
+    
+#     # change in emission temperature
+#     Ts400 = 300.0; # K 
+#     Te400 = Ts400 - Γm(Ts400, p.RHtrop)*He(Ts400, 400);
+#     ΔTe = -ΔR_t / (4*σ_SB*Te400^3);
+    
+#     # water vapor and lapse rate feedback on
+#     ΔHe(ΔTs) = A * log(p.CO2/400) + B * (L0/Rv) / Ts400^2 * ΔTs;
+#     ΔΓ(ΔTs) = Γm(Ts400+ΔTs, p.RHtrop) - Γm(Ts400, p.RHtrop);
 
-    #println(ΔΓ(ΔTs)*He400);
-
-    # absolute tropical SST
-    sst_t = Ts400 + ΔTs;
-    println(sst_t);
-end
+#     # # no water vapor feedback or lapse rate feedback
+#     # ΔHe(ΔTs) = A * log(p.CO2/400);
+#     # ΔΓ(ΔTs) = 0.0;
+    
+#     f(ΔTs) = ΔTs - (ΔTe + ΔΓ(ΔTs)*He(Ts400, 400) + Γm(Ts400, p.RHtrop)*ΔHe(ΔTs));
+#     ΔTs = find_zero(f, (-20, 20), Bisection());
+    
+#     # absolute tropical SST
+#     sst_t = Ts400 + ΔTs;
+#     println(sst_t)
+# end

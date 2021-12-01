@@ -10,7 +10,7 @@ export calc_qft0
     and reference pressure pref
 """
 function ρref(T)
-    return pref ./ (Rd .* T)
+    return pref / (Rd * T)
 end
 
 """
@@ -19,7 +19,7 @@ end
     assumes hydrostatic balance
 """
 function pres(z, T)
-    return psurf .* exp.((-g .* z) ./ (Rd .* T));
+    return psurf * exp((-g * z) / (Rd * T));
 end
 
 """
@@ -28,7 +28,7 @@ end
     calculate density given altitude and temperature
 """
 function rho(z, T)
-    return pres(z,T) ./ (Rd .* T)
+    return pres(z,T) / (Rd * T)
 end
 
 """
@@ -38,8 +38,8 @@ end
     latent heat of vaporization term L0=2.5e6
 """
 function q_sat(z, T)
-    psat = e0 .* exp.(-L0/Rv .* (1 ./ T .- 1/T0));
-    qsat = Rd/Rv .* psat ./ (pres(z,T) .- psat);
+    psat = e0 * exp(-L0/Rv * (1 / T - 1/T0));
+    qsat = Rd/Rv * psat / (pres(z,T) - psat);
     return qsat
 end
 
@@ -49,7 +49,7 @@ end
     as the minimum between the total specific humidty and saturation specific humidity
 """
 function q_v(z, T, qt)
-    return min.(qt, q_sat(z,T));
+    return min(qt, q_sat(z,T));
 end
 
 """
@@ -59,27 +59,18 @@ end
     if undersaturated, then ql=0
 """
 function q_l(z, T, qt)
-    return max.(qt - q_sat(z,T), 0.0);
+    return max(qt - q_sat(z,T), 0.0);
 end
 
 """
     temp(z, h, qt)
 
     uses saturation adjustment on the enthalpy
-    if no zero is found, then set temp = 0°C
 """
 function temp(z, h, qt)
-    h_act(T) = Cp .* T .+ g .* z .+ L0 .* q_v(z,T,qt);
+    h_act(T) = Cp*T + g*z + L0*q_v(z,T,qt);
     f(x) = h - h_act(x);
-    
-    T_guess = 300.0;
-    T = T0;
-    try
-        T = find_zero(f, T_guess);
-    catch
-        T = T0;
-    end
-        
+    T = find_zero(f, eltype(h)(300.0), Order1());
     return T
 end
 
@@ -91,8 +82,8 @@ end
     max value is 1
 """
 function RH(z, h, qt)
-    qsat = q_sat(z, temp.(z, h, qt));
-    x = min.(qt ./ qsat, 1.0);
+    qsat = q_sat(z, temp(z, h, qt));
+    x = min(qt / qsat, 1.0);
     return x
 end
 
@@ -102,9 +93,9 @@ end
     calculate the potential temperature
 """
 function theta(z,h,qt)
-    T = temp.(z,h,qt);
+    T = temp(z,h,qt);
     p = pres(z,T);
-    θ = T .* (pref ./ p) .^ (Rd/Cp);
+    θ = T * (pref / p) ^ (Rd/Cp);
     return θ
 end
 
@@ -116,19 +107,15 @@ end
 function calc_LCL(u)
     zi, hM, qtM, SST, CF = u;
 
-    zb = zi;
-    try
-        f(z) = qtM - q_sat(z,temp(z,hM,qtM));
+    f(z) = qtM - q_sat(z,temp(z,hM,qtM));
+    if f(0) > 0
+        zb = 0.0;
+    elseif f(zi) < 0
+        zb = zi;
+    else
         zb = find_zero(f, (0.0,zi), Bisection());
-    catch
-        z0 = 0.0;
-        ql0 = q_l(z0,temp(z0, hM, qtM),qtM);
-        if ql0 > 0
-            zb = z0;
-        else
-            zb = zi;
-        end
     end
+
     return zb
 end
 
@@ -141,15 +128,12 @@ function incloud_LWP(u)
     zi, hM, qtM, SST, CF = u;
 
     zb = calc_LCL(u);
-    x = 0.0;
     dz = 1.0;
-    for z in collect(zb:dz:zi)
-        T = temp.(z,hM,qtM);
-        ρ = rho(z,T);
-        ql = q_l(z,T,qtM);
-        x += ρ * ql * dz;
-    end
-    liq_wat_path = x;
+    z = zb:dz:zi;
+    T = temp.(z,hM,qtM);
+    ρ = rho.(z,T);
+    ql = q_l.(z,T,qtM);
+    liq_wat_path = sum(ρ .* ql .* dz);
 
     return liq_wat_path
 
@@ -167,7 +151,7 @@ function calc_qft0(RHft, Gamma_q, sft0, Gamma_s)
     qft(x) = x + Gamma_q * zft;
     hft(x) = Cp * (sft0 + Gamma_s * zft) + L0 * qft(x);
     Tft(x) = temp(zft, hft(x), qft(x));
-    f(x) = x .- q_sat(zft, Tft(x)) .* RHft;
+    f(x) = x - q_sat(zft, Tft(x)) * RHft;
     qft0 = find_zero(f, (0.0,0.1), Bisection());
     qft0 = qft0 - Gamma_q * zft;
     return qft0

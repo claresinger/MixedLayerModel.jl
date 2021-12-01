@@ -29,10 +29,10 @@ function surf_SW(u,p)
     zi, hM, qM, SST, CF = u;
 
     # shortwave calculation
-    LWP = incloud_LWP(u)*1000.0; # kg/m^2 \to g/m^2
+    LWP = incloud_LWP(u)*1e3; # kg/m^2 --> g/m^2
     αc = cloud_albedo(LWP, CF);
     αs = 0.1; # surface albedo of ocean water
-    SW_net = (1-αc) * (1-αs) * S_subtr;
+    SW_net = (1-αc) * (1-α_ocean) * S_subtr;
     return SW_net
 end
 
@@ -94,10 +94,10 @@ end
 function calc_cloudtop_RAD(u,p,rtype::varRad)
     zi, hM, qM, SST, CF = u;
     Tct = temp(zi,hM,qM);
-    LWP = incloud_LWP(u)*1e3; # kg/m^2 \to g/m^2
+    LWP = incloud_LWP(u)*1e3; # kg/m^2 --> g/m^2
     ϵc_up = cloud_emissivity(LWP);
     Teff = Tatmos(p);
-    ΔR = CF * (ϵc_up * σ_SB * Tct^4 - σ_SB * Teff^4);
+    ΔR = CF * σ_SB * (ϵc_up * Tct^4 - Teff^4);
     return ΔR
 end
 
@@ -132,6 +132,5 @@ end
 function cloud_emissivity(LWP)
     a0 = 0.15; # m^2/g
     ϵc = 1 - exp(-a0 * LWP); 
-    ϵc = ϵc;
     return ϵc
 end

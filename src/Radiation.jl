@@ -25,11 +25,11 @@ end
 """
     net downward shortwave radiation at surface
 """
-function surf_SW(u,p)
+function surf_SW(u, p, zb)
     zi, hM, qM, SST, CF = u;
 
     # shortwave calculation
-    LWP = incloud_LWP(u)*1e3; # kg/m^2 --> g/m^2
+    LWP = incloud_LWP(u, zb)*1e3; # kg/m^2 --> g/m^2
     αc = cloud_albedo(LWP, CF);
     αs = 0.1; # surface albedo of ocean water
     SW_net = (1-αc) * (1-α_ocean) * S_subtr;
@@ -45,12 +45,11 @@ end
 
     now written as just a linear function of SST
 """
-function surf_LW(u,p)
+function surf_LW(u, p, zb)
     zi, hM, qM, SST, CF = u;
     
     # longwave calculation
     # ϵc_down = cloud_emissivity(LWP);
-    # zb = calc_LCL(u);
     # Tc = temp(zb,hM,qM);
     # Teff = Tatmos(p);
     # Ta = temp(zb/2.0,hM,qM);
@@ -69,17 +68,14 @@ end
 """
     calculate net SW and LW radiation at the surface
 """
-function calc_surf_RAD(u,p)
-    SW_net = surf_SW(u,p);
-    LW_net = surf_LW(u,p);
-    RAD = SW_net + LW_net;
-    return RAD
+function calc_surf_RAD(u, p, zb)
+    return surf_SW(u, p, zb) + surf_LW(u, p, zb);
 end
 
 """
     returns the prescribed cloud-top radiative cooling ΔR
 """
-function calc_cloudtop_RAD(u,p,rtype::fixRad)
+function calc_cloudtop_RAD(u, p, zb, rtype::fixRad)
     return p.ΔR
 end
 
@@ -91,12 +87,13 @@ end
 
     gives ΔR ≈ 80 W/m2 for 400 ppm CO2
 """
-function calc_cloudtop_RAD(u,p,rtype::varRad)
+function calc_cloudtop_RAD(u, p, zb, rtype::varRad)
     zi, hM, qM, SST, CF = u;
     Tct = temp(zi,hM,qM);
-    LWP = incloud_LWP(u)*1e3; # kg/m^2 --> g/m^2
+    LWP = incloud_LWP(u, zb)*1e3; # kg/m^2 --> g/m^2
     ϵc_up = cloud_emissivity(LWP);
     Teff = Tatmos(p);
+    # ΔR = CF * σ_SB * ϵc_up * (Tct^4 - Teff^4);
     ΔR = CF * σ_SB * (ϵc_up * Tct^4 - Teff^4);
     return ΔR
 end

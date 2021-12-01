@@ -70,7 +70,9 @@ end
 function temp(z, h, qt)
     h_act(T) = Cp*T + g*z + L0*q_v(z,T,qt);
     f(x) = h - h_act(x);
-    T = find_zero(f, eltype(h)(300.0), Order1());
+    Tguess = eltype(h)(300.0);
+    # Tguess = eltype(h)((h - g*z - L0*q_v(z, 300.0, qt)) / Cp);
+    T = find_zero(f, Tguess, Order1());
     return T
 end
 
@@ -124,10 +126,9 @@ end
 
     calulcate the in-cloud liquid water path
 """
-function incloud_LWP(u)
+function incloud_LWP(u, zb)
     zi, hM, qtM, SST, CF = u;
 
-    zb = calc_LCL(u);
     dz = 1.0;
     z = zb:dz:zi;
     T = temp.(z,hM,qtM);

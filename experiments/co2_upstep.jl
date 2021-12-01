@@ -8,11 +8,11 @@ include("mlm_solve_funcs.jl")
 
 # use command line argument to set co2
 # newCO2 = parse(Float64,ARGS[1]);
-# println(newCO2);
-newCO2 = 1600.0;
+newCO2 = 600.0;
+println(newCO2);
 
 # load initial condition from file
-path = "experiments/output/twocol_clean/";
+path = "experiments/output/zbout/";
 restarttry1 = path*"co2_upstep_"*string(Int(newCO2-100))*".jld2";
 restarttry2 = path*"co2_upstep_"*string(Int(newCO2-200))*".jld2";
 restarttry3 = path*"co2_upstep_"*string(Int(newCO2-400))*".jld2";
@@ -73,17 +73,6 @@ println(par.OHU, "\t", par.R_s_400);
 ENV["GKSwstype"]="nul"
 u0, sol = run_mlm_from_init(u0, par, dt=3600.0*dt, tspan=(0.0,3600.0*24.0*tmax));
 
-## save steady-state solution
-uf = sol.u[end];
-du = zeros(5);
-mlm(du, uf, par, 0.0);
-zi,hM,qM,SST = uf;
-zb = calc_LCL(uf);
-println(uf);
-println(du);
-println("tropical SST:  ", trop_sst(uf, par));
-
-## plot and save
 t = sol.t / 3600.0 / 24.0;
 zi = getindex.(sol.u,1);
 hM = getindex.(sol.u,2) * 1e-3;
@@ -97,10 +86,10 @@ zb = zeros(length(t));
 LWP = zeros(length(t));
 for (i,si) in enumerate(S)
     zb[i] = calc_LCL(sol.u[i]);
-    S[i] = calc_S(sol.u[i], par);
+    S[i] = calc_S(sol.u[i], par, zb[i]);
     LHF[i] = calc_LHF(sol.u[i], par);
-    ΔR[i] = calc_cloudtop_RAD(sol.u[i], par, par.rtype);
-    LWP[i] = incloud_LWP(sol.u[i]);
+    ΔR[i] = calc_cloudtop_RAD(sol.u[i], par, zb[i], par.rtype);
+    LWP[i] = incloud_LWP(sol.u[i], zb[i]);
 end 
 plot(size=(1200,800), layout=(5,2), dpi=200, left_margin = 5Plots.mm);
 plot!(t, zi, marker="o-", legend=false, subplot=1, ylabel="zi, zb [m]");
@@ -127,8 +116,8 @@ println(uf);
 println(du);
 
 output = Dict("p" => par, "u0" => u0, "uf" => uf, "du/u" => du./uf, 
-"we" => we(uf,par,par.etype), "zb" => zb, "zc" => zi-zb,
+"we" => we(uf,par,zb,par.etype), "zb" => zb, "zc" => zi-zb,
 "RHsurf" => RH(0.0, hM, qM), "LHF" => calc_LHF(uf,par), "SHF" => calc_SHF(uf,par),
-"ΔR" => calc_cloudtop_RAD(uf,par,par.rtype), "OHU" => calc_OHU(uf,par,par.stype))
+"ΔR" => calc_cloudtop_RAD(uf,par,zb,par.rtype), "OHU" => calc_OHU(uf,par,zb,par.stype))
 
 save(path*"co2_upstep_"*string(Int(newCO2))*".jld2", output)

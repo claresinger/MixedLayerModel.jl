@@ -70,7 +70,8 @@ end
 function temp(z, h, qt)
     h_act(T) = Cp*T + g*z + L0*q_v(z,T,qt);
     f(x) = h - h_act(x);
-    Tguess = eltype(h)((h - g*z - L0*q_v(z, 300.0, qt)) / Cp);
+    Tguess = eltype(h)(300.0);
+    # Tguess = eltype(h)((h - g*z - L0*q_v(z, 300.0, qt)) / Cp);
     T = find_zero(f, Tguess, Order1());
 
     # T = Tguess;

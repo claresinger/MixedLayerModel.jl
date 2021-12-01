@@ -72,10 +72,7 @@ end
     calculate net SW and LW radiation at the surface
 """
 function calc_surf_RAD(u, p, zb)
-    SW_net = surf_SW(u, p, zb);
-    LW_net = surf_LW(u, p, zb);
-    RAD = SW_net + LW_net;
-    return RAD
+    return surf_SW(u, p, zb) + surf_LW(u, p, zb);
 end
 
 """
@@ -99,7 +96,8 @@ function calc_cloudtop_RAD(u, p, zb, rtype::varRad)
     LWP = incloud_LWP(u, zb)*1e3; # kg/m^2 --> g/m^2
     ϵc_up = cloud_emissivity(LWP);
     Teff = Tatmos(p);
-    ΔR = CF * σ_SB * ϵc_up * (Tct^4 - Teff^4);
+    # ΔR = CF * σ_SB * ϵc_up * (Tct^4 - Teff^4);
+    ΔR = CF * σ_SB * (ϵc_up * Tct^4 - Teff^4);
     return ΔR
 end
 

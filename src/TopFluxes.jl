@@ -79,6 +79,9 @@ function hjump(u, p, fttype::fixedFT)
 end
 
 """
+    temp_ft(u, p)
+
+    free-tropospheric temperature given tropical sst
 """
 function temp_ft(u, p)
     zi, hM, qM, SST, CF = u;

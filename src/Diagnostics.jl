@@ -20,7 +20,7 @@ function calc_bflux(u, p, zarr, etype::bflux)
     H0 = H_0(u, p, p.ftype);
     Q0 = Q_0(u, p, p.ftype);
 
-    ent = we(u, p, p.etype)
+    ent = we(u, p, p.etype);
     Hzi = H_zi(u, p, ent);
     Qzi = Q_zi(u, p, ent);
 

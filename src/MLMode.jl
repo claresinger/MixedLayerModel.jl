@@ -30,13 +30,12 @@ function dhMdt(u, p, ent)
     ΔR = calc_cloudtop_RAD(u,p,p.rtype);
     H0 = H_0(u, p, p.ftype);
     Hzi = H_zi(u, p, ent);
-    dEdz = 1/zi * (Hzi - H0 + ΔR/ρref(SST));
-    dhMdt = - dEdz
+    dhMdt = -(1/zi) * (Hzi - H0 + ΔR/ρref(SST));
     return dhMdt
 end
 
 """
-    dqMdt(u, p)
+    dqMdt(u, p, ent)
 
     evolution of mixed-layer total water specific humidity, qM
     negative of the vertical water flux
@@ -45,8 +44,7 @@ function dqMdt(u, p, ent)
     zi, hM, qM, SST, CF = u;
     Q0 = Q_0(u, p, p.ftype);
     Qzi = Q_zi(u, p, ent);
-    dWdz = (1/zi) * (Qzi - Q0);
-    dqMdt = - dWdz
+    dqMdt = -(1/zi) * (Qzi - Q0);
     return dqMdt
 end
 

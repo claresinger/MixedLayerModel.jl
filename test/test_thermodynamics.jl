@@ -1,4 +1,7 @@
+push!(LOAD_PATH, joinpath(@__DIR__, ".."))
+
 using MixedLayerModel
+using MixedLayerModel:psurf, Cp, L0
 
 @test pres(0.0, 290.0) == MixedLayerModel.psurf
 @test pres(0.0, 300.0) == MixedLayerModel.psurf
@@ -14,7 +17,7 @@ z = collect(0:10:500);
 T = 290.0
 qtM = 0.8 * q_sat(0.0, T)
 hM = MixedLayerModel.Cp * T + MixedLayerModel.L0 * qtM
-@test all(diff(theta(z, hM, qtM)) .> 0)
+@test all(diff(theta.(z, hM, qtM)) .> 0)
 @test all(diff(temp.(z, hM, qtM)) .< 0)
 
 zi = 900.0

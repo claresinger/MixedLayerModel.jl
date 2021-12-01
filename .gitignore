@@ -1,6 +1,7 @@
 experiments/output/
 experiments/figures/
 docs/build/
+*Manifest.toml
 *.cov
 *.ipynb_checkpoints/
 *.nc

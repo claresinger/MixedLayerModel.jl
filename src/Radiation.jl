@@ -33,7 +33,7 @@ function surf_SW(u,p)
     zi, hM, qM, SST, CF = u;
 
     # shortwave calculation
-    LWP = incloud_LWP(u)*1e3; # kg/m^2 \to g/m^2
+    LWP = incloud_LWP(u)*1e3; # kg/m^2 --> g/m^2
     αc = cloud_albedo(LWP, CF);
     SW_net = (1-αc) * (1-α_ocean) * S_subtr;
     return SW_net

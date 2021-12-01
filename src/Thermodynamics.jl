@@ -1,5 +1,3 @@
-using ForwardDiff, Debugger
-
 export ρref, pres, q_sat, q_v, q_l, temp, rho
 export RH, theta
 export incloud_LWP, calc_LCL

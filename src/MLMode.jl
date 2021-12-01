@@ -97,37 +97,37 @@ end
       dSST/dt = 1/c * (SWnet - LWnet - SHF - LHF - OHU)
 """
 function mlm(du, u, p, t)
-    if u[1] < 100
-        zi, hM, qM, SST, CF = u;
-        zb = calc_LCL(u);
-        println(t / 3600.0 / 24.0);
-        println(u);
-        println(zb);
-        println(we(u, p, zb, p.etype));
-        println(calc_cloudtop_RAD(u, p, zb, p.rtype));
-        Tct = temp(zi,hM,qM);
-        LWP = incloud_LWP(u, zb)*1e3; # kg/m^2 \to g/m^2
-        ϵc_up = cloud_emissivity(LWP);
-        Teff = Tatmos(p);
-        println(LWP, ϵc_up);
-        println(Tct, Teff);
-        println();
-        println(temp.(collect(0:50:1000), hM, qM));
-        #println(trop_sst(u, p), "\t", Γm(trop_sst(u, p), p.RHtrop), "\t",  temp_ft(u, p));
-        #println(hjump(u, p, p.fttype)+hM, "\t", qjump(u, p, p.fttype)+qM);
-    end
+    # if u[1] < 100
+    #     zi, hM, qM, SST, CF = u;
+    #     zb = calc_LCL(u);
+    #     println(t / 3600.0 / 24.0);
+    #     println(u);
+    #     println(zb);
+    #     println(we(u, p, zb, p.etype));
+    #     println(calc_cloudtop_RAD(u, p, zb, p.rtype));
+    #     Tct = temp(zi,hM,qM);
+    #     LWP = incloud_LWP(u, zb)*1e3; # kg/m^2 \to g/m^2
+    #     ϵc_up = cloud_emissivity(LWP);
+    #     Teff = Tatmos(p);
+    #     println(LWP, ϵc_up);
+    #     println(Tct, Teff);
+    #     println();
+    #     println(temp.(collect(0:50:1000), hM, qM));
+    #     #println(trop_sst(u, p), "\t", Γm(trop_sst(u, p), p.RHtrop), "\t",  temp_ft(u, p));
+    #     #println(hjump(u, p, p.fttype)+hM, "\t", qjump(u, p, p.fttype)+qM);
+    # end
 
-    if u[1] < 10
-        error()
-    end
+    # if u[1] < 10
+    #     error()
+    # end
 
-    try
-        zb = calc_LCL(u);
-        println(zb);
-    catch
-        println("failed to calc zb")
-        println(u);
-    end
+    # try
+    #     zb = calc_LCL(u);
+    #     println(zb);
+    # catch
+    #     println("failed to calc zb")
+    #     println(u);
+    # end
 
     zb = calc_LCL(u);
     ent = we(u, p, zb, p.etype);

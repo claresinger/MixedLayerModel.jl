@@ -1,5 +1,4 @@
 export ρref, pres, q_sat, q_v, q_l, temp, rho
-export RH, theta
 export incloud_LWP, calc_LCL
 export calc_qft0
 
@@ -70,48 +69,16 @@ end
 function temp(z, h, qt)
     h_act(T) = Cp*T + g*z + L0*q_v(z,T,qt);
     f(x) = h - h_act(x);
-    Tguess = eltype(h)(300.0);
-    # Tguess = eltype(h)((h - g*z - L0*q_v(z, 300.0, qt)) / Cp);
-    T = find_zero(f, Tguess, Order1());
+    
+    # Tguess = (h - g*z - L0*qt) / Cp;
+    # Tinit = eltype(h)((h - g*z - L0*q_v(z, Tguess, qt)) / Cp);
+    # T = find_zero(f, eltype(h)(Tinit), Order1());
 
-    # T = Tguess;
-    # try
-    #     T = find_zero(f, Tguess, Order1());#, xatol=0.1, atol=1.0);
-    # catch
-    #     println(z)
-    #     println(h)
-    #     println(qt)
-    #     println("guess: ", Tguess)
-    # end
-    # println(z)
-    # println("guess: ", Tguess)
-    # println("success: ", T)
+    Tm = (h - g*z - L0*qt) / Cp - 0.5;
+    Tp = (h - g*z) / Cp + 0.5;
+    T = find_zero(f, (Tm, Tp), Bisection(), xatol=0.1)
+
     return T
-end
-
-"""
-    RH(z, h, qt)
-
-    relative humidity is the ratio of 
-    total specific humidity to saturation
-    max value is 1
-"""
-function RH(z, h, qt)
-    qsat = q_sat(z, temp(z, h, qt));
-    x = min(qt / qsat, 1.0);
-    return x
-end
-
-"""
-    theta(z,h,qt)
-
-    calculate the potential temperature
-"""
-function theta(z,h,qt)
-    T = temp(z,h,qt);
-    p = pres(z,T);
-    θ = T * (pref / p) ^ (Rd/Cp);
-    return θ
 end
 
 """
@@ -122,7 +89,7 @@ end
 function calc_LCL(u)
     zi, hM, qtM, SST, CF = u;
 
-    f(z) = qtM - q_sat(z,temp(z,hM,qtM));
+    f(z) = qtM - q_sat(z,temp(z, hM, qtM));
     if f(0) > 0
         zb = 0.0;
     elseif f(zi) < 0

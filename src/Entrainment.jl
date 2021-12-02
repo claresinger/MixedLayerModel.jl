@@ -11,24 +11,24 @@ struct Sally <: ent_type end
 struct bflux <: ent_type end
 
 """
-    we(u, p, etype::fixed)
+    we(u, p, zb, LWP, etype::fixed)
 
     fixed entrainment velocity of 7 mm/s
 """ 
-function we(u, p, zb, etype::fixed)
+function we(u, p, zb, LWP, etype::fixed)
     w = 0.007; # 7 mm/s
     return w
 end
 
 """
-    we(u, p, etype::enBal)
+    we(u, p, zb, LWP, etype::enBal)
 
     entrainment velocity obtained via energy balance requirement
     w = ΔR / (Δs_vli * ρref)
 """
-function we(u, p, zb, etype::enBal)
+function we(u, p, zb, LWP, etype::enBal)
     zi, hM, qM, SST, CF = u;
-    ΔR = calc_cloudtop_RAD(u, p, zb, p.rtype);
+    ΔR = calc_cloudtop_RAD(u, p, LWP, p.rtype);
 
     # calculate change in s_vl across inversion
     hj = hjump(u, p, zb, p.fttype);
@@ -43,12 +43,12 @@ function we(u, p, zb, etype::enBal)
 end
 
 """
-    we(u, p, etype::Sally)
+    we(u, p, zb, LWP, etype::Sally)
 
     entrainment velocity obtained via energy balance requirement
     w = a * ΔR / (Δs_vli * ρref)
 """
-function we(u, p, zb, etype::Sally)
+function we(u, p, zb, LWP, etype::Sally)
     zi, hM, qM, SST, CF = u;
     ΔR = calc_cloudtop_RAD(u, p, zb, p.rtype);
 
@@ -65,14 +65,14 @@ function we(u, p, zb, etype::Sally)
 end
 
 """
-    we(u, p, etype::bflux)
+    we(u, p, zb, LWP, etype::bflux)
 
     entrainment velocity based on buoyancy flux
     without radiation
     
     integral is calculated analytically
 """
-function we(u, p, zb, etype::bflux)
+function we(u, p, zb, LWP, etype::bflux)
     zi, hM, qM, SST = u;
     
     # calculate change in s_vl across inversion

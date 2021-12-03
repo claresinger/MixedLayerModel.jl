@@ -7,12 +7,14 @@ using Plots
 include("mlm_solve_funcs.jl")
 
 # define path to save file (which experiment are you running?)
-path = "experiments/output/correct_emissivity/";
+path = "experiments/output/remove_SST_relax/";
 
 # define OHU from 400 ppm simulation
 par = upCO2();
 par.etype = enBal();
 par.fttype = co2dep();
+par.rtype = varRad();
+par.stype = fixSST();
 dt = 2.0;
 tmax = 20.0;
 

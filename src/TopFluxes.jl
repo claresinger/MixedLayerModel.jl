@@ -59,8 +59,8 @@ end
 """
 function qjump(u, p, zb, fttype::fixedFT)
     zi, hM, qM, SST, CF = u;
-    qft = p.qft0 .+ p.Gamma_q .* zi;
-    qft = max.(qft, 2e-3);
+    qft = p.qft0 + p.Gamma_q * zi;
+    qft = max(qft, 2e-3);
     qj = qft - qM;
     return qj
 end
@@ -71,9 +71,9 @@ end
 """
 function hjump(u, p, zb, fttype::fixedFT)
     zi, hM, qM, SST, CF = u;
-    sft = p.sft0 .+ p.Gamma_s .* zi;
+    sft = p.sft0 + p.Gamma_s * zi;
     qft = qjump(u, p, zb, p.fttype) + qM;
-    hft = Cp .* sft .+ L0 .* qft;
+    hft = Cp * sft + L0 * qft;
     hj = hft - hM;
     return hj
 end
@@ -109,7 +109,7 @@ function hjump(u, p, zb, fttype::twocol)
     zi, hM, qM, SST, CF = u;
     Tft = temp_ft(u, p, zb);
     qft = qjump(u, p, zb, p.fttype) + qM;
-    hft = Cp .* Tft .+ g .* zi .+ L0 .* qft;
+    hft = Cp*Tft + g*zi + L0*qft;
     hj = hft - hM;
     return hj
 end

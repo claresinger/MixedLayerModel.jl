@@ -67,12 +67,7 @@ function dSSTdt(u, p, LWP, stype::varSST)
     SHF = calc_SHF(u, p);
     LHF = calc_LHF(u, p);   
     c = ρw * Cw * p.Hw;
-    x = (1/c) * (RAD - SHF - LHF - p.OHU);
-
-    zi, hM, qM, SST, CF = u;
-    τ_SST = 3600.0*24.0*1.0;
-    y = (p.SST0 - SST) / τ_SST;
-    return (x + y)
+    return (1/c) * (RAD - SHF - LHF - p.OHU)
 end
 
 """

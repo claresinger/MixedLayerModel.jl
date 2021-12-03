@@ -11,7 +11,7 @@ export upCO2, climatology
     D::Real = 6.0e-6; # (1/s)
     
     # params for interactive surface fluxes
-    V::Real = 10.0; # m/s
+    V::Real = 10.0; # (m/s)
     CTh::Real = 8e-4;
     CTq::Real = 8e-4;
     
@@ -24,7 +24,7 @@ export upCO2, climatology
     ftype::flux_type = varFlux();
     rtype::rad_type = varRad();
     stype::sst_type = fixSST();
-    fttype::ft_type = sstdep();
+    fttype::ft_type = co2dep();
 end
 
 @with_kw mutable struct climatology
@@ -45,7 +45,7 @@ end
     qft0::Real = 0.0; # (kg/kg)
     
     # params for interactive surface fluxes
-    V::Real = 10.0; # m/s
+    V::Real = 10.0; # (m/s)
     CTh::Real = 8e-4;
     CTq::Real = 8e-4;
 

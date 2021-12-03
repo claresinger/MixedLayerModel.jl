@@ -45,8 +45,8 @@ end
     calculates the ocean heat uptake as the residual 
     between the radiative fluxes and the LHF + SHF
 """
-function calc_OHU(u, p, zb, stype::fixSST)
-    OHU = calc_surf_RAD(u, p, zb) - calc_SHF(u,p) - calc_LHF(u,p);
+function calc_OHU(u, p, LWP, stype::fixSST)
+    OHU = calc_surf_RAD(u, p, LWP) - calc_SHF(u,p) - calc_LHF(u,p);
     return OHU
 end
 
@@ -58,6 +58,6 @@ end
 
     returns p.OHU
 """
-function calc_OHU(u, p, zb, stype::varSST)
+function calc_OHU(u, p, LWP, stype::varSST)
     return p.OHU
 end

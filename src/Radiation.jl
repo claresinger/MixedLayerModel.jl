@@ -1,5 +1,4 @@
 export rad_type, varRad, fixRad
-export surf_SW, surf_LW
 export calc_surf_RAD, calc_cloudtop_RAD
 
 ## create type for radiation
@@ -23,59 +22,35 @@ function Tatmos(p)
 end
 
 """
-    net downward shortwave radiation at surface
+    calculate net SW and LW radiation at the surface
 """
-function surf_SW(u, p, zb)
+function calc_surf_RAD(u, p, LWP)
     zi, hM, qM, SST, CF = u;
 
     # shortwave calculation
-    LWP = incloud_LWP(u, zb)*1e3; # kg/m^2 --> g/m^2
     αc = cloud_albedo(LWP, CF);
-    αs = 0.1; # surface albedo of ocean water
     SW_net = (1-αc) * (1-α_ocean) * S_subtr;
-    return SW_net
-end
 
-"""
-    net downward LW radiation at surface
-
-    formerly written as the difference of two planck terms
-    up = σ * SST^4
-    down = CF(ϵ * σ * Tc^4) + (1-CF)(σ * Ta^4)
-
-    now written as just a linear function of SST
-"""
-function surf_LW(u, p, zb)
-    zi, hM, qM, SST, CF = u;
-    
     # longwave calculation
     # ϵc_down = cloud_emissivity(LWP);
-    # Tc = temp(zb,hM,qM);
+    # Tc = temp(zi,hM,qM);
     # Teff = Tatmos(p);
-    # Ta = temp(zb/2.0,hM,qM);
+    # Ta = temp(zi/2.0,hM,qM);
     # LW_down = CF * (ϵc_down * σ_SB * Tc^4) + (1-CF) * (σ_SB * Teff^4);
     # LW_down = CF * (ϵc_down * σ_SB * Tc^4) + (1-CF) * (σ_SB * Ta^4);
     # LW_up = σ_SB * SST^4;
     # LW_net = LW_down - LW_up;
     
     # fit from LES experiments
-    a = -30.0;
-    b = 0.0;
-    LW_net = a - b * (SST-300.0);
-    return LW_net
-end
+    LW_net = -30.0;
 
-"""
-    calculate net SW and LW radiation at the surface
-"""
-function calc_surf_RAD(u, p, zb)
-    return surf_SW(u, p, zb) + surf_LW(u, p, zb);
+    return SW_net + LW_net
 end
 
 """
     returns the prescribed cloud-top radiative cooling ΔR
 """
-function calc_cloudtop_RAD(u, p, zb, rtype::fixRad)
+function calc_cloudtop_RAD(u, p, LWP, rtype::fixRad)
     return p.ΔR
 end
 
@@ -87,10 +62,9 @@ end
 
     gives ΔR ≈ 80 W/m2 for 400 ppm CO2
 """
-function calc_cloudtop_RAD(u, p, zb, rtype::varRad)
+function calc_cloudtop_RAD(u, p, LWP, rtype::varRad)
     zi, hM, qM, SST, CF = u;
     Tct = temp(zi,hM,qM);
-    LWP = incloud_LWP(u, zb)*1e3; # kg/m^2 --> g/m^2
     ϵc_up = cloud_emissivity(LWP);
     Teff = Tatmos(p);
     # ΔR = CF * σ_SB * ϵc_up * (Tct^4 - Teff^4);
@@ -99,7 +73,7 @@ function calc_cloudtop_RAD(u, p, zb, rtype::varRad)
 end
 
 """
-    albedo of the cloud given LWP in g/m^2
+    albedo of the cloud given LWP in kg/m^2
     cloud albedo from Stephens 1978 part 2. eq 1 and 7.
     backscatter β = 0.07, looked up from table 2.
     zenith angle θ = 60° and effective radius r_e = 10 um.
@@ -111,8 +85,8 @@ function cloud_albedo(LWP, CF)
     # A = (2 * cosd(θ) * r_e)/ (3 * β);
     # αc = LWP / (A + LWP); 
 
-    m = 0.795
-    Lx = 19.136
+    m = 0.795;
+    Lx = 19.136*1e-3;
     αc = m * (1 - Lx/(Lx+LWP));
     αc = αc * CF;
     return αc
@@ -121,13 +95,13 @@ end
 """
     cloud_emissivity(LWP)
 
-    emissivity of the cloud as a function of LWP
+    emissivity of the cloud as a function of LWP in kg/m2
     ϵ = 1 - exp(-a0 * LWP) with a0 = 0.15 m^2/given
 
     based on Stephens 1978 part II: eq 15 and 16
 """
 function cloud_emissivity(LWP)
     a0 = 0.15; # m^2/g
-    ϵc = 1 - exp(-a0 * LWP); 
+    ϵc = 1 - exp(-a0 * LWP * 1e3); 
     return ϵc
 end

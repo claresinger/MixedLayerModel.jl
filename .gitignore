@@ -1,5 +1,5 @@
-experiments/output/
-experiments/figures/
+experiments/*output/
+experiments/*figures/
 docs/build/
 *Manifest.toml
 *.cov

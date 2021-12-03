@@ -83,6 +83,7 @@ println("LWP: ", LWP);
 output = Dict("p" => par, "u0" => u0, "uf" => uf, "du/u" => du./uf, 
 "we" => we(uf,par,zb,LWP,par.etype), "zb" => zb, "zc" => zi-zb,
 "RHsurf" => RH, "LHF" => calc_LHF(uf,par), "SHF" => calc_SHF(uf,par),
-"ΔR" => calc_cloudtop_RAD(uf,par,LWP,par.rtype), "OHU" => calc_OHU(uf,par,zb,par.stype))
+"ΔR" => calc_cloudtop_RAD(uf,par,LWP,par.rtype), 
+"OHU" => calc_OHU(uf,par,LWP,par.stype))
 
 save(path*"co2_400.jld2", output);

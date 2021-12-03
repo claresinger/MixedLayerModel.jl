@@ -67,10 +67,6 @@ function dSSTdt(u, p, LWP, stype::varSST)
     SHF = calc_SHF(u, p);
     LHF = calc_LHF(u, p);   
     c = ρw * Cw * p.Hw;
-    
-    # zi, hM, qM, SST, CF = u;
-    # τ_SST = 3600.0*24.0*1.0;
-    # y = (p.SST0 - SST) / τ_SST;
     return (1/c) * (RAD - SHF - LHF - p.OHU)
 end
 
@@ -81,7 +77,7 @@ end
 function dCFdt(u, p, zb, LWP)
     zi, hM, qM, SST, CF = u;
     CFnew = cloud_fraction(u, p, zb, LWP);
-    τ_CF = 3600.0*24.0*1.0; # 1 days; cloud fraction adjustment timescale [seconds]
+    τ_CF = 3600.0*24.0*2.0; # 2 days; cloud fraction adjustment timescale [seconds]
     dCFdt = (CFnew - CF) / τ_CF;
     return dCFdt
 end
@@ -96,28 +92,31 @@ end
       dSST/dt = 1/c * (SWnet - LWnet - SHF - LHF - OHU)
 """
 function mlm(du, u, p, t)
-    # println(t / 3600.0 / 24.0);
-    # println(u);
+    # println("t: ", t / 3600.0);
+    # println("u: ",u);
+    # println("du: ",du);
+    # println()
 
     if any(u .< zeros(length(u))) || (u[1] < 200) || (u[4] > 350)
-        #println("NEGATIVE")
+        println("t: ", t / 3600.0);
+        println("u: ",u);
+        println("du: ",du);
+        println()
         zi, hM, qM, SST, CF = u;
         zb = calc_LCL(u);
-        println(t / 3600.0 / 24.0);
-        println(u);
         println(zb);
-        LWP = incloud_LWP(u, zb); # kg/m^2 --> g/m^2
-        println(we(u, p, zb, p.etype));
+        LWP = incloud_LWP(u, zb);
+        println(we(u, p, zb, LWP, p.etype));
         println(calc_cloudtop_RAD(u, p, LWP, p.rtype));
-        Tct = temp(zi,hM,qM);
+        Tct = temp(zi,hM,qM,SST);
         ϵc_up = cloud_emissivity(LWP);
         Teff = Tatmos(p);
         println(LWP, ϵc_up);
         println(Tct, Teff);
         println();
-        println(temp.(collect(0:50:1000), hM, qM));
-        println(trop_sst(u, p, zb), "\t", Γm(trop_sst(u, p, zb), p.RHtrop), "\t",  temp_ft(u, p, zb));
-        println(hjump(u, p, zb, p.fttype)+hM, "\t", qjump(u, p, zb, p.fttype)+qM);
+        # println(temp.(collect(0:50:1000), hM, qM, SST));
+        # println(trop_sst(u, p, zb), "\t", Γm(trop_sst(u, p, zb), p.RHtrop), "\t",  temp_ft(u, p, zb));
+        # println(hjump(u, p, zb, p.fttype)+hM, "\t", qjump(u, p, zb, p.fttype)+qM);
     end
 
     # if u[1] < 10

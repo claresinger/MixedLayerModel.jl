@@ -42,9 +42,9 @@ function calc_surf_RAD(u, p, LWP)
     # longwave calculation
     # zi, hM, qM, SST, CF = u;
     # ϵc_down = cloud_emissivity(LWP);
-    # Tc = temp(zi,hM,qM);
+    # Tc = temp(zi,hM,qM,SST);
     # Teff = Tatmos(p);
-    # Ta = temp(zi/2.0,hM,qM);
+    # Ta = temp(zi/2.0,hM,qM,SST);
     # LW_down = CF * (ϵc_down * σ_SB * Tc^4) + (1-CF) * (σ_SB * Teff^4);
     # LW_down = CF * (ϵc_down * σ_SB * Tc^4) + (1-CF) * (σ_SB * Ta^4);
     # LW_up = σ_SB * SST^4;
@@ -73,7 +73,7 @@ end
 """
 function calc_cloudtop_RAD(u, p, LWP, rtype::varRad)
     zi, hM, qM, SST, CF = u;
-    Tct = temp(zi,hM,qM);
+    Tct = temp(zi,hM,qM,SST);
     ϵc_up = cloud_emissivity(LWP);
     Teff = Tatmos(p);
     #Teff = Tct - ΔTa(p);
@@ -142,6 +142,8 @@ end
     5. calculates emission height as func of CO2 and H2O concentration
 """
 function trop_sst(u, p, LWP)
+    zi, hM, qM, SST, CF = u;
+
     # net TOA imbalance
     if p.CO2 == 400.0
         ΔR_s = 0.0;
@@ -172,11 +174,11 @@ function trop_sst(u, p, LWP)
     ΔTs = ΔTe + Γm(Ts400, p.RHtrop)*ΔHe;
     
     # absolute tropical SST
-    sst_t = Ts400 + ΔTs;
+    #sst_t = Ts400 + ΔTs;
 
     # fix tropical SST right now 
-    sst_t = Ts400;
-    
+    sst_t = SST + 10.0;
+
     return sst_t
 end
 

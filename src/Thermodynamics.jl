@@ -69,6 +69,9 @@ end
 function temp(z, h, qt, Tsurf)
     h_act(T) = Cp*T + g*z + L0*q_v(z,T,qt);
     f(x) = h - h_act(x);
+
+    # Tguess = eltype(h)(300.0);
+    # T = find_zero(f, Tguess, Order1());
     
     Tqt = (h - g*z - L0*qt) / Cp;
     T = find_zero(f, eltype(h)(Tqt), Order1(), atol=0.1);
@@ -91,7 +94,6 @@ function temp(z, h, qt, Tsurf)
     # end
     # # println(T)
     # # println()
-
     return T
 end
 

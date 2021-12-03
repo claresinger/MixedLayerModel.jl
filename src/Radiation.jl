@@ -1,9 +1,9 @@
 export rad_type, varRad, fixRad
 export calc_surf_RAD, calc_cloudtop_RAD
 export toa_net_rad, trop_sst
-export test_trop_sst
 
 export cloud_emissivity, Tatmos
+export test_trop_sst
 
 ## create type for radiation
 ## one where ΔR is prescribed
@@ -94,8 +94,8 @@ function cloud_albedo(LWP, CF)
     # A = (2 * cosd(θ) * r_e)/ (3 * β);
     # αc = LWP / (A + LWP); 
 
-    m = 0.795
-    Lx = 19.136*1e-3
+    m = 0.795;
+    Lx = 19.136*1e-3;
     αc = m * (1 - Lx/(Lx+LWP));
     αc = αc * CF;
     return αc
@@ -110,8 +110,8 @@ end
     based on Stephens 1978 part II: eq 15 and 16
 """
 function cloud_emissivity(LWP)
-    a0 = 0.15; # m^2/g
-    ϵc = 1 - exp(-a0 * LWP * 1e3); 
+    a0 = 0.15 * 1e3; # m^2/kg
+    ϵc = 1 - exp(-a0 * LWP); 
     return ϵc
 end
 

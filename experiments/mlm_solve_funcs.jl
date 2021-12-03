@@ -1,11 +1,11 @@
 using OrdinaryDiffEq
 using SteadyStateDiffEq
 
-steptol = 1e-6;
-termtol = 1e-9;
+# steptol = 1e-6;
+# termtol = 1e-9;
 
-# steptol = 1e-3;
-# termtol = 1e-6;
+steptol = 1e-3;
+termtol = 1e-6;
 
 RHsurf = 0.65;
 
@@ -31,7 +31,7 @@ function run_mlm(params; dt=3600.0*5.0, tspan=(0.0,3600.0*24.0*10.0))
     
     @time begin
         println("Rodas5");
-        sol = solve(prob, Rodas5(autodiff=false), abstol=0.0, reltol=steptol, dtmax=dt);
+        sol = solve(prob, Rodas5(autodiff=false), abstol=0.0, reltol=steptol);
     end
 
     # @time begin
@@ -61,7 +61,7 @@ function run_mlm_from_init(u0, params; dt=3600.0*5.0, tspan=(0.0,3600.0*24.0*10.
 
     @time begin
         println("Rodas5");
-        sol = solve(prob, Rodas5(autodiff=false), abstol=0.0, reltol=steptol, dtmax=dt);
+        sol = solve(prob, Rodas5(autodiff=false), abstol=0.0, reltol=steptol);
     end
 
     # @time begin

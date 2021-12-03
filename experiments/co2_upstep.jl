@@ -12,7 +12,7 @@ newCO2 = 600.0;
 println(newCO2);
 
 # load initial condition from file
-path = "experiments/output/twocol/";
+path = "experiments/output/merge/";
 restarttry1 = path*"co2_upstep_"*string(Int(newCO2-100))*".jld2";
 restarttry2 = path*"co2_upstep_"*string(Int(newCO2-200))*".jld2";
 restarttry3 = path*"co2_upstep_"*string(Int(newCO2-400))*".jld2";
@@ -42,7 +42,7 @@ par.OHU = OHU;
 par.R_s_400 = R_s_400;
 par.CO2 = newCO2;
 par.etype = enBal();
-par.fttype = twocol();
+par.fttype = co2dep();
 par.rtype = varRad();
 par.stype = varSST();
 dt, tmax = 4.0, 30;
@@ -115,6 +115,7 @@ println("tropical sst: ", trop_sst(uf, par, zb));
 output = Dict("p" => par, "u0" => u0, "uf" => uf, "du/u" => du./uf, 
 "we" => we(uf,par,zb,LWP,par.etype), "zb" => zb, "zc" => zi-zb,
 "RHsurf" => RH, "LHF" => calc_LHF(uf,par), "SHF" => calc_SHF(uf,par),
-"ΔR" => calc_cloudtop_RAD(uf,par,LWP,par.rtype), "OHU" => calc_OHU(uf,par,zb,par.stype))
+"ΔR" => calc_cloudtop_RAD(uf,par,LWP,par.rtype), 
+"OHU" => calc_OHU(uf,par,LWP,par.stype))
 
 save(path*"co2_upstep_"*string(Int(newCO2))*".jld2", output)

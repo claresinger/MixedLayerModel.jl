@@ -1,4 +1,5 @@
-export ent_type, fixed, enBal, Sally, bflux
+export ent_type
+export fixed, enBal, bflux
 export we
 
 ###########
@@ -7,7 +8,6 @@ export we
 abstract type ent_type end
 struct fixed <: ent_type end
 struct enBal <: ent_type end
-struct Sally <: ent_type end
 struct bflux <: ent_type end
 
 """
@@ -39,28 +39,6 @@ function we(u, p, zb, LWP, etype::enBal)
 
     # calculate entrianment rate
     w = (f/Δs_vli);
-    return w
-end
-
-"""
-    we(u, p, zb, LWP, etype::Sally)
-
-    entrainment velocity obtained via energy balance requirement
-    w = a * ΔR / (Δs_vli * ρref)
-"""
-function we(u, p, zb, LWP, etype::Sally)
-    zi, hM, qM, SST, CF = u;
-    ΔR = calc_cloudtop_RAD(u, p, zb, p.rtype);
-
-    # calculate change in s_vl across inversion
-    hj = hjump(u, p, zb, p.fttype);
-    qj = qjump(u, p, zb, p.fttype);
-    Δs_vli = hj - μ*L0*qj;
-
-    f = ΔR / ρref(SST);
-
-    # calculate entrianment rate
-    w = p.a * (f/Δs_vli);
     return w
 end
 

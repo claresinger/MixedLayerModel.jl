@@ -20,14 +20,14 @@ function dzidt(u, p, ent)
 end
 
 """
-    dhMdt(u, p, ent) 
+    dhMdt(u, p, ent, zb, LWP) 
 
     evolution of mixed-layer enthalpy, hM
     negative of the vertical energy flux
 """
-function dhMdt(u, p, ent, zb)
+function dhMdt(u, p, ent, zb, LWP)
     zi, hM, qM, SST, CF = u;
-    ΔR = calc_cloudtop_RAD(u, p, zb, p.rtype);
+    ΔR = calc_cloudtop_RAD(u, p, LWP, p.rtype);
     H0 = H_0(u, p, p.ftype);
     Hzi = H_zi(u, p, ent, zb);
     dhMdt = -(1/zi) * (Hzi - H0 + ΔR/ρref(SST));
@@ -49,26 +49,26 @@ function dqMdt(u, p, ent, zb)
 end
 
 """
-    dSSTdt(u, p)
+    dSSTdt(u, p, LWP)
 
     defined as 0 for fixSST
 """
-function dSSTdt(u, p, zb, stype::fixSST)
+function dSSTdt(u, p, LWP, stype::fixSST)
     return 0
 end
 
 """
-    dSSTdt(u, p)
+    dSSTdt(u, p, LWP)
 
     close surface energy budge for varSST
 """
-function dSSTdt(u, p, zb, stype::varSST)
-    RAD = calc_surf_RAD(u, p, zb);
+function dSSTdt(u, p, LWP, stype::varSST)
+    RAD = calc_surf_RAD(u, p, LWP);
     SHF = calc_SHF(u, p);
     LHF = calc_LHF(u, p);   
     c = ρw * Cw * p.Hw;
     x = (1/c) * (RAD - SHF - LHF - p.OHU);
-    
+
     zi, hM, qM, SST, CF = u;
     τ_SST = 3600.0*24.0*1.0;
     y = (p.SST0 - SST) / τ_SST;
@@ -79,9 +79,9 @@ end
     calculation cloud fraction 
     determined as a logistic function of S, the stability parameter
 """
-function dCFdt(u, p, zb)
+function dCFdt(u, p, zb, LWP)
     zi, hM, qM, SST, CF = u;
-    CFnew = cloud_fraction(u, p, zb);
+    CFnew = cloud_fraction(u, p, zb, LWP);
     τ_CF = 3600.0*24.0*1.0; # 1 days; cloud fraction adjustment timescale [seconds]
     dCFdt = (CFnew - CF) / τ_CF;
     return dCFdt
@@ -98,10 +98,11 @@ end
 """
 function mlm(du, u, p, t)
     zb = calc_LCL(u);
-    ent = we(u, p, zb, p.etype);
+    LWP = incloud_LWP(u, zb);
+    ent = we(u, p, zb, LWP, p.etype);
     du[1] = dzidt(u, p, ent)
-    du[2] = dhMdt(u, p, ent, zb)
+    du[2] = dhMdt(u, p, ent, zb, LWP)
     du[3] = dqMdt(u, p, ent, zb)
-    du[4] = dSSTdt(u, p, zb, p.stype)
-    du[5] = dCFdt(u, p, zb)
+    du[4] = dSSTdt(u, p, LWP, p.stype)
+    du[5] = dCFdt(u, p, zb, LWP)
 end

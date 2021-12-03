@@ -9,10 +9,10 @@ export calc_S, cloud_fraction
     S = (LHF / ΔR) * (zc / zi)
     where zc is the cloud thickness (zi-zb)
 """
-function calc_S(u, p, zb)
+function calc_S(u, p, zb, LWP)
     zi, hM, qM, SST, CF = u;
     LHF = calc_LHF(u, p);
-    ΔR = calc_cloudtop_RAD(u, p, zb, p.rtype);
+    ΔR = calc_cloudtop_RAD(u, p, LWP, p.rtype);
     zc = zi - zb;
     S = (LHF/ΔR)*(zc/zi);
     return S
@@ -27,15 +27,10 @@ end
     100% and 20% cloud fraction based on the value of the
     stability parameter
 """
-function cloud_fraction(u, p, zb)
-    S = calc_S(u, p, zb);
+function cloud_fraction(u, p, zb, LWP)
+    S = calc_S(u, p, zb, LWP);
     m = 10; # tunable parameter for the slope of the CF nonlinearity
     S_crit = 0.7; # tunable parameter for the halfway point of CF decrease
     CF = 1 - 0.8 / (1 + exp(-m*(S-S_crit)));
-    
-    # S_min = 1/(2*σ); # minimum decoupling parameter, ≈0.55
-    # if S < S_min
-    #     CF = 1.0
-    # end
     return CF
 end

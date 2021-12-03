@@ -12,7 +12,7 @@ newCO2 = 600.0;
 println(newCO2);
 
 # load initial condition from file
-path = "experiments/output/zbout/";
+path = "experiments/output/after/";
 restarttry1 = path*"co2_upstep_"*string(Int(newCO2-100))*".jld2";
 restarttry2 = path*"co2_upstep_"*string(Int(newCO2-200))*".jld2";
 restarttry3 = path*"co2_upstep_"*string(Int(newCO2-400))*".jld2";
@@ -52,12 +52,6 @@ dt, tmax = 2.0, 30;
 # println(uf);
 # println(du);
 
-# output = Dict("code" => code, "p" => par, "u0" => u0, "uf" => uf, "du/u" => du./uf, 
-# "we" => we(uf,par,par.etype), "zb" => zb, "zc" => zi-zb,
-# "RHsurf" => RH(0.0, hM, qM), "LHF" => calc_LHF(uf,par), "SHF" => calc_SHF(uf,par),
-# "ΔR" => calc_cloudtop_RAD(uf,par,par.rtype), "OHU" => calc_OHU(uf,par,par.stype))
-
-# save(path*"co2_upstep_"*string(Int(newCO2))*".jld2", output)
 
 # plot time series
 ENV["GKSwstype"]="nul"
@@ -76,10 +70,10 @@ zb = zeros(length(t));
 LWP = zeros(length(t));
 for (i,si) in enumerate(S)
     zb[i] = calc_LCL(sol.u[i]);
-    S[i] = calc_S(sol.u[i], par, zb[i]);
-    LHF[i] = calc_LHF(sol.u[i], par);
-    ΔR[i] = calc_cloudtop_RAD(sol.u[i], par, zb[i], par.rtype);
     LWP[i] = incloud_LWP(sol.u[i], zb[i]);
+    S[i] = calc_S(sol.u[i], par, zb[i], LWP[i]);
+    LHF[i] = calc_LHF(sol.u[i], par);
+    ΔR[i] = calc_cloudtop_RAD(sol.u[i], par, LWP[i], par.rtype);
 end 
 plot(size=(1200,800), layout=(5,2), dpi=200, left_margin = 5Plots.mm);
 plot!(t, zi, marker="o-", legend=false, subplot=1, ylabel="zi, zb [m]");
@@ -102,12 +96,16 @@ du = zeros(5);
 mlm(du, uf, par, 0.0);
 zi,hM,qM,SST = uf;
 zb = calc_LCL(uf);
+LWP = incloud_LWP(uf, zb);
+RH = min(qM / q_sat(0.0, temp(0.0, hM, qM)), 1.0);
 println(uf);
 println(du);
+println("cloud base: ",zb)
+println("LWP: ", LWP);
 
 output = Dict("p" => par, "u0" => u0, "uf" => uf, "du/u" => du./uf, 
-"we" => we(uf,par,zb,par.etype), "zb" => zb, "zc" => zi-zb,
-"RHsurf" => RH(0.0, hM, qM), "LHF" => calc_LHF(uf,par), "SHF" => calc_SHF(uf,par),
-"ΔR" => calc_cloudtop_RAD(uf,par,zb,par.rtype), "OHU" => calc_OHU(uf,par,zb,par.stype))
+"we" => we(uf,par,zb,LWP,par.etype), "zb" => zb, "zc" => zi-zb,
+"RHsurf" => RH, "LHF" => calc_LHF(uf,par), "SHF" => calc_SHF(uf,par),
+"ΔR" => calc_cloudtop_RAD(uf,par,LWP,par.rtype), "OHU" => calc_OHU(uf,par,zb,par.stype))
 
 save(path*"co2_upstep_"*string(Int(newCO2))*".jld2", output)

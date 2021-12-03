@@ -111,7 +111,7 @@ function calc_LCL(u)
     elseif f(zi) < 0
         zb = zi;
     else
-        zb = find_zero(f, (0.0,zi), Bisection(), xatol=0.1);
+        zb = find_zero(f, (0.0,zi), Bisection());
     end
 
     return zb

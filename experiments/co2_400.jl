@@ -7,13 +7,13 @@ using Plots
 include("mlm_solve_funcs.jl")
 
 # define path to save file (which experiment are you running?)
-path = "experiments/output/merge/";
+path = "experiments/output/correct_emissivity/";
 
 # define OHU from 400 ppm simulation
 par = upCO2();
 par.etype = enBal();
 par.fttype = co2dep();
-dt = 24.0;
+dt = 2.0;
 tmax = 20.0;
 
 # u0, sol = run_mlm_ss(par, dt=3600.0*dt, tspan=3600.0*24.0*tmax);
@@ -45,25 +45,31 @@ LHF = zeros(length(t));
 zb = zeros(length(t));
 ΔR = zeros(length(t));
 LWP = zeros(length(t));
+Δsvl = zeros(length(t));
+ent = zeros(length(t));
 for (i,si) in enumerate(S)
     zb[i] = calc_LCL(sol.u[i]);
     LWP[i] = incloud_LWP(sol.u[i], zb[i]);
     S[i] = calc_S(sol.u[i], par, zb[i], LWP[i]);
     LHF[i] = calc_LHF(sol.u[i], par);
     ΔR[i] = calc_cloudtop_RAD(sol.u[i], par, LWP[i], par.rtype);
+    Δsvl[i] = Δs(sol.u[i], par, zb[i]);
+    ent[i] = we(sol.u[i], par, zb[i], LWP[i], par.etype);
 end 
-plot(size=(1200,800), layout=(5,2), dpi=200, left_margin = 5Plots.mm);
+plot(size=(1200,800), layout=(6,2), dpi=200, left_margin = 5Plots.mm);
 plot!(t, zi, marker="o-", legend=false, subplot=1, ylabel="zi, zb [m]");
 plot!(t, zb, marker="o-", legend=false, subplot=1);
-plot!(t, hM, marker="o-", legend=false, subplot=2, ylabel="hM [kJ/kg]"); 
-plot!(t, qtM, marker="o-", legend=false, subplot=3, ylabel="qtM [g/kg]");
+plot!(t, hM * 1e-3, marker="o-", legend=false, subplot=2, ylabel="hM [kJ/kg]"); 
+plot!(t, qtM * 1e3, marker="o-", legend=false, subplot=3, ylabel="qtM [g/kg]");
 plot!(t, sst, marker="o-", legend=false, subplot=4, ylabel="SST [K]");
 plot!(t, cf * 1e2, marker="o-", legend=false, subplot=5, ylabel="CF [%]");
 plot!(t, LWP .* cf * 1e3, marker="o-", legend=false, subplot=6, ylabel="LWP [g/m2]");
-plot!(t, LHF, marker="o-", legend=false, subplot=7, ylabel="LHF [W/m2]");
-plot!(t, ΔR, marker="o-", legend=false, subplot=8, ylabel="ΔR [W/m2]");
-plot!(t, (zi .- zb) ./ zi, marker="o-", legend=false, subplot=9, ylabel="zc/zi [-]", xlabel="time [days]");
-plot!(t, S, marker="o-", legend=false, subplot=10, ylabel="S [-]", xlabel="time [days]");
+plot!(t, Δsvl * 1e-3, marker="o-", legend=false, subplot=7, ylabel="Δs (kJ/kg)");
+plot!(t, ent*1e3, marker="o-", legend=false, subplot=8, ylabel="we (mm/s)")
+plot!(t, LHF, marker="o-", legend=false, subplot=9, ylabel="LHF [W/m2]");
+plot!(t, ΔR, marker="o-", legend=false, subplot=10, ylabel="ΔR [W/m2]");
+plot!(t, (zi .- zb) ./ zi, marker="o-", legend=false, subplot=11, ylabel="zc/zi [-]", xlabel="time [days]");
+plot!(t, S, marker="o-", legend=false, subplot=12, ylabel="S [-]", xlabel="time [days]");
 mkpath(replace(path, "output"=>"figures"));
 savefig(replace(path, "output"=>"figures")*"sol400_t.png");
 

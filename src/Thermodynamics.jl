@@ -1,5 +1,6 @@
 export ρref, pres, q_sat, q_v, q_l, temp, rho
 export incloud_LWP, calc_LCL
+export Γm
 export calc_qft0
 
 """
@@ -62,38 +63,15 @@ function q_l(z, T, qt)
 end
 
 """
-    temp(z, h, qt, Tsurf)
+    temp(z, h, qt)
 
     uses saturation adjustment on the enthalpy
 """
-function temp(z, h, qt, Tsurf)
+function temp(z, h, qt)
     h_act(T) = Cp*T + g*z + L0*q_v(z,T,qt);
     f(x) = h - h_act(x);
-
-    # Tguess = eltype(h)(300.0);
-    # T = find_zero(f, Tguess, Order1());
-    
     Tqt = (h - g*z - L0*qt) / Cp;
     T = find_zero(f, eltype(h)(Tqt), Order1(), atol=0.1);
-
-    # Tqt = (h - g*z - L0*qt) / Cp;
-    # # println(Tqt)
-    # # println(f(Tqt))
-    # if isapprox(f(Tqt), 0.0, atol=0.01)
-    #     T = Tqt;
-    # else
-    #     Tm = (h - g*z - L0*qt) / Cp - 0.1;
-    #     # Tp = (h - g*z) / Cp + 0.1;
-    #     Tp = Tsurf + 0.1;
-    #     # println(z, "\t", h, "\t", qt)
-    #     # println(Tm, "\t", Tp)
-    #     # println(f(Tm), "\t", f(Tp))
-    #     # println(f(Tm)*f(Tp))
-    #     # println(f.(Tm:1.0:Tp))
-    #     T = find_zero(f, (Tm, Tp), Bisection(), xatol=0.01)
-    # end
-    # # println(T)
-    # # println()
     return T
 end
 
@@ -105,7 +83,7 @@ end
 function calc_LCL(u)
     zi, hM, qtM, SST, CF = u;
 
-    f(z) = qtM - q_sat(z,temp(z, hM, qtM, SST));
+    f(z) = qtM - q_sat(z,temp(z, hM, qtM));
     if f(0) > 0
         zb = 0.0;
     elseif f(zi) < 0
@@ -127,7 +105,7 @@ function incloud_LWP(u, zb)
 
     dz = 1.0;
     z = zb:dz:zi;
-    T = temp.(z,hM,qtM,SST);
+    T = temp.(z,hM,qtM);
     ρ = rho.(z,T);
     ql = q_l.(z,T,qtM);
     liq_wat_path = sum(ρ .* ql .* dz);
@@ -147,7 +125,7 @@ function calc_qft0(RHft, Gamma_q, sft0, Gamma_s)
     zft = 900.0;
     qft(x) = x + Gamma_q * zft;
     hft(x) = Cp * (sft0 + Gamma_s * zft) + L0 * qft(x);
-    Tft(x) = temp(zft, hft(x), qft(x), 290.0);
+    Tft(x) = temp(zft, hft(x), qft(x));
     f(x) = x - q_sat(zft, Tft(x)) * RHft;
     qft0 = find_zero(f, (0.0,0.1), Bisection());
     qft0 = qft0 - Gamma_q * zft;
@@ -157,8 +135,8 @@ end
 """
     Γm - moist adiabatic lapse rate calculation
 """
-function Γm(Tsurf, RHsurf)
-    qv = q_sat(0.0, Tsurf) * RHsurf;
-    Γ = g * (1 + (L0*qv)/(Rd*Tsurf)) / (Cp + (L0^2*qv)/(Rv*Tsurf^2));
+function Γm(Tsurf)
+    qs = q_sat(0.0, Tsurf);
+    Γ = g * (1 + (L0*qs)/(Rd*Tsurf)) / (Cp + (L0^2*qs)/(Rv*Tsurf^2));
     return Γ
 end

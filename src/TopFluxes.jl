@@ -38,6 +38,7 @@ end
         via linear regression to LES results
 """
 function qjump(u, p, zb, fttype::co2dep)
+    zi, hM, qM, SST, CF = u;
     qj = -2.19e-6 * p.CO2 - 4.04e-3; # kg/kg
     return qj
 end
@@ -48,6 +49,7 @@ end
         via linear regression to LES results
 """
 function hjump(u, p, zb, fttype::co2dep)
+    zi, hM, qM, SST, CF = u;
     hj = -6.07 * p.CO2 + 157.0; # m^2/s^2 = J/kg
     return hj
 end
@@ -83,21 +85,23 @@ end
 
     free-tropospheric temperature given tropical sst
 """
-function temp_ft(u, p, zb)
+function temp_ft(u, p, zb, zft)
     zi, hM, qM, SST, CF = u;
     SST_trop = trop_sst(u, p, zb);
-    Γ = Γm(SST_trop, p.RHtrop);
-    Tft = SST_trop - zi*Γ;
+    Tft = SST_trop - zft*Γm(SST_trop);
     return Tft
 end
 
 """
     qjump(u, p, p.fttype::twocol)
+
+    specific humidity above cloud given fixed RH=0.2
+    and saturation calculated at Tft and fixed 1500 m 
 """
 function qjump(u, p, zb, fttype::twocol)
     zi, hM, qM, SST, CF = u;
-    Tft = temp_ft(u, p, zb);
-    qft = q_sat(zi, Tft) * 0.2;
+    zft = 1500.0;
+    qft = 0.2 * q_sat(zft, temp_ft(u, p, zb, zft));
     qj = qft - qM;
     return qj
 end
@@ -107,9 +111,10 @@ end
 """
 function hjump(u, p, zb, fttype::twocol)
     zi, hM, qM, SST, CF = u;
-    Tft = temp_ft(u, p, zb);
     qft = qjump(u, p, zb, p.fttype) + qM;
-    hft = Cp*Tft + g*zi + L0*qft;
+    zft = zi;
+    Tft = temp_ft(u, p, zb, zft);
+    hft = Cp*Tft + g*zft + L0*qft;
     hj = hft - hM;
     return hj
 end

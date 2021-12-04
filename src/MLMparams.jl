@@ -24,6 +24,7 @@ export upCO2, climatology
     RHtrop = 0.8;
     R_s_400 = -10.0; # (W/m2)
     R_t_400 = 30.0; # (W/m2)
+    Ts400 = 300.0; # (K)
     
     # default types
     etype::ent_type = enBal();

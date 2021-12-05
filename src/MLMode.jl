@@ -63,6 +63,7 @@ end
     close surface energy budge for varSST
 """
 function dSSTdt(u, p, LWP, stype::varSST)
+    zi, hM, qM, SST, CF = u;
     RAD = calc_surf_RAD(u, p, LWP);
     SHF = calc_SHF(u, p);
     LHF = calc_LHF(u, p);   
@@ -92,54 +93,6 @@ end
       dSST/dt = 1/c * (SWnet - LWnet - SHF - LHF - OHU)
 """
 function mlm(du, u, p, t)
-    # println("t: ", t / 3600.0);
-    # println("u: ",u);
-    # println("du: ",du);
-    # println()
-
-    if any(u .< zeros(length(u))) || (u[1] < 200) || (u[4] > 350)
-        println("t: ", t / 3600.0);
-        println("u: ",u);
-        println("du: ",du);
-        println()
-        zi, hM, qM, SST, CF = u;
-        zb = calc_LCL(u);
-        println(zb);
-        LWP = incloud_LWP(u, zb);
-        println(we(u, p, zb, LWP, p.etype));
-        println(calc_cloudtop_RAD(u, p, LWP, p.rtype));
-        Tct = temp(zi,hM,qM,SST);
-        ϵc_up = cloud_emissivity(LWP);
-        Teff = Tatmos(p);
-        println(LWP, ϵc_up);
-        println(Tct, Teff);
-        println();
-        # println(temp.(collect(0:50:1000), hM, qM, SST));
-        # println(trop_sst(u, p, zb), "\t", Γm(trop_sst(u, p, zb), p.RHtrop), "\t",  temp_ft(u, p, zb));
-        # println(hjump(u, p, zb, p.fttype)+hM, "\t", qjump(u, p, zb, p.fttype)+qM);
-    end
-
-    # if u[1] < 10
-    #     error()
-    # end
-
-    # try
-    #     zb = calc_LCL(u);
-    #     println(zb);
-    # catch
-    #     println("failed to calc zb")
-    #     println(u);
-    # end
-
-    # if t/3600.0/24.0 > 15
-    #     println(t / 3600.0 / 24.0,"\t", u);
-    # end
-    
-    # if t/3600.0/24.0 > 15
-    #     println(t / 3600.0 / 24.0,"\t", u);
-    #     println(zb);
-    # end
-
     zb = calc_LCL(u);
     LWP = incloud_LWP(u, zb);
     ent = we(u, p, zb, LWP, p.etype);

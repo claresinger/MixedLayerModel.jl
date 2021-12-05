@@ -40,6 +40,7 @@ end
 function qjump(u, p, zb, fttype::co2dep)
     zi, hM, qM, SST, CF = u;
     qj = -2.19e-6 * p.CO2 - 4.04e-3; # kg/kg
+    qj /= min(1, CF*2.5)
     return qj
 end
 
@@ -51,6 +52,7 @@ end
 function hjump(u, p, zb, fttype::co2dep)
     zi, hM, qM, SST, CF = u;
     hj = -6.07 * p.CO2 + 157.0; # m^2/s^2 = J/kg
+    hj /= min(1, CF*1.5)
     return hj
 end
 

@@ -7,16 +7,16 @@ using Plots
 include("mlm_solve_funcs.jl")
 
 # define path to save file (which experiment are you running?)
-path = "experiments/output/remove_SST_relax/";
+path = "experiments/output/twocol/";
 
 # define OHU from 400 ppm simulation
 par = upCO2();
 par.etype = enBal();
-par.fttype = co2dep();
+par.fttype = twocol();
 par.rtype = varRad();
 par.stype = fixSST();
 dt = 2.0;
-tmax = 20.0;
+tmax = 40.0;
 
 # u0, sol = run_mlm_ss(par, dt=3600.0*dt, tspan=3600.0*24.0*tmax);
 # code = sol.retcode;
@@ -38,8 +38,8 @@ u0, sol = run_mlm(par, dt=3600.0*dt, tspan=(0.0,3600.0*24.0*tmax));
 ## plot and save
 t = sol.t / 3600.0 / 24.0;
 zi = getindex.(sol.u,1);
-hM = getindex.(sol.u,2) * 1e-3;
-qtM = getindex.(sol.u,3) * 1e3;
+hM = getindex.(sol.u,2);
+qtM = getindex.(sol.u,3);
 sst = getindex.(sol.u,4);
 cf = getindex.(sol.u,5);
 S = zeros(length(t));
@@ -79,15 +79,16 @@ savefig(replace(path, "output"=>"figures")*"sol400_t.png");
 uf = sol.u[end];
 du = zeros(5);
 mlm(du, uf, par, 0.0);
-zi,hM,qM,SST = uf;
+zi,hM,qM,SST,CF = uf;
 zb = calc_LCL(uf);
 LWP = incloud_LWP(uf, zb);
-RH = min(qM / q_sat(0.0, temp(0.0, hM, qM, SST)), 1.0);
+RH = min(qM / q_sat(0.0, temp(0.0, hM, qM)), 1.0);
 println(uf);
 println(du);
 println("cloud base: ",zb)
 println("LWP: ", LWP);
 println("tropical sst: ", trop_sst(uf, par, zb));
+println("ft qt: ", qjump(uf, par, zb, par.fttype) + qM);
 
 output = Dict("p" => par, "u0" => u0, "uf" => uf, "du/u" => du./uf, 
 "we" => we(uf,par,zb,LWP,par.etype), "zb" => zb, "zc" => zi-zb,

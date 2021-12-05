@@ -13,7 +13,7 @@ newCO2 = 1600.0;
 println(newCO2);
 
 # load initial condition from file
-path = "experiments/output/remove_SST_relax/";
+path = "experiments/output/co2dep/";
 restarttry1 = path*"co2_upstep_"*string(Int(newCO2-100))*".jld2";
 restarttry2 = path*"co2_upstep_"*string(Int(newCO2-200))*".jld2";
 restarttry3 = path*"co2_upstep_"*string(Int(newCO2-400))*".jld2";
@@ -46,7 +46,7 @@ par.etype = enBal();
 par.fttype = co2dep();
 par.rtype = varRad();
 par.stype = varSST();
-dt, tmax = 2.0, 30;
+dt, tmax = 24.0, 60.0;
 
 println(par.OHU, "\t", par.R_s_400);
 
@@ -79,6 +79,7 @@ zb = zeros(length(t));
 LWP = zeros(length(t));
 Δsvl = zeros(length(t));
 ent = zeros(length(t));
+trop_SST = zeros(length(t));
 for (i,si) in enumerate(S)
     zb[i] = calc_LCL(sol.u[i]);
     LWP[i] = incloud_LWP(sol.u[i], zb[i]);
@@ -87,6 +88,7 @@ for (i,si) in enumerate(S)
     ΔR[i] = calc_cloudtop_RAD(sol.u[i], par, LWP[i], par.rtype);
     Δsvl[i] = Δs(sol.u[i], par, zb[i]);
     ent[i] = we(sol.u[i], par, zb[i], LWP[i], par.etype);
+    trop_SST[i] = trop_sst(sol.u[i], par, LWP[i]);
 end 
 plot(size=(1200,800), layout=(6,2), dpi=200, left_margin = 5Plots.mm);
 plot!(t, zi, marker="o-", legend=false, subplot=1, ylabel="zi, zb [m]");
@@ -94,6 +96,7 @@ plot!(t, zb, marker="o-", legend=false, subplot=1);
 plot!(t, hM * 1e-3, marker="o-", legend=false, subplot=2, ylabel="hM [kJ/kg]"); 
 plot!(t, qtM * 1e3, marker="o-", legend=false, subplot=3, ylabel="qtM [g/kg]");
 plot!(t, sst, marker="o-", legend=false, subplot=4, ylabel="SST [K]");
+plot!(t, trop_SST, marker="o-", legend=false, subplot=4);
 plot!(t, cf * 1e2, marker="o-", legend=false, subplot=5, ylabel="CF [%]");
 plot!(t, LWP .* cf * 1e3, marker="o-", legend=false, subplot=6, ylabel="LWP [g/m2]");
 plot!(t, Δsvl * 1e-3, marker="o-", legend=false, subplot=7, ylabel="Δs (kJ/kg)");
@@ -109,15 +112,16 @@ savefig(replace(path, "output"=>"figures")*"sol"*string(Int(newCO2))*"_t.png");
 uf = sol.u[end];
 du = zeros(5);
 mlm(du, uf, par, 0.0);
-zi,hM,qM,SST = uf;
+zi,hM,qM,SST,CF = uf;
 zb = calc_LCL(uf);
 LWP = incloud_LWP(uf, zb);
-RH = min(qM / q_sat(0.0, temp(0.0, hM, qM, SST)), 1.0);
+RH = min(qM / q_sat(0.0, temp(0.0, hM, qM)), 1.0);
 println(uf);
 println(du);
 println("cloud base: ",zb)
 println("LWP: ", LWP);
 println("tropical sst: ", trop_sst(uf, par, zb));
+println("ft qt: ", qjump(uf, par, zb, par.fttype) + qM);
 
 output = Dict("p" => par, "u0" => u0, "uf" => uf, "du/u" => du./uf, 
 "we" => we(uf,par,zb,LWP,par.etype), "zb" => zb, "zc" => zi-zb,

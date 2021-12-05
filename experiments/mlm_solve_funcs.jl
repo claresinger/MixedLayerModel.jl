@@ -61,7 +61,7 @@ function run_mlm_from_init(u0, params; dt=3600.0*5.0, tspan=(0.0,3600.0*24.0*10.
 
     @time begin
         println("Rodas5");
-        sol = solve(prob, Rodas5(autodiff=false), abstol=0.0, reltol=steptol);
+        sol = solve(prob, Rodas5(autodiff=false), abstol=0.0, reltol=steptol, dtmax=dt);
     end
 
     # @time begin

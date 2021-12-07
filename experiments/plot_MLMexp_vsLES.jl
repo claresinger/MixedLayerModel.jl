@@ -7,17 +7,6 @@ using LaTeXStrings
 using MixedLayerModel
 using MixedLayerModel: Rd, Rv, L0, T0, Cp, δ, ϵ, μ
 
-# ### constants
-# Rd = 287.0          # gas constant dry air (J/K/kg)
-# Rv = 461.0          # gas constant water vapor (J/K/kg)
-# L0 = 2.5e6          # latent heat of vaporization (J/kg)
-# T0 = 273.16         # absolute zero (K)
-# Cp = 1004.0         # heat capacity at constant pressure (J/K/kg)
-# δ = (Rv-Rd)/Rd     
-# ϵ = Cp*T0/L0        
-# μ = 1 - δ*ϵ 
-# ###
-
 ENV["GKSwstype"]="nul"
 
 # plot LES
@@ -31,6 +20,7 @@ lwp = Float64.(ds["lwp"][1:max]*1e3);
 sst = Float64.(ds["sst"][1:max]);
 lhf = Float64.(ds["lhf"][1:max]);
 dR = Float64.(ds["deltaR"][1:max]);
+dR = [74.1,69.6,66.5,61.9,4.7,2.5];
 S = (lhf./dR).*((zi.-zb)./zi);
 hplus_les = Float64.(ds["h_plus"][1:max]);
 hM_les = Float64.(ds["hM"][1:max]);
@@ -49,7 +39,9 @@ p6 = scatter(co2, sst, marker=:x, markersize=5, label="", ylabel="SST [K]")
 
 p7 = scatter(co2, lhf, marker=:x, markersize=5, label="", xlabel="CO2 [ppmv]", ylabel="LHF [W/m2]")
 p8 = scatter(co2, dR, marker=:x, markersize=5, label="", xlabel="CO2 [ppmv]", ylabel="dR [W/m2]")
-p9 = scatter(co2, S, marker=:x, markersize=5, label="", xlabel="CO2 [ppmv]", ylabel="Stability param., S")
+p9 = scatter(co2, S, marker=:x, markersize=5, label="", 
+                yscale=:log10, yticks=[0.1,0.5,1,5,10], yformatter=:plain,
+                xlabel="CO2 [ppmv]", ylabel="Stability param., S")
 
 # p1 = scatter(co2, zi, marker=:x, color="white", markersize=5, label="", ylabel="")
 # scatter!(co2, zb, marker=:x, color="white", markersize=5, label="", ylabel="Cloud top/base [m]")
@@ -76,7 +68,7 @@ p9 = scatter(co2, S, marker=:x, markersize=5, label="", xlabel="CO2 [ppmv]", yla
 # co2 = [400, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000, 2200, 2400, 2600];
 # exp_path = "twocol/"
 # co2 = [400, 600, 800, 1000, 1200, 1600, 1800, 2000, 2200, 2400, 2500, 2600];
-exp_path = "co2dep/"
+exp_path = "modCF/"
 co2 = [400, 600, 800, 1000, 1200, 1300, 1400, 1600];
 
 zi, zb, ent = zeros(length(co2)), zeros(length(co2)), zeros(length(co2));

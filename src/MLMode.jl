@@ -68,7 +68,11 @@ function dSSTdt(u, p, LWP, stype::varSST)
     SHF = calc_SHF(u, p);
     LHF = calc_LHF(u, p);   
     c = ρw * Cw * p.Hw;
-    return (1/c) * (RAD - SHF - LHF - p.OHU)
+    dx = (1/c) * (RAD - SHF - LHF - p.OHU);
+
+    τ_SST = 3600.0*24.0*1.0; # 1 days; SST damping timescale [seconds]
+    dy = (p.SST0 - SST) / τ_SST;
+    return (dx+dy)
 end
 
 """

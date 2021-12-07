@@ -9,14 +9,14 @@ include("mlm_solve_funcs.jl")
 
 # use command line argument to set co2
 newCO2 = parse(Float64,ARGS[1]);
-# newCO2 = 1600.0;
+# newCO2 = 200.0;
 println(newCO2);
 
 # load initial condition from file
 path = "experiments/output/modCF/";
-restarttry1 = path*"co2_upstep_"*string(Int(newCO2-100))*".jld2";
-restarttry2 = path*"co2_upstep_"*string(Int(newCO2-200))*".jld2";
-restarttry3 = path*"co2_upstep_"*string(Int(newCO2-400))*".jld2";
+restarttry1 = path*"co2_downstep_"*string(Int(newCO2+100))*".jld2";
+restarttry2 = path*"co2_downstep_"*string(Int(newCO2+200))*".jld2";
+restarttry3 = path*"co2_downstep_"*string(Int(newCO2+400))*".jld2";
 if isfile(restarttry1)
     output = load(restarttry1);
 elseif isfile(restarttry2)
@@ -24,7 +24,7 @@ elseif isfile(restarttry2)
 elseif isfile(restarttry3)
     output = load(restarttry3);
 else
-    output = load(path*"co2_400.jld2");
+    output = load(path*"co2_upstep_1600.jld2");
 end
 u0 = output["uf"];
 OHU = output["OHU"];
@@ -46,7 +46,7 @@ par.etype = enBal();
 par.fttype = co2dep();
 par.rtype = varRad();
 par.stype = varSST();
-dt, tmax = 12.0, 60.0;
+dt, tmax = 24.0, 60.0;
 
 println(par.OHU, "\t", par.R_s_400);
 
@@ -106,7 +106,20 @@ plot!(t, ΔR, marker="o-", legend=false, subplot=10, ylabel="ΔR [W/m2]");
 plot!(t, (zi .- zb) ./ zi, marker="o-", legend=false, subplot=11, ylabel="zc/zi [-]", xlabel="time [days]");
 plot!(t, S, marker="o-", legend=false, subplot=12, ylabel="S [-]", xlabel="time [days]");
 mkpath(replace(path, "output"=>"figures"));
-savefig(replace(path, "output"=>"figures")*"up"*string(Int(newCO2))*"_t.png");
+savefig(replace(path, "output"=>"figures")*"down"*string(Int(newCO2))*"_t.png");
+
+# ### AGU plots
+# Plots.scalefontsizes(2)
+# plot(size=(1000,500), layout=(2,2), dpi=200, left_margin = 5Plots.mm, bottom_margin=5Plots.mm);
+# plot!(t, ΔR, marker="o-", legend=false, subplot=1, ylabel="ΔR [W/m\$^2\$]");
+# plot!(t, S, marker="o-", legend=false, subplot=2, ylabel="Stability, \$S\$",
+#         yscale=:log10, yticks=([0.2,0.5,2,5], ["0.2","0.5","2","5"]), ylim=[0.2,10]);
+# plot!(t, cf * 1e2, marker="o-", legend=false, subplot=3, ylabel="CF [%]", xlabel="Time [days]");
+# plot!(t, sst, marker="o-", legend=false, subplot=4, ylabel="SST [K]", xlabel="Time [days]");
+# mkpath(replace(path, "output"=>"figures"));
+# savefig(replace(path, "output"=>"figures")*"AGU-down"*string(Int(newCO2))*"_t.png");
+# Plots.scalefontsizes(1/2)
+# ### 
 
 ## save steady-state solution
 uf = sol.u[end];
@@ -129,19 +142,4 @@ output = Dict("p" => par, "u0" => u0, "uf" => uf, "du/u" => du./uf,
 "ΔR" => calc_cloudtop_RAD(uf,par,LWP,par.rtype), 
 "OHU" => calc_OHU(uf,par,LWP,par.stype))
 
-save(path*"co2_upstep_"*string(Int(newCO2))*".jld2", output)
-
-# ### AGU plots
-if (u0[5] > 0.5) && (uf[5] < 0.5)
-    Plots.scalefontsizes(2)
-    plot(size=(1000,500), layout=(2,2), dpi=200, left_margin = 5Plots.mm, bottom_margin=5Plots.mm);
-    plot!(t, ΔR, marker="o-", legend=false, subplot=1, ylabel="ΔR [W/m\$^2\$]", ylim=[0,90]);
-    plot!(t, S, marker="o-", legend=false, subplot=2, ylabel="Stability, \$S\$",
-            yscale=:log10, yticks=([0.2,0.5,2,5], ["0.2","0.5","2","5"]), ylim=[0.2,10]);
-    plot!(t, cf * 1e2, marker="o-", legend=false, subplot=3, ylabel="CF [%]", xlabel="Time [days]", ylim=[0,100]);
-    plot!(t, sst, marker="o-", legend=false, subplot=4, ylabel="SST [K]", xlabel="Time [days]", ylim=[290,320]);
-    mkpath(replace(path, "output"=>"figures"));
-    savefig(replace(path, "output"=>"figures")*"AGU-up"*string(Int(newCO2))*"_t.png");
-    Plots.scalefontsizes(1/2)
-end
-### 
+save(path*"co2_downstep_"*string(Int(newCO2))*".jld2", output)

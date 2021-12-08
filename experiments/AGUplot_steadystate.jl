@@ -130,8 +130,8 @@ scatter!(p1, [-1], [-1], color="black", marker=:circle, markersize=1, markerstro
 
 # save plot
 p = plot(p1,p2,p3,p4, layout=(2,2), 
-    link=:x, size=(1000,700), dpi=300,
-    legend=:topright, legendfontsize=12,
+    link=:x, size=(1000,650), dpi=300,
+    legend=:topright, legendfontsize=12, legendfont=font(12),
     left_margin=10Plots.mm, bottom_margin=5Plots.mm, top_margin=5Plots.mm);
 mkpath("experiments/figures/"*exp_path)
 savefig(p, "experiments/figures/"*exp_path*"AGU-steady-state.png")

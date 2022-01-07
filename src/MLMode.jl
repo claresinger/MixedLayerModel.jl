@@ -70,8 +70,9 @@ function dSSTdt(u, p, LWP, stype::varSST)
     c = ρw * Cw * p.Hw;
     dx = (1/c) * (RAD - SHF - LHF - p.OHU);
 
-    τ_SST = 3600.0*24.0*1.0; # 1 days; SST damping timescale [seconds]
-    dy = (p.SST0 - SST) / τ_SST;
+    # τ_SST = 3600.0*24.0*1.0; # 1 days; SST damping timescale [seconds]
+    # dy = (p.SST0 - SST) / τ_SST;
+    dy = 0.0;
     return (dx+dy)
 end
 
@@ -97,6 +98,8 @@ end
       dSST/dt = 1/c * (SWnet - LWnet - SHF - LHF - OHU)
 """
 function mlm(du, u, p, t)
+    println(t/3600/24)
+    println(u)
     zb = calc_LCL(u);
     LWP = incloud_LWP(u, zb);
     ent = we(u, p, zb, LWP, p.etype);

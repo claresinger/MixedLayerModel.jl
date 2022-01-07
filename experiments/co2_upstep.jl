@@ -8,12 +8,12 @@ using Plots
 include("mlm_solve_funcs.jl")
 
 # use command line argument to set co2
-newCO2 = parse(Float64,ARGS[1]);
-# newCO2 = 1600.0;
+# newCO2 = parse(Float64,ARGS[1]);
+newCO2 = 1000.0;
 println(newCO2);
 
 # load initial condition from file
-path = "experiments/output/modCF/";
+path = "experiments/output/twocol/";
 restarttry1 = path*"co2_upstep_"*string(Int(newCO2-100))*".jld2";
 restarttry2 = path*"co2_upstep_"*string(Int(newCO2-200))*".jld2";
 restarttry3 = path*"co2_upstep_"*string(Int(newCO2-400))*".jld2";
@@ -43,10 +43,10 @@ par.OHU = OHU;
 par.R_s_400 = R_s_400;
 par.CO2 = newCO2;
 par.etype = enBal();
-par.fttype = co2dep();
+par.fttype = twocol();
 par.rtype = varRad();
 par.stype = varSST();
-dt, tmax = 12.0, 40.0;
+dt, tmax = 24.0, 15.0;
 
 println(par.OHU, "\t", par.R_s_400);
 
@@ -96,7 +96,7 @@ plot!(t, zb, marker="o-", legend=false, subplot=1);
 plot!(t, hM * 1e-3, marker="o-", legend=false, subplot=2, ylabel="hM [kJ/kg]"); 
 plot!(t, qtM * 1e3, marker="o-", legend=false, subplot=3, ylabel="qtM [g/kg]");
 plot!(t, sst, marker="o-", legend=false, subplot=4, ylabel="SST [K]");
-#plot!(t, trop_SST, marker="o-", legend=false, subplot=4);
+plot!(t, trop_SST, marker="o-", legend=false, subplot=4);
 plot!(t, cf * 1e2, marker="o-", legend=false, subplot=5, ylabel="CF [%]");
 plot!(t, LWP .* cf * 1e3, marker="o-", legend=false, subplot=6, ylabel="LWP [g/m2]");
 plot!(t, Δsvl * 1e-3, marker="o-", legend=false, subplot=7, ylabel="Δs (kJ/kg)");

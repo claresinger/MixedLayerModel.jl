@@ -88,7 +88,6 @@ end
     free-tropospheric temperature given tropical sst
 """
 function temp_ft(u, p, zb, zft)
-    zi, hM, qM, SST, CF = u;
     SST_trop = trop_sst(u, p, zb);
     Tft = SST_trop - zft*Γm(SST_trop);
     return Tft

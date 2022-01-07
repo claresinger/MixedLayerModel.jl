@@ -87,7 +87,7 @@ function calc_LCL(u)
     if f(0) > 0
         zb = 0.0;
     elseif f(zi) < 0
-        zb = zi;
+        zb = zi-10;
     else
         zb = find_zero(f, (0.0,zi), Bisection());
     end

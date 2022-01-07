@@ -7,12 +7,12 @@ using Plots
 include("mlm_solve_funcs.jl")
 
 # define path to save file (which experiment are you running?)
-path = "experiments/output/modCF/";
+path = "experiments/output/twocol/";
 
 # define OHU from 400 ppm simulation
 par = upCO2();
 par.etype = enBal();
-par.fttype = co2dep();
+par.fttype = twocol();
 par.rtype = varRad();
 par.stype = fixSST();
 dt = 2.0;

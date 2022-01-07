@@ -1,5 +1,6 @@
 export ρref, pres, q_sat, q_v, q_l, temp, rho
 export incloud_LWP, calc_LCL
+export Γm
 export calc_qft0
 
 """
@@ -69,9 +70,8 @@ end
 function temp(z, h, qt)
     h_act(T) = Cp*T + g*z + L0*q_v(z,T,qt);
     f(x) = h - h_act(x);
-    Tguess = eltype(h)(300.0);
-    # Tguess = eltype(h)((h - g*z - L0*q_v(z, 300.0, qt)) / Cp);
-    T = find_zero(f, Tguess, Order1());
+    Tqt = (h - g*z - L0*qt) / Cp;
+    T = find_zero(f, eltype(h)(Tqt), Order1(), atol=0.1);
     return T
 end
 
@@ -83,7 +83,7 @@ end
 function calc_LCL(u)
     zi, hM, qtM, SST, CF = u;
 
-    f(z) = qtM - q_sat(z,temp(z,hM,qtM));
+    f(z) = qtM - q_sat(z,temp(z, hM, qtM));
     if f(0) > 0
         zb = 0.0;
     elseif f(zi) < 0
@@ -130,4 +130,13 @@ function calc_qft0(RHft, Gamma_q, sft0, Gamma_s)
     qft0 = find_zero(f, (0.0,0.1), Bisection());
     qft0 = qft0 - Gamma_q * zft;
     return qft0
+end
+
+"""
+    Γm - moist adiabatic lapse rate calculation
+"""
+function Γm(Tsurf)
+    qs = q_sat(0.0, Tsurf);
+    Γ = g * (1 + (L0*qs)/(Rd*Tsurf)) / (Cp + (L0^2*qs)/(Rv*Tsurf^2));
+    return Γ
 end

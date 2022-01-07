@@ -1,6 +1,6 @@
 export ent_type
 export fixed, enBal, bflux
-export we
+export Δs,  we
 
 ###########
 # create structure for ent_type
@@ -9,6 +9,20 @@ abstract type ent_type end
 struct fixed <: ent_type end
 struct enBal <: ent_type end
 struct bflux <: ent_type end
+
+"""
+    Δs(u, p, zb)
+
+    calculate the jump in dry virtual liquid static energy (s_vl)
+    across the inversion
+    Δs = Δh - μL Δq
+"""
+function Δs(u, p, zb)
+    # calculate change in s_vl across inversion
+    hj = hjump(u, p, zb, p.fttype);
+    qj = qjump(u, p, zb, p.fttype);
+    return hj - μ*L0*qj
+end
 
 """
     we(u, p, zb, LWP, etype::fixed)
@@ -29,16 +43,7 @@ end
 function we(u, p, zb, LWP, etype::enBal)
     zi, hM, qM, SST, CF = u;
     ΔR = calc_cloudtop_RAD(u, p, LWP, p.rtype);
-
-    # calculate change in s_vl across inversion
-    hj = hjump(u, p, zb, p.fttype);
-    qj = qjump(u, p, zb, p.fttype);
-    Δs_vli = hj - μ*L0*qj;
-
-    f = ΔR / ρref(SST);
-
-    # calculate entrianment rate
-    w = (f/Δs_vli);
+    w = (ΔR / ρref(SST)) / Δs(u, p, zb);
     return w
 end
 
@@ -52,11 +57,6 @@ end
 """
 function we(u, p, zb, LWP, etype::bflux)
     zi, hM, qM, SST = u;
-    
-    # calculate change in s_vl across inversion
-    hj = hjump(u, p, zb, p.fttype);
-    qj = qjump(u, p, zb, p.fttype);
-    Δs_vli = hj - μ*L0*qj;
 
     # calculate sv flux <w'sv'>(z) = f0(z) + we*f1(z)
     # split into two terms I0, I1 where Ii = \integral fi(z) dz
@@ -71,7 +71,7 @@ function we(u, p, zb, LWP, etype::bflux)
     B1 = β*hj- ϵ*L0*qj;
     I1 = A1 * (-(zb^2)/(2*zi)) + B1 * ((-zi^2 + zb^2)/(2*zi));
     
-    α = (2.5 * p.A) / (zi * Δs_vli);
+    α = (2.5 * p.A) / (zi * Δs(u, p, zb));
     w = α*I0 / (1 - α*I1)
     return w
 end

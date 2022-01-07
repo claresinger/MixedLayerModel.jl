@@ -1,4 +1,4 @@
-export calc_S, cloud_fraction
+export calc_S, cloud_fraction, cloud_fraction_S
 
 """
     calc_S(u, p)
@@ -29,6 +29,11 @@ end
 """
 function cloud_fraction(u, p, zb, LWP)
     S = calc_S(u, p, zb, LWP);
+    CF = cloud_fraction_S(S);
+    return CF
+end
+
+function cloud_fraction_S(S)
     m = 10; # tunable parameter for the slope of the CF nonlinearity
     S_crit = 0.7; # tunable parameter for the halfway point of CF decrease
     CF = 1 - 0.8 / (1 + exp(-m*(S-S_crit)));

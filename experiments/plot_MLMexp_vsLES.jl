@@ -5,17 +5,7 @@ using NCDatasets
 using Plots
 using LaTeXStrings
 using MixedLayerModel
-
-### constants
-Rd = 287.0          # gas constant dry air (J/K/kg)
-Rv = 461.0          # gas constant water vapor (J/K/kg)
-L0 = 2.5e6          # latent heat of vaporization (J/kg)
-T0 = 273.16         # absolute zero (K)
-Cp = 1004.0         # heat capacity at constant pressure (J/K/kg)
-δ = (Rv-Rd)/Rd     
-ϵ = Cp*T0/L0        
-μ = 1 - δ*ϵ 
-###
+using MixedLayerModel: Rd, Rv, L0, T0, Cp, δ, ϵ, μ
 
 ENV["GKSwstype"]="nul"
 
@@ -25,11 +15,12 @@ max = 6;
 co2 = Float64.(ds["CO2"][1:max]);
 zi = Float64.(ds["zi"][1:max]);
 zb = Float64.(ds["zb"][1:max]);
-we = zi.*6e-6*1e3;
+ent = zi.*6e-6*1e3;
 lwp = Float64.(ds["lwp"][1:max]*1e3);
 sst = Float64.(ds["sst"][1:max]);
 lhf = Float64.(ds["lhf"][1:max]);
 dR = Float64.(ds["deltaR"][1:max]);
+dR = [74.1,69.6,66.5,61.9,4.7,2.5];
 S = (lhf./dR).*((zi.-zb)./zi);
 hplus_les = Float64.(ds["h_plus"][1:max]);
 hM_les = Float64.(ds["hM"][1:max]);
@@ -42,13 +33,15 @@ scatter!(co2, zb, marker=:x, color="green", markersize=5, label="", ylabel="Clou
 p2 = scatter(co2, zi-zb, marker=:x, markersize=5, label="", ylabel="Cloud depth, zc [m]")
 p3 = scatter(co2, lwp, marker=:x, markersize=5, label="", ylabel="LWP [g/m2]")
 
-p4 = scatter(co2, we, marker=:x, markersize=5, label="", ylabel="Entrainment, we [mm/s]")
+p4 = scatter(co2, ent, marker=:x, markersize=5, label="", ylabel="Entrainment, we [mm/s]")
 p5 = scatter(co2, Δs_vli, marker=:x, markersize=5, label="", ylabel="Inv. strength [kJ/kg]")
 p6 = scatter(co2, sst, marker=:x, markersize=5, label="", ylabel="SST [K]")
 
 p7 = scatter(co2, lhf, marker=:x, markersize=5, label="", xlabel="CO2 [ppmv]", ylabel="LHF [W/m2]")
 p8 = scatter(co2, dR, marker=:x, markersize=5, label="", xlabel="CO2 [ppmv]", ylabel="dR [W/m2]")
-p9 = scatter(co2, S, marker=:x, markersize=5, label="", xlabel="CO2 [ppmv]", ylabel="Stability param., S")
+p9 = scatter(co2, S, marker=:x, markersize=5, label="", 
+                yscale=:log10, yticks=[0.1,0.5,1,5,10], yformatter=:plain,
+                xlabel="CO2 [ppmv]", ylabel="Stability param., S")
 
 # p1 = scatter(co2, zi, marker=:x, color="white", markersize=5, label="", ylabel="")
 # scatter!(co2, zb, marker=:x, color="white", markersize=5, label="", ylabel="Cloud top/base [m]")
@@ -71,10 +64,14 @@ p9 = scatter(co2, S, marker=:x, markersize=5, label="", xlabel="CO2 [ppmv]", yla
 # exp_path = "enBal_restart/"
 # co2 = [400, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000, 2200, 2400, 2600, 2800, 3000];
 
-exp_path = "dampSST/"
-co2 = [400, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000, 2200, 2400, 2600];
+# exp_path = "dampSST/"
+# co2 = [400, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000, 2200, 2400, 2600];
+# exp_path = "twocol/"
+# co2 = [400, 600, 800, 1000, 1200, 1600, 1800, 2000, 2200, 2400, 2500, 2600];
+exp_path = "modCF/"
+co2 = [400, 600, 800, 1000, 1200, 1300, 1400, 1600];
 
-zi, zb, we = zeros(length(co2)), zeros(length(co2)), zeros(length(co2));
+zi, zb, ent = zeros(length(co2)), zeros(length(co2)), zeros(length(co2));
 cf, lwp, sst, lhf = zeros(length(co2)), zeros(length(co2)), zeros(length(co2)), zeros(length(co2));
 dR, Δs_vli = zeros(length(co2)), zeros(length(co2));
 for (i, co2i) in enumerate(co2)
@@ -90,17 +87,15 @@ for (i, co2i) in enumerate(co2)
     #zii, hM, qM, ssti = uf;
     zbi = dat["zb"];
     zi[i], zb[i], sst[i] = zii, zbi, ssti;
-    lhf[i], we[i], dR[i] = dat["LHF"], dat["we"]*1e3, dat["ΔR"];
-    hj = hjump(uf, p, p.fttype);
-    qj = qjump(uf, p, p.fttype);
-    Δs_vli[i] = (hj - μ*L0*qj)*1e-3;
+    lhf[i], ent[i], dR[i] = dat["LHF"], dat["we"]*1e3, dat["ΔR"];
+    Δs_vli[i] = Δs(uf, p, p.fttype)*1e-3;
     
     # uf = [zii, hM, qM, ssti, 1];
     # cf[i] = 1;
     # lwp[i] = incloud_LWP(uf) * 1e3;
 
     cf[i] = cfi;
-    lwp[i] = incloud_LWP(uf) * 1e3;
+    lwp[i] = incloud_LWP(uf, zb[i]) * 1e3;
 end
 S = (lhf./dR).*((zi.-zb)./zi);
 
@@ -110,7 +105,7 @@ scatter!(p1, co2, zb, marker=:circle, color="red", markersize=ms, markerstrokewi
 scatter!(p2, co2, zi-zb, marker=:circle, markersize=ms, markerstrokewidth=0, label="")
 scatter!(p3, co2, lwp .* cf, marker=:circle, markersize=ms, markerstrokewidth=0, label="")
 
-scatter!(p4, co2, we, marker=:circle, markersize=ms, markerstrokewidth=0, label="")
+scatter!(p4, co2, ent, marker=:circle, markersize=ms, markerstrokewidth=0, label="")
 scatter!(p5, co2, Δs_vli, marker=:circle, markersize=ms, markerstrokewidth=0, label="")
 scatter!(p6, co2, sst, marker=:circle, markersize=ms, markerstrokewidth=0, label="")
 
@@ -121,6 +116,7 @@ scatter!(p9, co2, S, marker=:circle, markersize=ms, markerstrokewidth=0, label="
 # save plot
 p = plot(p1,p2,p3,p4,p5,p6,p7,p8,p9, layout=(3,3), 
     link=:x, size=(1000,700), dpi=300,
+    legend=:bottomleft,
     left_margin=10Plots.mm, bottom_margin=5Plots.mm, top_margin=5Plots.mm);
 mkpath("experiments/figures/"*exp_path)
 savefig(p, "experiments/figures/"*exp_path*"steady-state.png")

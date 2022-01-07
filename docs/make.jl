@@ -1,3 +1,4 @@
+push!(LOAD_PATH, joinpath(@__DIR__, ".."))
 using MixedLayerModel, Documenter
 
 # https://github.com/jheinen/GR.jl/issues/278#issuecomment-587090846

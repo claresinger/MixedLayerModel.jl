@@ -70,7 +70,7 @@ function dSSTdt(u, p, LWP, stype::varSST)
     c = ρw * Cw * p.Hw;
     dx = (1/c) * (RAD - SHF - LHF - p.OHU);
 
-    # τ_SST = 3600.0*24.0*1.0; # 1 days; SST damping timescale [seconds]
+    # τ_SST = 3600.0*24.0*3.0; # 3 days; SST damping timescale [seconds]
     # dy = (p.SST0 - SST) / τ_SST;
     dy = 0.0;
     return (dx+dy)

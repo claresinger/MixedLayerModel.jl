@@ -55,7 +55,7 @@ for (i,si) in enumerate(S)
     S[i] = calc_S(sol.u[i], par, zb[i], LWP[i]);
     LHF[i] = calc_LHF(sol.u[i], par);
     ΔR[i] = calc_cloudtop_RAD(sol.u[i], par, LWP[i], par.rtype);
-    Δsvl[i] = Δs(sol.u[i], par, zb[i]);
+    Δsvl[i] = Δs(sol.u[i], par, LWP[i]);
     ent[i] = we(sol.u[i], par, zb[i], LWP[i], par.etype);
 end 
 plot(size=(1200,800), layout=(6,2), dpi=200, left_margin = 5Plots.mm);
@@ -87,7 +87,7 @@ println(uf);
 println(du);
 println("cloud base: ",zb)
 println("LWP: ", LWP);
-println("tropical sst: ", trop_sst(uf, par, zb));
+println("tropical sst: ", trop_sst(uf, par, LWP));
 println("ft qt: ", qjump(uf, par, zb, par.fttype) + qM);
 
 output = Dict("p" => par, "u0" => u0, "uf" => uf, "du/u" => du./uf, 

@@ -9,7 +9,7 @@ include("mlm_solve_funcs.jl")
 
 # use command line argument to set co2
 # newCO2 = parse(Float64,ARGS[1]);
-newCO2 = 1000.0;
+newCO2 = 1400.0;
 println(newCO2);
 
 # load initial condition from file
@@ -46,7 +46,7 @@ par.etype = enBal();
 par.fttype = twocol();
 par.rtype = varRad();
 par.stype = varSST();
-dt, tmax = 12.0, 15.0;
+dt, tmax = 12.0, 7.5;
 
 println(par.OHU, "\t", par.R_s_400);
 
@@ -88,9 +88,9 @@ for (i,si) in enumerate(S)
     S[i] = calc_S(sol.u[i], par, zb[i], LWP[i]);
     LHF[i] = calc_LHF(sol.u[i], par);
     ΔR[i] = calc_cloudtop_RAD(sol.u[i], par, LWP[i], par.rtype);
-    Δsvl[i] = Δs(sol.u[i], par, zb[i]);
-    Δh[i] = hjump(sol.u[i], par, zb[i], par.fttype);
-    Δq[i] = μ*L0*qjump(sol.u[i], par, zb[i], par.fttype);
+    Δsvl[i] = Δs(sol.u[i], par, LWP[i]);
+    Δh[i] = hjump(sol.u[i], par, LWP[i], par.fttype);
+    Δq[i] = μ*L0*qjump(sol.u[i], par, LWP[i], par.fttype);
     ent[i] = we(sol.u[i], par, zb[i], LWP[i], par.etype);
     trop_SST[i] = trop_sst(sol.u[i], par, LWP[i]);
 end 
@@ -104,8 +104,8 @@ plot!(t, trop_SST, marker="o-", legend=false, subplot=4);
 plot!(t, cf * 1e2, marker="o-", legend=false, subplot=5, ylabel="CF [%]");
 plot!(t, LWP .* cf * 1e3, marker="o-", legend=false, subplot=6, ylabel="LWP [g/m2]");
 plot!(t, Δsvl * 1e-3, marker="o-", legend=false, subplot=7, ylabel="Δs, Δh, Δq (kJ/kg)");
-plot!(t, Δh * 1e-3, marker="o-", legend=false, subplot=7);
-plot!(t, Δq * 1e-3, marker="o-", legend=false, subplot=7);
+# plot!(t, Δh * 1e-3 .+ 30, marker="o-", legend=false, subplot=7);
+# plot!(t, Δq * 1e-3 .+ 30, marker="o-", legend=false, subplot=7);
 plot!(t, ent*1e3, marker="o-", legend=false, subplot=8, ylabel="we (mm/s)")
 plot!(t, LHF, marker="o-", legend=false, subplot=9, ylabel="LHF [W/m2]");
 plot!(t, ΔR, marker="o-", legend=false, subplot=10, ylabel="ΔR [W/m2]");
@@ -126,7 +126,7 @@ println(uf);
 println(du);
 println("cloud base: ",zb)
 println("LWP: ", LWP);
-println("tropical sst: ", trop_sst(uf, par, zb));
+println("tropical sst: ", trop_sst(uf, par, LWP));
 println("ft qt: ", qjump(uf, par, zb, par.fttype) + qM);
 
 output = Dict("p" => par, "u0" => u0, "uf" => uf, "du/u" => du./uf, 

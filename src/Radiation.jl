@@ -113,6 +113,24 @@ function cloud_emissivity(LWP)
     return ϵc
 end
 
+# function trop_sst(u, p, LWP)
+#     zi, hM, qM, SST, CF = u;
+
+#     # proportionality factor for 
+#     # tropical temperature increase 
+#     # relative to cloud cover decrease
+#     a = 0.2;
+
+#     αc = cloud_albedo(LWP);
+#     Δαc = αc - cloud_albedo(0.1);
+#     ΔCF = CF-1.0;
+#     ΔTt = -a * (1-α_ocean) * S_trop/4 * (αc * ΔCF + CF * Δαc);
+#     # ΔTt = -a * (1-α_ocean) * αc * S_trop/4 * ΔCF;
+#     sst_t = p.Ts400 + ΔTt;
+
+#     return sst_t
+# end
+
 """
     toa_net_rad(u, LWP)
     calculates net sw and OLR at TOA
@@ -159,7 +177,7 @@ function trop_sst(u, p, LWP)
     # change in emission temperature
     Te400 = p.Ts400 - Γm(p.Ts400)*He(p.Ts400, 400);
     #σTe3 = 4 * σ_SB * Te400^3;
-    σTe3 = 1.0; #2.57;
+    σTe3 = 3.0; #2.57;
     ΔTe = -ΔR_t / σTe3;
     
     # water vapor and lapse rate feedback on
@@ -183,40 +201,40 @@ function trop_sst(u, p, LWP)
     return sst_t
 end
 
-function test_trop_sst(ΔR_s, p)
-    ΔR_t = -p.AreaFrac/(1-p.AreaFrac)*ΔR_s;
+# function test_trop_sst(ΔR_s, p)
+#     ΔR_t = -p.AreaFrac/(1-p.AreaFrac)*ΔR_s;
         
-    # emission height parameterization
-    thermo_x = log((Rd/Rv)*(e0/psurf)*p.RHtrop) + (L0/Rv)*(1/T0);
-    A = 1292.5;
-    B = 886.8;
-    He(Ts, CO2) = A * log(CO2) + B * thermo_x + B * (-L0/Rv) / Ts;
+#     # emission height parameterization
+#     thermo_x = log((Rd/Rv)*(e0/psurf)*p.RHtrop) + (L0/Rv)*(1/T0);
+#     A = 1292.5;
+#     B = 886.8;
+#     He(Ts, CO2) = A * log(CO2) + B * thermo_x + B * (-L0/Rv) / Ts;
 
-    # change in emission temperature
-    #Te400 = p.Ts400 - Γm(p.Ts400)*He(p.Ts400, 400);
-    #σTe3 = 4 * σ_SB * Te400^3;
-    σTe3 = 2.57;
-    ΔTe = -ΔR_t / σTe3;
+#     # change in emission temperature
+#     #Te400 = p.Ts400 - Γm(p.Ts400)*He(p.Ts400, 400);
+#     #σTe3 = 4 * σ_SB * Te400^3;
+#     σTe3 = 2.57;
+#     ΔTe = -ΔR_t / σTe3;
 
-    # water vapor and lapse rate feedback on
-    ΔHe(ΔTs) = A * log(p.CO2/400) + B * (L0/Rv) / p.Ts400^2 * ΔTs;
-    ΔΓ(ΔTs) = Γm(p.Ts400+ΔTs) - Γm(p.Ts400);
-    f(ΔTs) = ΔTs - (ΔTe + ΔΓ(ΔTs)*He(p.Ts400, 400) + Γm(p.Ts400)*ΔHe(ΔTs));
-    ΔTs = find_zero(f, (-30, 30), Bisection());
-    println("both: ", ΔTs)
+#     # water vapor and lapse rate feedback on
+#     ΔHe(ΔTs) = A * log(p.CO2/400) + B * (L0/Rv) / p.Ts400^2 * ΔTs;
+#     ΔΓ(ΔTs) = Γm(p.Ts400+ΔTs) - Γm(p.Ts400);
+#     f(ΔTs) = ΔTs - (ΔTe + ΔΓ(ΔTs)*He(p.Ts400, 400) + Γm(p.Ts400)*ΔHe(ΔTs));
+#     ΔTs = find_zero(f, (-30, 30), Bisection());
+#     println("both: ", ΔTs)
 
-    # only water vapor feedback on, lapse rate off
-    f2(ΔTs) = ΔTs - (ΔTe + Γm(p.Ts400)*ΔHe(ΔTs));
-    ΔTs = find_zero(f2, (-30, 30), Bisection());
-    println("wv only: ", ΔTs)
+#     # only water vapor feedback on, lapse rate off
+#     f2(ΔTs) = ΔTs - (ΔTe + Γm(p.Ts400)*ΔHe(ΔTs));
+#     ΔTs = find_zero(f2, (-30, 30), Bisection());
+#     println("wv only: ", ΔTs)
 
-    # no water vapor feedback or lapse rate feedback
-    ΔHe_nowv = A * log(p.CO2/400.0);
-    ΔTs = ΔTe + Γm(p.Ts400)*ΔHe_nowv;
-    println("neither: ", ΔTs)
+#     # no water vapor feedback or lapse rate feedback
+#     ΔHe_nowv = A * log(p.CO2/400.0);
+#     ΔTs = ΔTe + Γm(p.Ts400)*ΔHe_nowv;
+#     println("neither: ", ΔTs)
 
-    # absolute tropical SST
-    sst_t = p.Ts400 + ΔTs;
+#     # absolute tropical SST
+#     sst_t = p.Ts400 + ΔTs;
 
-    return sst_t
-end
+#     return sst_t
+# end

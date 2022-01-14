@@ -21,7 +21,9 @@ function Δs(u, p, zb)
     # calculate change in s_vl across inversion
     hj = hjump(u, p, zb, p.fttype);
     qj = qjump(u, p, zb, p.fttype);
-    return hj - μ*L0*qj
+    sj = hj - μ*L0*qj
+    #sj = max(sj, 2e3)
+    return sj
 end
 
 """

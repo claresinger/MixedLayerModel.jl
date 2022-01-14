@@ -46,7 +46,7 @@ par.etype = enBal();
 par.fttype = twocol();
 par.rtype = varRad();
 par.stype = varSST();
-dt, tmax = 24.0, 15.0;
+dt, tmax = 12.0, 15.0;
 
 println(par.OHU, "\t", par.R_s_400);
 
@@ -78,6 +78,8 @@ zb = zeros(length(t));
 ΔR = zeros(length(t));
 LWP = zeros(length(t));
 Δsvl = zeros(length(t));
+Δh = zeros(length(t));
+Δq = zeros(length(t));
 ent = zeros(length(t));
 trop_SST = zeros(length(t));
 for (i,si) in enumerate(S)
@@ -87,6 +89,8 @@ for (i,si) in enumerate(S)
     LHF[i] = calc_LHF(sol.u[i], par);
     ΔR[i] = calc_cloudtop_RAD(sol.u[i], par, LWP[i], par.rtype);
     Δsvl[i] = Δs(sol.u[i], par, zb[i]);
+    Δh[i] = hjump(sol.u[i], par, zb[i], par.fttype);
+    Δq[i] = μ*L0*qjump(sol.u[i], par, zb[i], par.fttype);
     ent[i] = we(sol.u[i], par, zb[i], LWP[i], par.etype);
     trop_SST[i] = trop_sst(sol.u[i], par, LWP[i]);
 end 
@@ -99,7 +103,9 @@ plot!(t, sst, marker="o-", legend=false, subplot=4, ylabel="SST [K]");
 plot!(t, trop_SST, marker="o-", legend=false, subplot=4);
 plot!(t, cf * 1e2, marker="o-", legend=false, subplot=5, ylabel="CF [%]");
 plot!(t, LWP .* cf * 1e3, marker="o-", legend=false, subplot=6, ylabel="LWP [g/m2]");
-plot!(t, Δsvl * 1e-3, marker="o-", legend=false, subplot=7, ylabel="Δs (kJ/kg)");
+plot!(t, Δsvl * 1e-3, marker="o-", legend=false, subplot=7, ylabel="Δs, Δh, Δq (kJ/kg)");
+plot!(t, Δh * 1e-3, marker="o-", legend=false, subplot=7);
+plot!(t, Δq * 1e-3, marker="o-", legend=false, subplot=7);
 plot!(t, ent*1e3, marker="o-", legend=false, subplot=8, ylabel="we (mm/s)")
 plot!(t, LHF, marker="o-", legend=false, subplot=9, ylabel="LHF [W/m2]");
 plot!(t, ΔR, marker="o-", legend=false, subplot=10, ylabel="ΔR [W/m2]");

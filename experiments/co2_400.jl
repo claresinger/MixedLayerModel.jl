@@ -7,7 +7,7 @@ using Plots
 include("mlm_solve_funcs.jl")
 
 # define path to save file (which experiment are you running?)
-path = "experiments/output/twocol/";
+path = "experiments/output/CF2Temp/";
 
 # define OHU from 400 ppm simulation
 par = upCO2();
@@ -88,7 +88,7 @@ println(du);
 println("cloud base: ",zb)
 println("LWP: ", LWP);
 println("tropical sst: ", trop_sst(uf, par, LWP));
-println("ft qt: ", qjump(uf, par, zb, par.fttype) + qM);
+println("ft qt: ", qjump(uf, par, LWP, par.fttype) + qM);
 
 output = Dict("p" => par, "u0" => u0, "uf" => uf, "du/u" => du./uf, 
 "we" => we(uf,par,zb,LWP,par.etype), "zb" => zb, "zc" => zi-zb,

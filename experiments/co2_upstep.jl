@@ -9,11 +9,11 @@ include("mlm_solve_funcs.jl")
 
 # use command line argument to set co2
 # newCO2 = parse(Float64,ARGS[1]);
-newCO2 = 1400.0;
+newCO2 = 1200.0;
 println(newCO2);
 
 # load initial condition from file
-path = "experiments/output/twocol/";
+path = "experiments/output/CF2Temp/";
 restarttry1 = path*"co2_upstep_"*string(Int(newCO2-100))*".jld2";
 restarttry2 = path*"co2_upstep_"*string(Int(newCO2-200))*".jld2";
 restarttry3 = path*"co2_upstep_"*string(Int(newCO2-400))*".jld2";
@@ -33,8 +33,9 @@ println("restarting from CO2 = "*string(output["p"].CO2));
 # get toa net rad @ 400 ppm
 output = load(path*"co2_400.jld2");
 u400 = output["uf"];
-zb = output["zb"];
-R_s_400 = toa_net_rad(u400, zb);
+LWP = output["LWP"];
+# R_s_400 = toa_net_rad(u400, LWP);
+R_s_400 = -1.0;
 
 # set OHU, increase CO2, let SST evolve and check cloud changes
 par = upCO2();
@@ -46,7 +47,7 @@ par.etype = enBal();
 par.fttype = twocol();
 par.rtype = varRad();
 par.stype = varSST();
-dt, tmax = 12.0, 7.5;
+dt, tmax = 12.0, 40.0;
 
 println(par.OHU, "\t", par.R_s_400);
 
@@ -127,7 +128,7 @@ println(du);
 println("cloud base: ",zb)
 println("LWP: ", LWP);
 println("tropical sst: ", trop_sst(uf, par, LWP));
-println("ft qt: ", qjump(uf, par, zb, par.fttype) + qM);
+println("ft qt: ", qjump(uf, par, LWP, par.fttype) + qM);
 
 output = Dict("p" => par, "u0" => u0, "uf" => uf, "du/u" => du./uf, 
 "we" => we(uf,par,zb,LWP,par.etype), "zb" => zb, "zc" => zi-zb,

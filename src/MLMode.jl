@@ -98,8 +98,8 @@ end
       dSST/dt = 1/c * (SWnet - LWnet - SHF - LHF - OHU)
 """
 function mlm(du, u, p, t)
-    println(t/3600/24)
-    println(u)
+    # println(t/3600/24)
+    # println(u)
     zb = calc_LCL(u);
     LWP = incloud_LWP(u, zb);
     ent = we(u, p, zb, LWP, p.etype);

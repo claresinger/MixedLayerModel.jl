@@ -22,7 +22,6 @@ function Δs(u, p, LWP)
     hj = hjump(u, p, LWP, p.fttype);
     qj = qjump(u, p, LWP, p.fttype);
     sj = hj - μ*L0*qj
-    #sj = max(sj, 2e3)
     return sj
 end
 

@@ -9,14 +9,14 @@ include("mlm_solve_funcs.jl")
 
 # use command line argument to set co2
 # newCO2 = parse(Float64,ARGS[1]);
-newCO2 = 10.0;
+newCO2 = 200.0;
 println(newCO2);
 
 # load initial condition from file
-path = "experiments/output/CF2Temp/";
-restarttry1 = path*"co2_downstep_"*string(Int(newCO2+100))*".jld2";
-restarttry2 = path*"co2_downstep_"*string(Int(newCO2+200))*".jld2";
-restarttry3 = path*"co2_downstep_"*string(Int(newCO2+400))*".jld2";
+path = "experiments/output/Tt02_m6/";
+restarttry1 = path*"co2_downstep_"*string(Int(newCO2+50))*".jld2";
+restarttry2 = path*"co2_downstep_"*string(Int(newCO2+100))*".jld2";
+restarttry3 = path*"co2_downstep_"*string(Int(newCO2+200))*".jld2";
 if isfile(restarttry1)
     output = load(restarttry1);
 elseif isfile(restarttry2)
@@ -25,24 +25,24 @@ elseif isfile(restarttry3)
     output = load(restarttry3);
 else
     # output = load(path*"co2_upstep_1600.jld2");
-    output = load(path*"co2_upstep_1200.jld2");
+    output = load(path*"co2_upstep_1100.jld2");
 end
 u0 = output["uf"];
 OHU = output["OHU"];
 println("restarting from CO2 = "*string(output["p"].CO2));
 
 # get toa net rad @ 400 ppm
-output = load(path*"co2_400.jld2");
-u400 = output["uf"];
-LWP = output["LWP"];
+# output = load(path*"co2_400.jld2");
+# u400 = output["uf"];
+# zb = output["zb"];
+# LWP = incloud_LWP(u400, zb);
 # R_s_400 = toa_net_rad(u400, LWP);
-R_s_400 = -1.0;
 
 # set OHU, increase CO2, let SST evolve and check cloud changes
 par = upCO2();
 par.Hw = 0.1;
 par.OHU = OHU;
-par.R_s_400 = R_s_400;
+# par.R_s_400 = R_s_400;
 par.CO2 = newCO2;
 par.etype = enBal();
 par.fttype = twocol();
@@ -50,7 +50,7 @@ par.rtype = varRad();
 par.stype = varSST();
 dt, tmax = 12.0, 40.0;
 
-println(par.OHU, "\t", par.R_s_400);
+# println(par.OHU, "\t", par.R_s_400);
 
 # u0, sol = run_mlm_ss_from_init(u0, par, dt=3600.0*dt, tspan=3600.0*24.0*tmax);
 # code = sol.retcode;

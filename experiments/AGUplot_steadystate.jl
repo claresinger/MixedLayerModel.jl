@@ -21,14 +21,14 @@ S = (lhf./dR).*((zi.-zb)./zi);
 ms = 10
 c = "crimson"
 p1 = scatter(co2, dR, color=c, marker=:x, markersize=ms, label="", ylabel="ΔR [W/m\$^2\$]",
-                xticks=([400, 800, 1200, 1600]), xlim=[100,1700], ylim=[0,90])
+                xticks=([400, 800, 1200, 1600]), xlim=[100,1700], ylim=[0,100])
 p2 = scatter(co2, S, color=c, marker=:x, markersize=ms, label="", ylabel="Stability, \$S\$",
                 yscale=:log10, yticks=([0.2,0.5,2,5,20], ["0.2","0.5","2","5","20"]),
                 ylim=[0.2,40], xticks=([400, 800, 1200, 1600]), xlim=[100,1700])
 p3 = scatter(co2, cf*100, color=c, marker=:x, markersize=ms, label="", xlabel="CO\$_2\$ [ppmv]", ylabel="CF [%]",
                 xticks=([400, 800, 1200, 1600]), xlim=[100,1700], ylim=[0,110])
 p4 = scatter(co2, sst, color=c, marker=:x, markersize=ms, label="", xlabel="CO\$_2\$ [ppmv]", ylabel="SST [K]",
-                xticks=([400, 800, 1200, 1600]), xlim=[100,1700], ylim=[288, 316])
+                xticks=([400, 800, 1200, 1600]), xlim=[100,1700], ylim=[285, 312])
 plot!(p1, co2, dR, linewidth=2, linestyle=:dot, color=c, label="")
 plot!(p2, co2, S, linewidth=2, linestyle=:dot, color=c, label="")
 plot!(p3, co2, cf*100, linewidth=2, linestyle=:dot, color=c, label="")
@@ -56,8 +56,14 @@ plot!(p4, co2, sst, linewidth=2, linestyle=:dot, color=c, label="")
 
 ###################
 
-exp_path = "modCF/"
-co2 = [400, 600, 800, 1000, 1200, 1400, 1500, 1600, 1700];
+# exp_path = "Tt_01/"
+# co2 = [200, 400, 600, 800, 1000, 1100, 1200];
+# exp_path = "Tt02_m5/"
+# co2 = [400, 600, 800, 1000, 1100, 1200, 1300];
+# exp_path = "Tt02_m8/"
+# co2 = [400, 600, 700, 800, 900, 1000];
+exp_path = "Tt02_m6/"
+co2 = [400, 600, 800, 900, 1000, 1100];
 N = length(co2);
 
 zi, zb, ent = zeros(N), zeros(N), zeros(N);
@@ -65,7 +71,7 @@ cf, lwp, sst, lhf = zeros(N), zeros(N), zeros(N), zeros(N);
 dR, Δs_vli = zeros(N), zeros(N);
 
 for (i, co2i) in enumerate(co2)
-    if i == 1
+    if co2i == 400
         file = "experiments/output/"*exp_path*"co2_400.jld2"
     else
         file = "experiments/output/"*exp_path*"co2_upstep_"*string(co2i)*".jld2"
@@ -77,8 +83,8 @@ for (i, co2i) in enumerate(co2)
     zbi = dat["zb"];
     zi[i], zb[i], sst[i], cf[i] = zii, zbi, ssti, cfi;
     lhf[i], ent[i], dR[i] = dat["LHF"], dat["we"]*1e3, dat["ΔR"];
-    Δs_vli[i] = Δs(uf, par, par.fttype)*1e-3;
     lwp[i] = incloud_LWP(uf, zb[i]) * 1e3;
+    Δs_vli[i] = Δs(uf, par, lwp[i])*1e-3;
 end
 S = (lhf./dR).*((zi.-zb)./zi);
 
@@ -93,7 +99,9 @@ plot!(p2, co2, S, color=c, linewidth=2, label="")
 plot!(p3, co2, cf*100, color=c, linewidth=2, label="")
 plot!(p4, co2, sst, color=c, linewidth=2, label="")
 
-co2 = [1600, 1500, 1400, 1200, 1000, 800, 600, 400, 300, 200];
+# co2 = [1200, 1000, 800, 700, 600, 400];
+# co2 = [900, 800, 600, 400, 200, 100];
+co2 = [1000, 800, 600, 400, 300, 200];
 N = length(co2);
 
 zi, zb, ent = zeros(N), zeros(N), zeros(N);
@@ -109,8 +117,8 @@ for (i, co2i) in enumerate(co2)
     zbi = dat["zb"];
     zi[i], zb[i], sst[i], cf[i] = zii, zbi, ssti, cfi;
     lhf[i], ent[i], dR[i] = dat["LHF"], dat["we"]*1e3, dat["ΔR"];
-    Δs_vli[i] = Δs(uf, par, par.fttype)*1e-3;
     lwp[i] = incloud_LWP(uf, zb[i]) * 1e3;
+    Δs_vli[i] = Δs(uf, par, lwp[i])*1e-3;
 end
 S = (lhf./dR).*((zi.-zb)./zi);
 

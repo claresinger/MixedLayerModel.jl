@@ -8,15 +8,15 @@ using Plots
 include("mlm_solve_funcs.jl")
 
 # use command line argument to set co2
-newCO2 = parse(Float64,ARGS[1]);
-# newCO2 = 200.0;
+# newCO2 = parse(Float64,ARGS[1]);
+newCO2 = 200.0;
 println(newCO2);
 
 # load initial condition from file
-path = "experiments/output/modCF/";
-restarttry1 = path*"co2_downstep_"*string(Int(newCO2+100))*".jld2";
-restarttry2 = path*"co2_downstep_"*string(Int(newCO2+200))*".jld2";
-restarttry3 = path*"co2_downstep_"*string(Int(newCO2+400))*".jld2";
+path = "experiments/output/Tt02_m6/";
+restarttry1 = path*"co2_downstep_"*string(Int(newCO2+50))*".jld2";
+restarttry2 = path*"co2_downstep_"*string(Int(newCO2+100))*".jld2";
+restarttry3 = path*"co2_downstep_"*string(Int(newCO2+200))*".jld2";
 if isfile(restarttry1)
     output = load(restarttry1);
 elseif isfile(restarttry2)
@@ -24,31 +24,33 @@ elseif isfile(restarttry2)
 elseif isfile(restarttry3)
     output = load(restarttry3);
 else
-    output = load(path*"co2_upstep_1600.jld2");
+    # output = load(path*"co2_upstep_1600.jld2");
+    output = load(path*"co2_upstep_1100.jld2");
 end
 u0 = output["uf"];
 OHU = output["OHU"];
 println("restarting from CO2 = "*string(output["p"].CO2));
 
 # get toa net rad @ 400 ppm
-output = load(path*"co2_400.jld2");
-u400 = output["uf"];
-zb = output["zb"];
-R_s_400 = toa_net_rad(u400, zb);
+# output = load(path*"co2_400.jld2");
+# u400 = output["uf"];
+# zb = output["zb"];
+# LWP = incloud_LWP(u400, zb);
+# R_s_400 = toa_net_rad(u400, LWP);
 
 # set OHU, increase CO2, let SST evolve and check cloud changes
 par = upCO2();
 par.Hw = 0.1;
 par.OHU = OHU;
-par.R_s_400 = R_s_400;
+# par.R_s_400 = R_s_400;
 par.CO2 = newCO2;
 par.etype = enBal();
-par.fttype = co2dep();
+par.fttype = twocol();
 par.rtype = varRad();
 par.stype = varSST();
-dt, tmax = 24.0, 60.0;
+dt, tmax = 12.0, 40.0;
 
-println(par.OHU, "\t", par.R_s_400);
+# println(par.OHU, "\t", par.R_s_400);
 
 # u0, sol = run_mlm_ss_from_init(u0, par, dt=3600.0*dt, tspan=3600.0*24.0*tmax);
 # code = sol.retcode;
@@ -86,7 +88,7 @@ for (i,si) in enumerate(S)
     S[i] = calc_S(sol.u[i], par, zb[i], LWP[i]);
     LHF[i] = calc_LHF(sol.u[i], par);
     ΔR[i] = calc_cloudtop_RAD(sol.u[i], par, LWP[i], par.rtype);
-    Δsvl[i] = Δs(sol.u[i], par, zb[i]);
+    Δsvl[i] = Δs(sol.u[i], par, LWP[i]);
     ent[i] = we(sol.u[i], par, zb[i], LWP[i], par.etype);
     trop_SST[i] = trop_sst(sol.u[i], par, LWP[i]);
 end 
@@ -96,7 +98,7 @@ plot!(t, zb, marker="o-", legend=false, subplot=1);
 plot!(t, hM * 1e-3, marker="o-", legend=false, subplot=2, ylabel="hM [kJ/kg]"); 
 plot!(t, qtM * 1e3, marker="o-", legend=false, subplot=3, ylabel="qtM [g/kg]");
 plot!(t, sst, marker="o-", legend=false, subplot=4, ylabel="SST [K]");
-#plot!(t, trop_SST, marker="o-", legend=false, subplot=4);
+plot!(t, trop_SST, marker="o-", legend=false, subplot=4);
 plot!(t, cf * 1e2, marker="o-", legend=false, subplot=5, ylabel="CF [%]");
 plot!(t, LWP .* cf * 1e3, marker="o-", legend=false, subplot=6, ylabel="LWP [g/m2]");
 plot!(t, Δsvl * 1e-3, marker="o-", legend=false, subplot=7, ylabel="Δs (kJ/kg)");
@@ -133,8 +135,8 @@ println(uf);
 println(du);
 println("cloud base: ",zb)
 println("LWP: ", LWP);
-println("tropical sst: ", trop_sst(uf, par, zb));
-println("ft qt: ", qjump(uf, par, zb, par.fttype) + qM);
+println("tropical sst: ", trop_sst(uf, par, LWP));
+println("ft qt: ", qjump(uf, par, LWP, par.fttype) + qM);
 
 output = Dict("p" => par, "u0" => u0, "uf" => uf, "du/u" => du./uf, 
 "we" => we(uf,par,zb,LWP,par.etype), "zb" => zb, "zc" => zi-zb,

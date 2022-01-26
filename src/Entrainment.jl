@@ -11,17 +11,18 @@ struct enBal <: ent_type end
 struct bflux <: ent_type end
 
 """
-    Δs(u, p, zb)
+    Δs(u, p, LWP)
 
     calculate the jump in dry virtual liquid static energy (s_vl)
     across the inversion
     Δs = Δh - μL Δq
 """
-function Δs(u, p, zb)
+function Δs(u, p, LWP)
     # calculate change in s_vl across inversion
-    hj = hjump(u, p, zb, p.fttype);
-    qj = qjump(u, p, zb, p.fttype);
-    return hj - μ*L0*qj
+    hj = hjump(u, p, LWP, p.fttype);
+    qj = qjump(u, p, LWP, p.fttype);
+    sj = hj - μ*L0*qj
+    return sj
 end
 
 """
@@ -43,7 +44,7 @@ end
 function we(u, p, zb, LWP, etype::enBal)
     zi, hM, qM, SST, CF = u;
     ΔR = calc_cloudtop_RAD(u, p, LWP, p.rtype);
-    w = (ΔR / ρref(SST)) / Δs(u, p, zb);
+    w = (ΔR / ρref(SST)) / Δs(u, p, LWP);
     return w
 end
 
@@ -71,7 +72,7 @@ function we(u, p, zb, LWP, etype::bflux)
     B1 = β*hj- ϵ*L0*qj;
     I1 = A1 * (-(zb^2)/(2*zi)) + B1 * ((-zi^2 + zb^2)/(2*zi));
     
-    α = (2.5 * p.A) / (zi * Δs(u, p, zb));
+    α = (2.5 * p.A) / (zi * Δs(u, p, LWP));
     w = α*I0 / (1 - α*I1)
     return w
 end

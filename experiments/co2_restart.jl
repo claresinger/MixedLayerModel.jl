@@ -82,7 +82,7 @@ zi,hM,qM,SST = uf;
 zb = calc_LCL(uf);
 println(uf);
 println(du);
-println("tropical SST:  ", trop_sst(uf, par));
+println("tropical SST:  ", trop_sst(uf, par, LWP));
 
 output = Dict("p" => par, "u0" => u0, "uf" => uf, "du/u" => du./uf, 
 "we" => we(uf,par,par.etype), "zb" => zb, "zc" => zi-zb,

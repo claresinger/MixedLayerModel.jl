@@ -34,8 +34,8 @@ function cloud_fraction(u, p, zb, LWP)
 end
 
 function cloud_fraction_S(S)
-    m = 10; # tunable parameter for the slope of the CF nonlinearity
-    S_crit = 0.7; # tunable parameter for the halfway point of CF decrease
+    m = 6; # tunable parameter for the slope of the CF nonlinearity
+    S_crit = 0.55 + log(7)/m; # 50% value such that the 90% value is at 0.55
     CF = 1 - 0.8 / (1 + exp(-m*(S-S_crit)));
     return CF
 end

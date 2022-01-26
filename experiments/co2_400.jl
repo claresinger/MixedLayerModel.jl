@@ -7,12 +7,12 @@ using Plots
 include("mlm_solve_funcs.jl")
 
 # define path to save file (which experiment are you running?)
-path = "experiments/output/modCF/";
+path = "experiments/output/Tt02_m6/";
 
 # define OHU from 400 ppm simulation
 par = upCO2();
 par.etype = enBal();
-par.fttype = co2dep();
+par.fttype = twocol();
 par.rtype = varRad();
 par.stype = fixSST();
 dt = 2.0;
@@ -55,7 +55,7 @@ for (i,si) in enumerate(S)
     S[i] = calc_S(sol.u[i], par, zb[i], LWP[i]);
     LHF[i] = calc_LHF(sol.u[i], par);
     ΔR[i] = calc_cloudtop_RAD(sol.u[i], par, LWP[i], par.rtype);
-    Δsvl[i] = Δs(sol.u[i], par, zb[i]);
+    Δsvl[i] = Δs(sol.u[i], par, LWP[i]);
     ent[i] = we(sol.u[i], par, zb[i], LWP[i], par.etype);
 end 
 plot(size=(1200,800), layout=(6,2), dpi=200, left_margin = 5Plots.mm);
@@ -87,8 +87,8 @@ println(uf);
 println(du);
 println("cloud base: ",zb)
 println("LWP: ", LWP);
-println("tropical sst: ", trop_sst(uf, par, zb));
-println("ft qt: ", qjump(uf, par, zb, par.fttype) + qM);
+println("tropical sst: ", trop_sst(uf, par, LWP));
+println("ft qt: ", qjump(uf, par, LWP, par.fttype) + qM);
 
 output = Dict("p" => par, "u0" => u0, "uf" => uf, "du/u" => du./uf, 
 "we" => we(uf,par,zb,LWP,par.etype), "zb" => zb, "zc" => zi-zb,

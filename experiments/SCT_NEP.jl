@@ -19,24 +19,27 @@ u0 = output["uf"];
 # set OHU, increase CO2, let SST evolve and check cloud changes
 par = climatology();
 par.etype = enBal();
+par.stype = fixSST();
 
 # climatology at 4 sites in NEP
-SSTs = [290.2, 293.5, 297.2, 299.5];
-Ds = [6e-6, 6e-6, 3e-6, 3e-6]; # ??????????????
-Vs = [2.7, 5.2, 8.0, 9.0];
-RHfts = [0.25, 0.21, 0.24, 0.35];
-sft0s = [308.6, 309.6, 311.4, 312.9];
+SSTs = [290.2, 293.5, 297.2, 299.5]; # (K)
+Ds = [6e-6, 3e-6, 2e-6, 1e-6]; # (1/s)
+#Vs = [2.7, 5.2, 8.0, 9.0]; # (m/s)
+#Vs = [8, 8, 8, 8];
+Vs = [6, 6, 8, 8];
+RHfts = [0.25, 0.21, 0.24, 0.35]; # (-)
+sft0s = [308.6, 309.6, 311.4, 312.9]; # (K)
 
 par.SST0 = SSTs[i]; # (K)
 par.D = Ds[i]; # (1/s)
-par.V = Vs[i] # m/s 
+par.V = Vs[i] # (m/s) 
 
 par.RHft = RHfts[i]; # (-) 
 par.Gamma_q = 0.0; # (kg/kg/m)
 par.sft0 = sft0s[i]; # (K) 
 par.Gamma_s = 0.0; # (K/m)
 
-dt, tmax = 4.0, 30;
+dt, tmax = 12, 40;
 
 # plot time series
 ENV["GKSwstype"]="nul"
@@ -55,10 +58,10 @@ zb = zeros(length(t));
 LWP = zeros(length(t));
 for (i,si) in enumerate(S)
     zb[i] = calc_LCL(sol.u[i]);
-    S[i] = calc_S(sol.u[i], par);
+    LWP[i] = incloud_LWP(sol.u[i], zb[i]);
+    S[i] = calc_S(sol.u[i], par, zb[i], LWP[i]);
     LHF[i] = calc_LHF(sol.u[i], par);
-    ΔR[i] = calc_cloudtop_RAD(sol.u[i], par, par.rtype);
-    LWP[i] = incloud_LWP(sol.u[i]);
+    ΔR[i] = calc_cloudtop_RAD(sol.u[i], par, LWP[i], par.rtype);
 end 
 plot(size=(1200,800), layout=(5,2), dpi=200, left_margin = 5Plots.mm);
 plot!(t, zi, marker="o-", legend=false, subplot=1, ylabel="zi, zb [m]");
@@ -81,12 +84,14 @@ du = zeros(5);
 mlm(du, uf, par, 0.0);
 zi,hM,qM,SST = uf;
 zb = calc_LCL(uf);
+LWP = incloud_LWP(uf, zb);
+RH = min(qM / q_sat(0.0, temp(0.0, hM, qM)), 1.0);
 println(uf);
 println(du);
 
 output = Dict("p" => par, "u0" => u0, "uf" => uf, "du/u" => du./uf, 
-"we" => we(uf,par,par.etype), "zb" => zb, "zc" => zi-zb,
-"RHsurf" => RH(0.0, hM, qM), "LHF" => calc_LHF(uf,par), "SHF" => calc_SHF(uf,par),
-"ΔR" => calc_cloudtop_RAD(uf,par,par.rtype), "OHU" => calc_OHU(uf,par,par.stype))
+"we" => we(uf,par,zb,LWP,par.etype), "zb" => zb, "zc" => zi-zb,
+"RHsurf" => RH, "LHF" => calc_LHF(uf,par), "SHF" => calc_SHF(uf,par),
+"ΔR" => calc_cloudtop_RAD(uf,par,LWP,par.rtype), "OHU" => calc_OHU(uf,par,LWP,par.stype))
 
 save(path*"sol_"*string(i)*".jld2", output)

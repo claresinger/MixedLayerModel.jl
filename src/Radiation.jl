@@ -18,8 +18,16 @@ struct fixRad <: rad_type end
     gets optically thicker and the effective level of emissions
     gets lower / closer to the cloud top 
 """
-function Tatmos(p)
-    return 264 + 10.25*log(p.CO2/400.0);
+function Tatmos(u, p, LWP)
+    # 256.3141643571133 4.918012015836561 23.281984599677102
+    zi, hM, qM, SST, CF = u;
+    qft = qM + qjump(u, p, LWP, p.fttype);
+    Ta = 256.3 + 4.92*log(p.CO2/400) + 5*log(qft*1e3);
+    
+    # 263.5496704373385 10.248820450874831
+    # Ta_other = 263.5 + 10.25*log(p.CO2/400.0);
+    
+    return Ta
 end
 
 """
@@ -64,7 +72,7 @@ function calc_cloudtop_RAD(u, p, LWP, rtype::varRad)
     zi, hM, qM, SST, CF = u;
     Tct = temp(zi,hM,qM);
     ϵc_up = cloud_emissivity(LWP);
-    Teff = Tatmos(p);
+    Teff = Tatmos(u, p, LWP);
     ΔR = CF * σ_SB * ϵc_up * (Tct^4 - Teff^4);
     return ΔR
 end

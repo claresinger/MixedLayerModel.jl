@@ -1,3 +1,9 @@
+push!(LOAD_PATH, joinpath(@__DIR__, ".."))
+
+using FileIO
+using Plots
+using MixedLayerModel
+
 # # run transition from coast to West
 # ARGS = ["1"]; include("SCT_NEP.jl");
 # ARGS = ["2"]; include("SCT_NEP.jl");
@@ -25,24 +31,24 @@ for (i, sitei) in enumerate(site)
     lwp[i] = incloud_LWP(uf, zb[i]) * 1e3;
     Δs_vli[i] = Δs(uf, par, lwp[i])*1e-3;
 end
-S = (lhf./dR).*((zi.-zb)./zi);
+I = (lhf./dR).*((zi.-zb)./zi);
 
 ms = 8
 c = "crimson"
-p1 = scatter(site, dR, color=c, marker=:circle, markersize=ms, markerstrokewidth=0, 
-                label="", ylabel="ΔR [W/m\$^2\$]")
-p2 = scatter(site, S, color=c, marker=:circle, markersize=ms, markerstrokewidth=0, 
-                label="", ylabel="Stability, \$S\$")
-p3 = scatter(site, cf*100, color=c, marker=:circle, markersize=ms, markerstrokewidth=0, 
-                label="", ylabel="CF [%]")
-p4 = scatter(site, sst, color=c, marker=:circle, markersize=ms, markerstrokewidth=0, 
+p1 = scatter(site, sst, color=c, marker=:circle, markersize=ms, markerstrokewidth=0, 
                 label="", ylabel="SST [K]")
-plot!(p1, site, dR, color=c, linewidth=2, label="")
-plot!(p2, site, S, color=c, linewidth=2, label="")
-plot!(p3, site, cf*100, color=c, linewidth=2, label="")
-plot!(p4, site, sst, color=c, linewidth=2, label="")
+p2 = scatter(site, lhf, color=c, marker=:circle, markersize=ms, markerstrokewidth=0, 
+                label="", ylabel="LHF [W/m\$^2\$]")
+p3 = scatter(site, I, color=c, marker=:circle, markersize=ms, markerstrokewidth=0, 
+                label="", ylabel="I [-]")
+p4 = scatter(site, cf*100, color=c, marker=:circle, markersize=ms, markerstrokewidth=0, 
+                label="", ylabel="CF [%]")
+p5 = scatter(site, zi, color=c, marker=:circle, markersize=ms, markerstrokewidth=0, 
+                label="", ylabel="Inversion height [m]")
+p6 = scatter(site, zi-zb, color=c, marker=:circle, markersize=ms, markerstrokewidth=0, 
+                label="", ylabel="Cloud depth [m]")
 
-p = plot(p1,p2,p3,p4, layout=(2,2), 
+p = plot(p1,p2,p3,p4,p5,p6, layout=(2,3), 
     link=:x, size=(1000,650), dpi=300,
     legend=:topright, legendfontsize=12, legendfont=font(12),
     left_margin=10Plots.mm, bottom_margin=5Plots.mm, top_margin=5Plots.mm);

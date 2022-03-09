@@ -23,6 +23,7 @@ export upCO2, climatology
     # AreaFrac = 0.065;
     RHtrop = 0.8;
     Ts400 = 300.0; # (K)
+    RHft = 0.2;
     
     # default types
     etype::ent_type = enBal();

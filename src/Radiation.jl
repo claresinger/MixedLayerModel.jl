@@ -19,14 +19,15 @@ struct fixRad <: rad_type end
     gets lower / closer to the cloud top 
 """
 function Tatmos(u, p, LWP)
-    # 256.3141643571133 4.918012015836561 23.281984599677102
     zi, hM, qM, SST, CF = u;
-    qft = qM + qjump(u, p, LWP, p.fttype);
-    Ta = 256.3 + 4.92*log(p.CO2/400) + 5*log(qft*1e3);
+    SST_trop = trop_sst(u, p, LWP);
     
-    # 263.5496704373385 10.248820450874831
-    # Ta_other = 263.5 + 10.25*log(p.CO2/400.0);
-    
+    zft = 3000; # 3km
+    Tft = temp_ft(SST_trop, zft, p);
+    qft = p.RHft * q_sat(zft, Tft);
+
+    Ta = 375 + 2.8*log(p.CO2) + 21.1*log(qft); # co2 and qft
+    # Ta = 167 + 16.7*log(p.CO2); # just co2
     return Ta
 end
 
@@ -40,10 +41,6 @@ function calc_surf_RAD(u, p, LWP)
     αc = cloud_albedo(LWP);
     WVtrans = 1/exp(10*qM);
     SW_net = WVtrans * (1-CF*αc) * (1-α_ocean) * S_subtr;
-
-    # longwave calculation
-    # fit from LES experiments, constant value
-    # LW_net = -30.0;
 
     # LW_net linear with SST with coefficient dependent on log(CO2)
     # greenhouse effect
@@ -74,6 +71,7 @@ function calc_cloudtop_RAD(u, p, LWP, rtype::varRad)
     ϵc_up = cloud_emissivity(LWP);
     Teff = Tatmos(u, p, LWP);
     ΔR = CF * σ_SB * ϵc_up * (Tct^4 - Teff^4);
+    ΔR += 1;
     return ΔR
 end
 
@@ -98,7 +96,7 @@ end
 """
 function cloud_emissivity(LWP)
     a0 = 0.15 * 1e3; # m^2/kg
-    ϵc = 1 - exp(-a0 * LWP); 
+    ϵc = 1 - exp(-a0 * LWP);
     return ϵc
 end
 
@@ -114,10 +112,7 @@ function trop_sst(u, p, LWP)
     Δαc = cloud_albedo(LWP) - αc0;
     ΔCF = CF - CF0;
     ΔTt = -a * (1-α_ocean) * S_trop/4 * (αc0 * ΔCF + CF0 * Δαc);
-
-    sst_t = p.Ts400 + ΔTt;
-
-    return sst_t
+    return p.Ts400 + ΔTt
 end
 
 # """

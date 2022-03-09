@@ -48,6 +48,19 @@ p5 = scatter(site, zi, color=c, marker=:circle, markersize=ms, markerstrokewidth
 p6 = scatter(site, zi-zb, color=c, marker=:circle, markersize=ms, markerstrokewidth=0, 
                 label="", ylabel="Cloud depth [m]")
 
+
+### observations
+sst_obs = [290.2, 293.5, 297.2, 299.5];
+cf_obs = [21.60, 62.26, 31.77, 13.18];
+
+c = "dodgerblue"
+scatter!(p1, site, sst_obs, color=c, marker=:x, markersize=ms, markerstrokewidth=0, label="")
+#scatter!(p2, site, lhf_obs, color=c, marker=:x, markersize=ms, markerstrokewidth=0, label="")
+#scatter!(p3, site, I_obs, color=c, marker=:x, markersize=ms, markerstrokewidth=0, label="")
+scatter!(p4, site, cf_obs, color=c, marker=:x, markersize=ms, markerstrokewidth=0, label="")
+#scatter!(p5, site, zi_obs, color=c, marker=:x, markersize=ms, markerstrokewidth=0, label="")
+#scatter!(p6, site, zi_obs - zb_obs, color=c, marker=:x, markersize=ms, markerstrokewidth=0, label="")
+
 p = plot(p1,p2,p3,p4,p5,p6, layout=(2,3), 
     link=:x, size=(1000,650), dpi=300,
     legend=:topright, legendfontsize=12, legendfont=font(12),

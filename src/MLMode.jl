@@ -20,30 +20,30 @@ function dzidt(u, p, ent)
 end
 
 """
-    dhMdt(u, p, ent, zb, LWP) 
+    dhMdt(u, p, ent, LWP) 
 
     evolution of mixed-layer enthalpy, hM
     negative of the vertical energy flux
 """
-function dhMdt(u, p, ent, zb, LWP)
+function dhMdt(u, p, ent, LWP)
     zi, hM, qM, SST, CF = u;
     ΔR = calc_cloudtop_RAD(u, p, LWP, p.rtype);
     H0 = H_0(u, p, p.ftype);
-    Hzi = H_zi(u, p, ent, zb);
+    Hzi = H_zi(u, p, ent, LWP);
     dhMdt = -(1/zi) * (Hzi - H0 + ΔR/ρref(SST));
     return dhMdt
 end
 
 """
-    dqMdt(u, p, ent)
+    dqMdt(u, p, ent, LWP)
 
     evolution of mixed-layer total water specific humidity, qM
     negative of the vertical water flux
 """
-function dqMdt(u, p, ent, zb)
+function dqMdt(u, p, ent, LWP)
     zi, hM, qM, SST, CF = u;
     Q0 = Q_0(u, p, p.ftype);
-    Qzi = Q_zi(u, p, ent, zb);
+    Qzi = Q_zi(u, p, ent, LWP);
     dqMdt = -(1/zi) * (Qzi - Q0);
     return dqMdt
 end
@@ -68,15 +68,12 @@ function dSSTdt(u, p, LWP, stype::varSST)
     SHF = calc_SHF(u, p);
     LHF = calc_LHF(u, p);   
     c = ρw * Cw * p.Hw;
-    dx = (1/c) * (RAD - SHF - LHF - p.OHU);
-
-    # τ_SST = 3600.0*24.0*3.0; # 3 days; SST damping timescale [seconds]
-    # dy = (p.SST0 - SST) / τ_SST;
-    dy = 0.0;
-    return (dx+dy)
+    return (1/c) * (RAD - SHF - LHF - p.OHU)
 end
 
 """
+    dCFdt(u, p, zb, LWP)
+
     calculation cloud fraction 
     determined as a logistic function of S, the stability parameter
 """
@@ -98,14 +95,15 @@ end
       dSST/dt = 1/c * (SWnet - LWnet - SHF - LHF - OHU)
 """
 function mlm(du, u, p, t)
-    # println(t/3600/24)
-    # println(u)
+    println(t/3600/24)
+    println(u)
     zb = calc_LCL(u);
     LWP = incloud_LWP(u, zb);
     ent = we(u, p, zb, LWP, p.etype);
     du[1] = dzidt(u, p, ent)
-    du[2] = dhMdt(u, p, ent, zb, LWP)
-    du[3] = dqMdt(u, p, ent, zb)
+    du[2] = dhMdt(u, p, ent, LWP)
+    du[3] = dqMdt(u, p, ent, LWP)
     du[4] = dSSTdt(u, p, LWP, p.stype)
     du[5] = dCFdt(u, p, zb, LWP)
+    println(du)
 end

@@ -19,7 +19,7 @@ function calc_S(u, p, zb, LWP)
 end
 
 """
-    cloud_fraction(u, p)
+    cloud_fraction(u, p, zb, LWP)
 
     calculates the cloud fraction 
     inspired by Chung et al 2012

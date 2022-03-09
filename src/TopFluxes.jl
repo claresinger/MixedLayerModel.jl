@@ -17,7 +17,7 @@ struct twocol <: ft_type end
 """
 function qjump(u, p, LWP, fttype::sstdep)
     zi, hM, qM, SST, CF = u;
-    qj = p.qj_m * (SST-290) + p.qj_b; # kg/kg
+    qj = p.qj_m * (SST-p.SST0) + p.qj_b; # kg/kg
     return qj
 end
 
@@ -28,7 +28,7 @@ end
 """
 function hjump(u, p, LWP, fttype::sstdep)
     zi, hM, qM, SST, CF = u;
-    hj = p.hj_m * (SST-290) + p.hj_b; # m^2/s^2 = J/kg
+    hj = p.hj_m * (SST-p.SST0) + p.hj_b; # m^2/s^2 = J/kg
     return hj
 end
 
@@ -83,26 +83,16 @@ function hjump(u, p, LWP, fttype::fixedFT)
 end
 
 """
-    temp_ft(u, p, LWP)
-
-    free-tropospheric temperature given tropical sst
-"""
-function temp_ft(u, p, LWP, zft)
-    SST_trop = trop_sst(u, p, LWP);
-    Tft = SST_trop - zft*Γm(SST_trop);
-    return Tft
-end
-
-"""
     qjump(u, p, LWP, p.fttype::twocol)
 
     specific humidity above cloud given fixed RH=0.2
-    and saturation calculated at Tft and fixed 1500 m 
+    and saturation calculated at Tft
 """
 function qjump(u, p, LWP, fttype::twocol)
     zi, hM, qM, SST, CF = u;
-    zft = 1500.0;
-    qft = 0.2 * q_sat(zft, temp_ft(u, p, LWP, zft));
+    SST_trop = trop_sst(u, p, LWP);
+    Tft = temp_ft(SST_trop, zi, p);
+    qft = p.RHft * q_sat(zi, Tft);
     qj = qft - qM;
     return qj
 end
@@ -112,10 +102,10 @@ end
 """
 function hjump(u, p, LWP, fttype::twocol)
     zi, hM, qM, SST, CF = u;
+    SST_trop = trop_sst(u, p, LWP);
     qft = qjump(u, p, LWP, p.fttype) + qM;
-    zft = zi;
-    Tft = temp_ft(u, p, LWP, zft);
-    hft = Cp*Tft + g*zft + L0*qft;
+    Tft = temp_ft(SST_trop, zi, p);
+    hft = Cp*Tft + g*zi + L0*qft;
     hj = hft - hM;
     return hj
 end

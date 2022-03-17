@@ -8,12 +8,12 @@ using Plots
 include("mlm_solve_funcs.jl")
 
 # use command line argument to set co2
-# newCO2 = parse(Float64,ARGS[1]);
-newCO2 = 200.0;
+newCO2 = parse(Float64,ARGS[1]);
+# newCO2 = 200.0;
 println(newCO2);
 
 # load initial condition from file
-path = "experiments/output/Tt02_m6/";
+path = "experiments/output/Teff_co2_h2o/";
 restarttry1 = path*"co2_downstep_"*string(Int(newCO2+50))*".jld2";
 restarttry2 = path*"co2_downstep_"*string(Int(newCO2+100))*".jld2";
 restarttry3 = path*"co2_downstep_"*string(Int(newCO2+200))*".jld2";
@@ -24,8 +24,7 @@ elseif isfile(restarttry2)
 elseif isfile(restarttry3)
     output = load(restarttry3);
 else
-    # output = load(path*"co2_upstep_1600.jld2");
-    output = load(path*"co2_upstep_1100.jld2");
+    println("no restart file")
 end
 u0 = output["uf"];
 OHU = output["OHU"];

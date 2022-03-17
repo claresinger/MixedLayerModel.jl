@@ -9,11 +9,11 @@ include("mlm_solve_funcs.jl")
 
 # use command line argument to set co2
 # newCO2 = parse(Float64,ARGS[1]);
-newCO2 = 1100.0;
+newCO2 = 600.0;
 println(newCO2);
 
 # load initial condition from file
-path = "experiments/output/Tt02_m6/";
+path = "experiments/output/twocol_zi_tGH1_tEX/";
 restarttry1 = path*"co2_upstep_"*string(Int(newCO2-100))*".jld2";
 restarttry2 = path*"co2_upstep_"*string(Int(newCO2-200))*".jld2";
 restarttry3 = path*"co2_upstep_"*string(Int(newCO2-400))*".jld2";
@@ -41,7 +41,6 @@ println("restarting from CO2 = "*string(output["p"].CO2));
 par = upCO2();
 par.Hw = 0.1;
 par.OHU = OHU;
-# par.R_s_400 = R_s_400;
 par.CO2 = newCO2;
 par.etype = enBal();
 par.fttype = twocol();

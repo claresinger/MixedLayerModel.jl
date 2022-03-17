@@ -95,8 +95,6 @@ end
       dSST/dt = 1/c * (SWnet - LWnet - SHF - LHF - OHU)
 """
 function mlm(du, u, p, t)
-    println(t/3600/24)
-    println(u)
     zb = calc_LCL(u);
     LWP = incloud_LWP(u, zb);
     ent = we(u, p, zb, LWP, p.etype);
@@ -105,5 +103,8 @@ function mlm(du, u, p, t)
     du[3] = dqMdt(u, p, ent, LWP)
     du[4] = dSSTdt(u, p, LWP, p.stype)
     du[5] = dCFdt(u, p, zb, LWP)
-    println(du)
+    
+    # println(t/3600/24)
+    # println(u)
+    # println(du)
 end

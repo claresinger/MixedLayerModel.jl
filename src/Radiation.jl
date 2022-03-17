@@ -21,14 +21,26 @@ struct fixRad <: rad_type end
 function Tatmos(u, p, LWP)
     zi, hM, qM, SST, CF = u;
     SST_trop = trop_sst(u, p, LWP);
-    
     zft = 3000; # 3km
     Tft = temp_ft(SST_trop, zft, p);
     qft = p.RHft * q_sat(zft, Tft);
-
     Ta = 375 + 2.8*log(p.CO2) + 21.1*log(qft); # co2 and qft
+    
     # Ta = 167 + 16.7*log(p.CO2); # just co2
+    
     return Ta
+end
+
+function ΔTa(u, p, LWP)
+    zi, hM, qM, SST, CF = u;
+    SST_trop = trop_sst(u, p, LWP);
+    zft = 1000;
+    Tft = temp_ft(SST_trop, zft, p);
+    qft = p.RHft * q_sat(zft, Tft);
+    ΔT = -7.92 + 2.51*log(p.CO2) + 4.97*log(qft); # co2 and qft   
+
+    # ΔT = -22.5 + 0.008*p.CO2
+    return ΔT
 end
 
 """
@@ -70,6 +82,7 @@ function calc_cloudtop_RAD(u, p, LWP, rtype::varRad)
     Tct = temp(zi,hM,qM);
     ϵc_up = cloud_emissivity(LWP);
     Teff = Tatmos(u, p, LWP);
+    # Teff = Tct + ΔTa(u, p, LWP);
     ΔR = CF * σ_SB * ϵc_up * (Tct^4 - Teff^4);
     ΔR += 1;
     return ΔR
@@ -78,6 +91,7 @@ end
 """
     albedo of the cloud given LWP in kg/m^2
     fit from LES experiments
+    goes between 0 and 0.8
 """
 function cloud_albedo(LWP)
     m = 0.795;
@@ -106,13 +120,19 @@ function trop_sst(u, p, LWP)
     # proportionality factor for 
     # tropical temperature increase 
     # relative to albedo decrease
-    a = 0.2;
+    a = 0.1;
     αc0 = cloud_albedo(0.1);
     CF0 = 1.0;
     Δαc = cloud_albedo(LWP) - αc0;
     ΔCF = CF - CF0;
-    ΔTt = -a * (1-α_ocean) * S_trop/4 * (αc0 * ΔCF + CF0 * Δαc);
-    return p.Ts400 + ΔTt
+    ΔT_export = -a * (1-α_ocean) * S_trop/4 * (αc0 * ΔCF + CF0 * Δαc);
+
+    # increase in tropical temperature from
+    # direct greenhouse warming in tropics
+    # ECS = 3 K per doubling 
+    ΔT_greenhouse = 3 / log(2) * log(p.CO2 / 400);
+
+    return p.Ts400 + ΔT_export + ΔT_greenhouse
 end
 
 # """

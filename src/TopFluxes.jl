@@ -91,8 +91,9 @@ end
 function qjump(u, p, LWP, fttype::twocol)
     zi, hM, qM, SST, CF = u;
     SST_trop = trop_sst(u, p, LWP);
-    Tft = temp_ft(SST_trop, zi, p);
-    qft = p.RHft * q_sat(zi, Tft);
+    zft = zi;
+    Tft = temp_ft(SST_trop, zft, p);
+    qft = p.RHft * q_sat(zft, Tft);
     qj = qft - qM;
     return qj
 end
@@ -104,8 +105,9 @@ function hjump(u, p, LWP, fttype::twocol)
     zi, hM, qM, SST, CF = u;
     SST_trop = trop_sst(u, p, LWP);
     qft = qjump(u, p, LWP, p.fttype) + qM;
-    Tft = temp_ft(SST_trop, zi, p);
-    hft = Cp*Tft + g*zi + L0*qft;
+    zft = zi;
+    Tft = temp_ft(SST_trop, zft, p);
+    hft = Cp*Tft + g*zft + L0*qft;
     hj = hft - hM;
     return hj
 end

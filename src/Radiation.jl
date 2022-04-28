@@ -31,33 +31,31 @@ struct fixRad <: rad_type end
 #     return Ta
 # end
 
-"""
-    ΔTa(u, p, LWP, fttype::twocol)
+# """
+#     ΔTa(u, p, LWP, fttype::twocol)
 
-    writes the difference between cloud-top temperature and downwelling emission
-    temperature as a function of CO2 and H2O above-cloud
+#     writes the difference between cloud-top temperature and downwelling emission
+#     temperature as a function of CO2 and H2O above-cloud
     
-    qft is taken at zft=1500m to be consistent with TopFluxes in the twocol framework
-"""
-function ΔTa(u, p, LWP, fttype::twocol)
-    zi, hM, qM, SST, CF = u;
-    SST_trop = trop_sst(u, p, LWP);
-    zft = 1500;
-    Tft = temp_ft(SST_trop, zft, p);
-    qft = p.RHft * q_sat(zft, Tft);
-    ΔT = 16.0 + 3.0*log(p.CO2) + 8.9*log(qft); # co2 and qft
-    return ΔT
-end
+#     qft is taken at zft=1500m to be consistent with TopFluxes in the twocol framework
+# """
+# function ΔTa(u, p, LWP, fttype::twocol)
+#     zi, hM, qM, SST, CF = u;
+#     SST_trop = trop_sst(u, p, LWP);
+#     zft = 1500;
+#     Tft = temp_ft(SST_trop, zft, p);
+#     qft = p.RHft * q_sat(zft, Tft);
+#     ΔT = 16.0 + 3.0*log(p.CO2) + 8.9*log(qft); # co2 and qft
+#     return ΔT
+# end
 
 """
-    ΔTa(u, p, LWP, fttype::fixedFT)
+    ΔTa(u, p, LWP)
 
     writes the difference between cloud-top temperature and downwelling emission
     temperature as a function of CO2 and H2O above-cloud
-
-    qft is taken at zi to be consistent with TopFluxes in the fixedFT framework
 """
-function ΔTa(u, p, LWP, fttype::fixedFT)
+function ΔTa(u, p, LWP)
     zi, hM, qM, SST, CF = u;
     qft = qjump(u, p, LWP, p.fttype) + qM;
     ΔT = 16.0 + 3.0*log(p.CO2) + 8.9*log(qft); # co2 and qft
@@ -108,7 +106,7 @@ function calc_cloudtop_RAD(u, p, LWP, rtype::varRad)
     Tct = temp(zi,hM,qM);
     #ϵc_up = cloud_emissivity(LWP);
     ϵc_up = 1.0;
-    Teff = Tct + ΔTa(u, p, LWP, p.fttype);
+    Teff = Tct + ΔTa(u, p, LWP);
     ΔR = CF * σ_SB * ϵc_up * (Tct^4 - Teff^4);
     ΔR = maximum(ΔR, 1.0);
     return ΔR

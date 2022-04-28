@@ -135,6 +135,13 @@ function Γs(z, T)
 end
 
 """
+    moist_adiabat(Tsurf, zft, p)
+
+    calculate moist adiabat given a surface temperature (Tsurf),
+    up to an altitude zft, with the parameters p
+    - first calculates the zLCL
+    - then calculates the moist adiabatic profile with dz=10m up to zft
+    returns (T,z) profile
 """
 function moist_adiabat(Tsurf, zft, p)
     qsurf = p.RHtrop * q_sat(0, Tsurf); # surface humidity
@@ -159,7 +166,7 @@ function moist_adiabat(Tsurf, zft, p)
             T[i] = T[i-1] - Γs(zi, T[i-1])*dz;
         end
     end
-    return T
+    return T, z
 end
 
 """
@@ -167,6 +174,6 @@ end
     go up dry adiabat to LCL and then saturated adiabat
 """
 function temp_ft(Tsurf, zft, p)
-    T = moist_adiabat(Tsurf, zft, p);
+    T, z = moist_adiabat(Tsurf, zft, p);
     return T[end]
 end

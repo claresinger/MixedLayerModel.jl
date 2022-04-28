@@ -108,7 +108,7 @@ function calc_cloudtop_RAD(u, p, LWP, rtype::varRad)
     ϵc_up = 1.0;
     Teff = Tct + ΔTa(u, p, LWP);
     ΔR = CF * σ_SB * ϵc_up * (Tct^4 - Teff^4);
-    ΔR = maximum(ΔR, 1.0);
+    ΔR = max(ΔR, 1.0);
     return ΔR
 end
 

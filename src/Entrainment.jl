@@ -68,11 +68,14 @@ function we(u, p, zb, LWP, etype::bflux)
     B0 = β*H0 - ϵ*L0*Q0;
     I0 = A0 * (zb - (zb^2)/(2*zi)) + B0 * ((zi-zb) + (zi^2 - zb^2)/(2*zi));
     
+    hj = hjump(u, p, LWP, p.fttype);
+    qj = qjump(u, p, LWP, p.fttype);
     A1 = hj - μ*L0*qj;
     B1 = β*hj- ϵ*L0*qj;
     I1 = A1 * (-(zb^2)/(2*zi)) + B1 * ((-zi^2 + zb^2)/(2*zi));
     
-    α = (2.5 * p.A) / (zi * Δs(u, p, LWP));
+    A = 2.0;
+    α = (2.5 * A) / (zi * Δs(u, p, LWP));
     w = α*I0 / (1 - α*I1)
     return w
 end

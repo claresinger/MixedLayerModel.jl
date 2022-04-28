@@ -6,6 +6,7 @@ export upCO2, climatology
 
     # baseline CO2
     CO2::Real = 400; # (ppm)
+    ECS::Real = 2; # (K/CO2 doubling)
     
     # subsidence strength
     D::Real = 6.0e-6; # (1/s)

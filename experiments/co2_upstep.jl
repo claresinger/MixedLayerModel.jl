@@ -9,11 +9,11 @@ include("mlm_solve_funcs.jl")
 
 # use command line argument to set co2
 # newCO2 = parse(Float64,ARGS[1]);
-newCO2 = 600.0;
+newCO2 = 1400.0;
 println(newCO2);
 
 # load initial condition from file
-path = "experiments/output/twocol_zi_tGH1_tEX/";
+path = "experiments/output/fix_ϵc_Ttrop/";
 restarttry1 = path*"co2_upstep_"*string(Int(newCO2-100))*".jld2";
 restarttry2 = path*"co2_upstep_"*string(Int(newCO2-200))*".jld2";
 restarttry3 = path*"co2_upstep_"*string(Int(newCO2-400))*".jld2";
@@ -103,7 +103,7 @@ plot!(t, sst, marker="o-", legend=false, subplot=4, ylabel="SST [K]");
 plot!(t, trop_SST, marker="o-", legend=false, subplot=4);
 plot!(t, cf * 1e2, marker="o-", legend=false, subplot=5, ylabel="CF [%]");
 plot!(t, LWP .* cf * 1e3, marker="o-", legend=false, subplot=6, ylabel="LWP [g/m2]");
-plot!(t, Δsvl * 1e-3, marker="o-", legend=false, subplot=7, ylabel="Δs, Δh, Δq (kJ/kg)");
+plot!(t, Δsvl * 1e-3, marker="o-", legend=false, subplot=7, ylabel="Δs (kJ/kg)");
 # plot!(t, Δh * 1e-3 .+ 30, marker="o-", legend=false, subplot=7);
 # plot!(t, Δq * 1e-3 .+ 30, marker="o-", legend=false, subplot=7);
 plot!(t, ent*1e3, marker="o-", legend=false, subplot=8, ylabel="we (mm/s)")

@@ -7,7 +7,7 @@ using Plots
 include("mlm_solve_funcs.jl")
 
 # define path to save file (which experiment are you running?)
-path = "experiments/output/twocol_zi_tGH1_tEX/";
+path = "experiments/output/fix_ϵc_Ttrop/";
 
 # define OHU from 400 ppm simulation
 par = upCO2();
@@ -15,7 +15,7 @@ par.etype = enBal();
 par.fttype = twocol();
 par.rtype = varRad();
 par.stype = fixSST();
-dt = 24.0;
+dt = 6.0;
 tmax = 40.0;
 
 # u0, sol = run_mlm_ss(par, dt=3600.0*dt, tspan=3600.0*24.0*tmax);

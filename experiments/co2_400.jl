@@ -7,12 +7,12 @@ using Plots
 include("mlm_solve_funcs.jl")
 
 # define path to save file (which experiment are you running?)
-path = "experiments/output/Tt02_m6/";
+path = "experiments/output/test_implicit_CF/";
 
 # define OHU from 400 ppm simulation
 par = upCO2();
 par.etype = enBal();
-par.fttype = twocol();
+par.fttype = co2dep();
 par.rtype = varRad();
 par.stype = fixSST();
 dt = 2.0;
@@ -41,7 +41,8 @@ zi = getindex.(sol.u,1);
 hM = getindex.(sol.u,2);
 qtM = getindex.(sol.u,3);
 sst = getindex.(sol.u,4);
-cf = getindex.(sol.u,5);
+#cf = getindex.(sol.u,5);
+CF = zeros(length(t));
 S = zeros(length(t));
 LHF = zeros(length(t));
 zb = zeros(length(t));
@@ -52,6 +53,7 @@ ent = zeros(length(t));
 for (i,si) in enumerate(S)
     zb[i] = calc_LCL(sol.u[i]);
     LWP[i] = incloud_LWP(sol.u[i], zb[i]);
+    CF[i] = cloud_fraction(sol.u[i], par, zb[i], LWP[i]);
     S[i] = calc_S(sol.u[i], par, zb[i], LWP[i]);
     LHF[i] = calc_LHF(sol.u[i], par);
     ΔR[i] = calc_cloudtop_RAD(sol.u[i], par, LWP[i], par.rtype);
@@ -64,8 +66,8 @@ plot!(t, zb, marker="o-", legend=false, subplot=1);
 plot!(t, hM * 1e-3, marker="o-", legend=false, subplot=2, ylabel="hM [kJ/kg]"); 
 plot!(t, qtM * 1e3, marker="o-", legend=false, subplot=3, ylabel="qtM [g/kg]");
 plot!(t, sst, marker="o-", legend=false, subplot=4, ylabel="SST [K]");
-plot!(t, cf * 1e2, marker="o-", legend=false, subplot=5, ylabel="CF [%]");
-plot!(t, LWP .* cf * 1e3, marker="o-", legend=false, subplot=6, ylabel="LWP [g/m2]");
+plot!(t, CF * 1e2, marker="o-", legend=false, subplot=5, ylabel="CF [%]");
+plot!(t, LWP .* CF * 1e3, marker="o-", legend=false, subplot=6, ylabel="LWP [g/m2]");
 plot!(t, Δsvl * 1e-3, marker="o-", legend=false, subplot=7, ylabel="Δs (kJ/kg)");
 plot!(t, ent*1e3, marker="o-", legend=false, subplot=8, ylabel="we (mm/s)")
 plot!(t, LHF, marker="o-", legend=false, subplot=9, ylabel="LHF [W/m2]");
@@ -77,9 +79,9 @@ savefig(replace(path, "output"=>"figures")*"sol400_t.png");
 
 ## save steady-state solution
 uf = sol.u[end];
-du = zeros(5);
+du = zeros(4);
 mlm(du, uf, par, 0.0);
-zi,hM,qM,SST,CF = uf;
+zi,hM,qM,SST = uf;
 zb = calc_LCL(uf);
 LWP = incloud_LWP(uf, zb);
 RH = min(qM / q_sat(0.0, temp(0.0, hM, qM)), 1.0);
@@ -87,7 +89,7 @@ println(uf);
 println(du);
 println("cloud base: ",zb)
 println("LWP: ", LWP);
-println("tropical sst: ", trop_sst(uf, par, LWP));
+#println("tropical sst: ", trop_sst(uf, par, LWP));
 println("ft qt: ", qjump(uf, par, LWP, par.fttype) + qM);
 
 output = Dict("p" => par, "u0" => u0, "uf" => uf, "du/u" => du./uf, 

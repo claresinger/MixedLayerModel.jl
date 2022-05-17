@@ -10,7 +10,7 @@ export calc_bflux, calc_OHU
     calculates the buoyancy flux for plotting
 """
 function calc_bflux(u, p, zarr, etype::bflux)
-    zi, hM, qM, SST, CF = u;
+    zi, hM, qM, SST = u;
     zb = calc_LCL(u);
 
     z1 = zarr[zarr .< zb];

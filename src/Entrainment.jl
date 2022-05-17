@@ -42,7 +42,7 @@ end
     w = ΔR / (Δs_vli * ρref)
 """
 function we(u, p, zb, LWP, etype::enBal)
-    zi, hM, qM, SST, CF = u;
+    zi, hM, qM, SST = u;
     ΔR = calc_cloudtop_RAD(u, p, LWP, p.rtype);
     w = (ΔR / ρref(SST)) / Δs(u, p, LWP);
     return w

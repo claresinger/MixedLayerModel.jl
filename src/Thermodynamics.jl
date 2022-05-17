@@ -81,7 +81,7 @@ end
     calculate the lifiting condensation level
 """
 function calc_LCL(u)
-    zi, hM, qtM, SST, CF = u;
+    zi, hM, qtM, SST = u;
 
     f(z) = qtM - q_sat(z,temp(z, hM, qtM));
     if f(0) > 0
@@ -101,7 +101,7 @@ end
     calulcate the in-cloud liquid water path
 """
 function incloud_LWP(u, zb)
-    zi, hM, qtM, SST, CF = u;
+    zi, hM, qtM, SST = u;
 
     dz = 1.0;
     z = zb:dz:zi;

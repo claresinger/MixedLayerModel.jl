@@ -26,7 +26,10 @@ end
     calculate net SW and LW radiation at the surface
 """
 function calc_surf_RAD(u, p, LWP)
-    zi, hM, qM, SST, CF = u;
+    zi, hM, qM, SST = u;
+
+    zb = calc_LCL(u);
+    CF = cloud_fraction(u, p, zb, LWP);
 
     # shortwave calculation
     αc = cloud_albedo(LWP);
@@ -61,11 +64,24 @@ end
     gives ΔR ≈ 80 W/m2 for 400 ppm CO2
 """
 function calc_cloudtop_RAD(u, p, LWP, rtype::varRad)
-    zi, hM, qM, SST, CF = u;
+    zi, hM, qM, SST = u;
     Tct = temp(zi,hM,qM);
     ϵc_up = cloud_emissivity(LWP);
     Teff = Tatmos(p);
-    ΔR = CF * σ_SB * ϵc_up * (Tct^4 - Teff^4);
+
+    #ΔR = CF * σ_SB * ϵc_up * (Tct^4 - Teff^4);
+    zb = calc_LCL(u);
+    LHF = calc_LHF(u, p);
+    k = 1 / (σ_SB * ϵc_up * (Tct^4 - Teff^4));
+    f(x) = k * x - cloud_fraction_S((LHF/x)*(zi-zb)/zi);
+    ΔR = find_zero(f, (0, 500), Bisection());
+    
+    # CF = cloud_fraction_S((LHF/ΔR)*(zi-zb)/zi);
+    # println(LHF)
+    # println(k)
+    # println(ΔR)
+    # println(CF)
+    
     return ΔR
 end
 
@@ -95,7 +111,7 @@ function cloud_emissivity(LWP)
 end
 
 function trop_sst(u, p, LWP)
-    zi, hM, qM, SST, CF = u;
+    zi, hM, qM, SST = u;
 
     # proportionality factor for 
     # tropical temperature increase 
@@ -118,7 +134,7 @@ end
 #     OLR is linear func of SST based on LES
 # """
 # function toa_net_rad(u, LWP)
-#     zi, hM, qM, SST, CF = u;
+#     zi, hM, qM, SST = u;
 
 #     T = 0.8;
 #     αc = cloud_albedo(LWP);
@@ -139,7 +155,7 @@ end
 #     5. calculates emission height as func of CO2 and H2O concentration
 # """
 # function trop_sst(u, p, LWP)
-#     zi, hM, qM, SST, CF = u;
+#     zi, hM, qM, SST = u;
 
 #     # net TOA imbalance
 #     if p.CO2 == 400.0

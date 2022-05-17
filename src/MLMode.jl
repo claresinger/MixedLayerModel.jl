@@ -15,7 +15,8 @@ struct varSST <: sst_type end
     balance between entrainment and subsidence
 """
 function dzidt(u, p, ent)
-    dzidt = ent - p.D*u[1]
+    zi, hM, qM, SST, CF = u;
+    dzidt = ent - p.D*zi;
     return dzidt
 end
 
@@ -49,7 +50,7 @@ function dqMdt(u, p, ent, LWP)
 end
 
 """
-    dSSTdt(u, p, LWP)
+    dSSTdt(u, p, LWP, p.stype)
 
     defined as 0 for fixSST
 """
@@ -58,7 +59,7 @@ function dSSTdt(u, p, LWP, stype::fixSST)
 end
 
 """
-    dSSTdt(u, p, LWP)
+    dSSTdt(u, p, LWP, p.stype)
 
     close surface energy budge for varSST
 """
@@ -80,7 +81,7 @@ end
 function dCFdt(u, p, zb, LWP)
     zi, hM, qM, SST, CF = u;
     CFnew = cloud_fraction(u, p, zb, LWP);
-    τ_CF = 3600.0*24.0*1.0; # 1 days; cloud fraction adjustment timescale [seconds]
+    τ_CF = 3600.0*24.0*10; # 1 days; cloud fraction adjustment timescale [seconds]
     dCFdt = (CFnew - CF) / τ_CF;
     return dCFdt
 end
@@ -106,5 +107,6 @@ function mlm(du, u, p, t)
     
     # println(t/3600/24)
     # println(u)
+    # println(zb)
     # println(du)
 end

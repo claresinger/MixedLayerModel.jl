@@ -18,7 +18,7 @@ function run_mlm(params; dt=3600.0*5.0, tspan=(0.0,3600.0*24.0*10.0))
     end
     qtM0 = 0.65 * q_sat(0.0, params.SST0);
     hM0 = MixedLayerModel.Cp * params.SST0 + MixedLayerModel.L0 * qtM0;
-    zi0 = 900.0;
+    zi0 = 1000.0;
     CF0 = 1.0;
     u0 = [zi0, hM0, qtM0, params.SST0, CF0]; 
     prob = ODEProblem(ODEFunction(mlm, tgrad=(du, u, p, t) -> fill!(du, 0.0)), 

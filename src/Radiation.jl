@@ -74,13 +74,17 @@ function calc_cloudtop_RAD(u, p, LWP, rtype::varRad)
     LHF = calc_LHF(u, p);
     k = 1 / (σ_SB * ϵc_up * (Tct^4 - Teff^4));
     f(x) = k * x - cloud_fraction_S((LHF/x)*(zi-zb)/zi);
-    ΔR = find_zero(f, (0, 500), Bisection());
+    #ΔR = find_zero(f, (0, 100))#, Bisection());
+    ΔR = find_zero(f, 10);
+    println(ΔR)
     
-    # CF = cloud_fraction_S((LHF/ΔR)*(zi-zb)/zi);
-    # println(LHF)
-    # println(k)
-    # println(ΔR)
-    # println(CF)
+    
+    CF = cloud_fraction_S((LHF/ΔR[1])*(zi-zb)/zi);
+    println(LHF)
+    println((zi-zb)/zi)
+    println(k)
+    println(ΔR)
+    println(CF)
     
     return ΔR
 end

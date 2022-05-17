@@ -71,7 +71,7 @@ function temp(z, h, qt)
     h_act(T) = Cp*T + g*z + L0*q_v(z,T,qt);
     f(x) = h - h_act(x);
     Tqt = (h - g*z - L0*qt) / Cp;
-    T = find_zero(f, eltype(h)(Tqt), Order1(), atol=0.1);
+    T = find_zero(f, eltype(h)(Tqt), Order1(), atol=0.5);
     return T
 end
 

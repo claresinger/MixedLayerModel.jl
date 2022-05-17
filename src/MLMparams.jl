@@ -35,9 +35,6 @@ export upCO2, climatology
 end
 
 @with_kw mutable struct climatology
-    # fixed SST for 400ppm
-    SST0::Real = 290.0; # (K)
-
     # baseline CO2
     CO2::Real = 400; # (ppm)
     
@@ -52,9 +49,16 @@ end
     qft0::Real = 0.0; # (kg/kg)
     
     # params for interactive surface fluxes
+    SST0::Real = 290.; # (K)
     V::Real = 10.0; # (m/s)
     CTh::Real = 8e-4;
     CTq::Real = 8e-4;
+    Hw::Real = 1.0;
+    OHU::Real = 10.0;
+
+    # fixed surface fluxes
+    LHF::Real = 100.0; # (W/m^2)
+    SHF::Real = 10.0; # (W/m^2)
 
     # default types
     etype::ent_type = enBal();

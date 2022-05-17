@@ -7,14 +7,15 @@ using Plots
 include("mlm_solve_funcs.jl")
 
 # use command line argument to set co2
-i = parse(Int,ARGS[1]);
+#i = parse(Int,ARGS[1]);
+i = 4
 println(i);
 
-# load initial condition from file
-path = "experiments/output/SCT_NEP/";
-restartfile = path*"mean.jld2"
-output = load(restartfile);
-u0 = output["uf"];
+# # load initial condition from file
+# path = "experiments/output/SCT_NEP/";
+# restartfile = path*"mean.jld2"
+# output = load(restartfile);
+# u0 = output["uf"];
 
 # set OHU, increase CO2, let SST evolve and check cloud changes
 par = climatology();
@@ -76,7 +77,7 @@ plot!(t, ΔR, marker="o-", legend=false, subplot=8, ylabel="ΔR [W/m2]");
 plot!(t, (zi .- zb) ./ zi, marker="o-", legend=false, subplot=9, ylabel="zc/zi [-]", xlabel="time [days]");
 plot!(t, S, marker="o-", legend=false, subplot=10, ylabel="S [-]", xlabel="time [days]");
 mkpath(replace(path, "output"=>"figures"));
-savefig(replace(path, "output"=>"figures")*"sol"*string(i)*"_t.png");
+savefig(replace(path, "output"=>"figures")*"sol"*string(i)*"_t_new.png");
 
 ## save steady-state solution
 uf = sol.u[end];
@@ -89,9 +90,9 @@ RH = min(qM / q_sat(0.0, temp(0.0, hM, qM)), 1.0);
 println(uf);
 println(du);
 
-output = Dict("p" => par, "u0" => u0, "uf" => uf, "du/u" => du./uf, 
-"we" => we(uf,par,zb,LWP,par.etype), "zb" => zb, "zc" => zi-zb,
-"RHsurf" => RH, "LHF" => calc_LHF(uf,par), "SHF" => calc_SHF(uf,par),
-"ΔR" => calc_cloudtop_RAD(uf,par,LWP,par.rtype), "OHU" => calc_OHU(uf,par,LWP,par.stype))
+# output = Dict("p" => par, "u0" => u0, "uf" => uf, "du/u" => du./uf, 
+# "we" => we(uf,par,zb,LWP,par.etype), "zb" => zb, "zc" => zi-zb,
+# "RHsurf" => RH, "LHF" => calc_LHF(uf,par), "SHF" => calc_SHF(uf,par),
+# "ΔR" => calc_cloudtop_RAD(uf,par,LWP,par.rtype), "OHU" => calc_OHU(uf,par,LWP,par.stype))
 
-save(path*"sol_"*string(i)*".jld2", output)
+# save(path*"sol_"*string(i)*".jld2", output)

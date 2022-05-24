@@ -81,7 +81,7 @@ end
 function dCFdt(u, p, zb, LWP)
     zi, hM, qM, SST, CF = u;
     CFnew = cloud_fraction(u, p, zb, LWP);
-    τ_CF = 3600.0*24.0*10; # 1 days; cloud fraction adjustment timescale [seconds]
+    τ_CF = 3600.0*24.0*10; # 10 days; cloud fraction adjustment timescale [seconds]
     dCFdt = (CFnew - CF) / τ_CF;
     return dCFdt
 end

@@ -25,23 +25,24 @@ file = "experiments/JJA_NEP_boundary_conditions_from_reanalysis.nc";
 ds = Dataset(file, "r");
 
 #println(ds)
-lon = zeros(length(ds["lat"]))
-sst_ss = zeros(length(ds["lat"]))
-real_cf = zeros(length(ds["lat"]))
+N = length(ds["lat"]) - 3
+lon = zeros(N)
+sst_ss = zeros(N)
+real_cf = zeros(N)
 
-zi_ss = zeros(length(ds["lat"]))
-qtM_ss = zeros(length(ds["lat"]))
-cf_ss = zeros(length(ds["lat"]))
-zb_ss = zeros(length(ds["lat"]))
-lwp_ss = zeros(length(ds["lat"]))
+zi_ss = zeros(N)
+qtM_ss = zeros(N)
+cf_ss = zeros(N)
+zb_ss = zeros(N)
+lwp_ss = zeros(N)
 
 for (j,lat) in enumerate(ds["lat"])
-    if j < 100
+    if j > 3
         i = 2j
         j = length(ds["lat"])+1 - j
         i = length(ds["lon"])+1 - i
 
-        par.SST0 = ds["sst"][i,j];
+        par.SST0 = ds["sst"][i,j] + 2.25;
         par.V = 10.0;
         par.D = 6e-6;
         # par.D = 6e-6 - 3e-6*((ds["sst"][i,j]-290)/290);
@@ -103,19 +104,19 @@ for (j,lat) in enumerate(ds["lat"])
         # plot!(t, ΔR, marker="o-", legend=false, subplot=8, ylabel="ΔR [W/m2]");
         # plot!(t, (zi .- zb) ./ zi, marker="o-", legend=false, subplot=9, ylabel="zc/zi [-]", xlabel="time [days]");
         # plot!(t, S, marker="o-", legend=false, subplot=10, ylabel="S [-]", xlabel="time [days]");
-        # savefig("experiments/figures/JJA_NEP_MLM_j14_CF01days.png")
+        # savefig("experiments/figures/JJA_NEP_MLM_j14.png")
         # display(p)
     end
 end
 
-p = plot(size=(600,800), layout=(5,1), dpi=200, left_margin = 5Plots.mm, show=true);
-plot!(lon, sst_ss, subplot=1, marker=:o, legend=false, ylabel="SST (K)")
+p = plot(size=(600,600), layout=(3,1), dpi=200, left_margin = 5Plots.mm, show=true);
+plot!(lon, sst_ss, subplot=1, marker=:o, color=:black, legend=false, ylabel="SST (K)")
 plot!(lon, zi_ss, subplot=2, marker=:o)
-plot!(lon, zb_ss, subplot=2, marker=:o, legend=false, ylabel="zi, zb (m)")
-plot!(lon, lwp_ss*1e3, subplot=3, marker=:o, legend=false, ylabel="LWP (g/m2)")
-plot!(lon, cf_ss*100, subplot=4, marker=:o, legend=false, ylabel="CF (%)")
-#plot!(lon, real_cf*100, subplot=4, marker=:o)
-plot!(lon, qtM_ss*1e3, subplot=5, marker=:o, legend=false, ylabel="qt (g/kg)", xlabel="longitude")
+plot!(lon, zb_ss, subplot=2, marker=:o, legend=false, ylabel="zb, zi (m)")
+plot!(lon, cf_ss*100, subplot=3, marker=:o, legend=false, ylabel="CF (%)", xlabel="longitude")
+plot!(lon, real_cf*100, subplot=3, marker=:o, color=:black)
+#plot!(lon, lwp_ss*1e3, subplot=4, marker=:o, legend=false, ylabel="LWP (g/m2)")
+#plot!(lon, qtM_ss*1e3, subplot=5, marker=:o, legend=false, ylabel="qt (g/kg)", xlabel="longitude")
 savefig("experiments/figures/JJA_NEP_MLM_transect.png");
 display(p)
 

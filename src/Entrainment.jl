@@ -11,21 +11,6 @@ struct enBal <: ent_type end
 struct bflux <: ent_type end
 
 """
-    Δs(u, p, LWP)
-
-    calculate the jump in dry virtual liquid static energy (s_vl)
-    across the inversion
-    Δs = Δh - μL Δq
-"""
-function Δs(u, p, LWP)
-    # calculate change in s_vl across inversion
-    hj = hjump(u, p, LWP, p.fttype);
-    qj = qjump(u, p, LWP, p.fttype);
-    sj = hj - μ*L0*qj
-    return sj
-end
-
-"""
     we(u, p, zb, LWP, etype::fixed)
 
     fixed entrainment velocity of 7 mm/s
@@ -42,9 +27,9 @@ end
     w = ΔR / (Δs_vli * ρref)
 """
 function we(u, p, zb, LWP, etype::enBal)
-    zi, hM, qM, SST, CF = u;
+    zi, sM, qM, SST, CF = u;
     ΔR = calc_cloudtop_RAD(u, p, LWP, p.rtype);
-    w = (ΔR / ρref(SST)) / Δs(u, p, LWP);
+    w = (ΔR / ρref(SST)) / sjump(u, p, LWP, p.fttype);
     return w
 end
 
@@ -57,22 +42,27 @@ end
     integral is calculated analytically
 """
 function we(u, p, zb, LWP, etype::bflux)
-    zi, hM, qM, SST = u;
+    zi, sM, qM, SST = u;
 
     # calculate sv flux <w'sv'>(z) = f0(z) + we*f1(z)
     # split into two terms I0, I1 where Ii = \integral fi(z) dz
-    H0 = H_0(u, p, p.ftype);
+    S0 = S_0(u, p, p.ftype);
     Q0 = Q_0(u, p, p.ftype);
+    H0 = S0 + L0*Q0; # h = s + Lv*qt
 
     A0 = H0 - μ*L0*Q0;
     B0 = β*H0 - ϵ*L0*Q0;
     I0 = A0 * (zb - (zb^2)/(2*zi)) + B0 * ((zi-zb) + (zi^2 - zb^2)/(2*zi));
     
+    sj = sjump(u, p, LWP, p.fttype);
+    qj = qjump(u, p, LWP, p.fttype);
+    hj = sj + L0*qj; # h = s + Lv*qt
     A1 = hj - μ*L0*qj;
     B1 = β*hj- ϵ*L0*qj;
     I1 = A1 * (-(zb^2)/(2*zi)) + B1 * ((-zi^2 + zb^2)/(2*zi));
     
-    α = (2.5 * p.A) / (zi * Δs(u, p, LWP));
+    A = 2.0;
+    α = (2.5 * A) / (zi * Δs(u, p, LWP));
     w = α*I0 / (1 - α*I1)
     return w
 end

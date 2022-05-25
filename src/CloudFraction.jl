@@ -10,7 +10,7 @@ export calc_S, cloud_fraction, cloud_fraction_S
     where zc is the cloud thickness (zi-zb)
 """
 function calc_S(u, p, zb, LWP)
-    zi, hM, qM, SST, CF = u;
+    zi, sM, qM, SST, CF = u;
     LHF = calc_LHF(u, p);
     ΔR = calc_cloudtop_RAD(u, p, LWP, p.rtype);
     zc = zi - zb;

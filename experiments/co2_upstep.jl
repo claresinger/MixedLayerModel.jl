@@ -9,11 +9,11 @@ include("mlm_solve_funcs.jl")
 
 # use command line argument to set co2
 # newCO2 = parse(Float64,ARGS[1]);
-newCO2 = 1100.0;
+newCO2 = 800.0;
 println(newCO2);
 
 # load initial condition from file
-path = "experiments/output/Tt02_m6/";
+path = "experiments/output/switch_h_to_sl/";
 restarttry1 = path*"co2_upstep_"*string(Int(newCO2-100))*".jld2";
 restarttry2 = path*"co2_upstep_"*string(Int(newCO2-200))*".jld2";
 restarttry3 = path*"co2_upstep_"*string(Int(newCO2-400))*".jld2";
@@ -30,38 +30,16 @@ u0 = output["uf"];
 OHU = output["OHU"];
 println("restarting from CO2 = "*string(output["p"].CO2));
 
-# get toa net rad @ 400 ppm
-# output = load(path*"co2_400.jld2");
-# u400 = output["uf"];
-# zb = output["zb"];
-# LWP = incloud_LWP(u400, zb);
-# R_s_400 = toa_net_rad(u400, LWP);
-
 # set OHU, increase CO2, let SST evolve and check cloud changes
 par = upCO2();
 par.Hw = 0.1;
 par.OHU = OHU;
-# par.R_s_400 = R_s_400;
 par.CO2 = newCO2;
 par.etype = enBal();
 par.fttype = twocol();
 par.rtype = varRad();
 par.stype = varSST();
 dt, tmax = 12.0, 40.0;
-
-# println(par.OHU, "\t", par.R_s_400);
-
-# u0, sol = run_mlm_ss_from_init(u0, par, dt=3600.0*dt, tspan=3600.0*24.0*tmax);
-# code = sol.retcode;
-# println(code);
-
-# uf = sol.u;
-# du = zeros(5);
-# mlm(du, uf, par, 0.0);
-# zi,hM,qM,SST = uf;
-# zb = calc_LCL(uf);
-# println(uf);
-# println(du);
 
 # plot time series
 ENV["GKSwstype"]="nul"
@@ -78,9 +56,7 @@ LHF = zeros(length(t));
 zb = zeros(length(t));
 ΔR = zeros(length(t));
 LWP = zeros(length(t));
-Δsvl = zeros(length(t));
-Δh = zeros(length(t));
-Δq = zeros(length(t));
+Δs = zeros(length(t));
 ent = zeros(length(t));
 trop_SST = zeros(length(t));
 for (i,si) in enumerate(S)
@@ -89,9 +65,7 @@ for (i,si) in enumerate(S)
     S[i] = calc_S(sol.u[i], par, zb[i], LWP[i]);
     LHF[i] = calc_LHF(sol.u[i], par);
     ΔR[i] = calc_cloudtop_RAD(sol.u[i], par, LWP[i], par.rtype);
-    Δsvl[i] = Δs(sol.u[i], par, LWP[i]);
-    Δh[i] = hjump(sol.u[i], par, LWP[i], par.fttype);
-    Δq[i] = μ*L0*qjump(sol.u[i], par, LWP[i], par.fttype);
+    Δs[i] = sjump(sol.u[i], par, LWP[i], par.fttype);
     ent[i] = we(sol.u[i], par, zb[i], LWP[i], par.etype);
     trop_SST[i] = trop_sst(sol.u[i], par, LWP[i]);
 end 
@@ -104,9 +78,7 @@ plot!(t, sst, marker="o-", legend=false, subplot=4, ylabel="SST [K]");
 plot!(t, trop_SST, marker="o-", legend=false, subplot=4);
 plot!(t, cf * 1e2, marker="o-", legend=false, subplot=5, ylabel="CF [%]");
 plot!(t, LWP .* cf * 1e3, marker="o-", legend=false, subplot=6, ylabel="LWP [g/m2]");
-plot!(t, Δsvl * 1e-3, marker="o-", legend=false, subplot=7, ylabel="Δs, Δh, Δq (kJ/kg)");
-# plot!(t, Δh * 1e-3 .+ 30, marker="o-", legend=false, subplot=7);
-# plot!(t, Δq * 1e-3 .+ 30, marker="o-", legend=false, subplot=7);
+plot!(t, Δs * 1e-3, marker="o-", legend=false, subplot=7, ylabel="Δs, Δh, Δq (kJ/kg)");
 plot!(t, ent*1e3, marker="o-", legend=false, subplot=8, ylabel="we (mm/s)")
 plot!(t, LHF, marker="o-", legend=false, subplot=9, ylabel="LHF [W/m2]");
 plot!(t, ΔR, marker="o-", legend=false, subplot=10, ylabel="ΔR [W/m2]");

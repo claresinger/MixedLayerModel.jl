@@ -6,6 +6,7 @@ export upCO2, climatology
 
     # baseline CO2
     CO2::Real = 400; # (ppm)
+    ECS = 3.0; #(K / co2 doubling)
     
     # subsidence strength
     D::Real = 6.0e-6; # (1/s)
@@ -23,6 +24,7 @@ export upCO2, climatology
     # AreaFrac = 0.065;
     RHtrop = 0.8;
     Ts400 = 300.0; # (K)
+    RHft = 0.2;
     
     # default types
     etype::ent_type = enBal();

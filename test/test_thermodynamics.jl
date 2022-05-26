@@ -7,9 +7,6 @@ using MixedLayerModel:psurf, Cp, L0
 @test pres(0.0, 300.0) == psurf
 @test pres(200.0, 300.0) < psurf
 
-@test q_v(200.0, 288.0, 12e-3) == q_sat(200.0, 288.0)
-@test q_v(200.0, 288.0, 8e-3) == 8e-3
-
 @test q_l(200.0, 288.0, 12e-3) > 0
 @test q_l(200.0, 288.0, 8e-3) == 0.0
 
@@ -34,3 +31,11 @@ zb = calc_LCL(u);
 u = [900.0, hM, qtM*3, 290.0, 1.0];
 zb = calc_LCL(u);
 @test zb == 0.0
+
+p = upCO2();
+zft = 5000;
+Tsurf = 300;
+T, z = moist_adiabat(Tsurf, zft, p);
+Tft = temp_ft(Tsurf, zft, p);
+@test T == sort!(T)
+@test Tft < Tsurf

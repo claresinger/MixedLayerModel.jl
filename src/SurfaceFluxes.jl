@@ -28,7 +28,7 @@ end
 """
 function H_0(u, p, ftype::fixFlux)
     zi, hM, qM, SST, CF = u;
-    return (p.SHF + p.LHF) / rho_ref(SST)
+    return (p.SHF + p.LHF) / ρref(SST)
 end
 
 """

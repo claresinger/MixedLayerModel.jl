@@ -43,8 +43,9 @@ end
     
     # params for fixedFT inverson specification
     RHft::Real = 0.25;
+    Tft::Real = 280;
     Gamma_q::Real = -3e-6; # (kg/kg/m)
-    sft0::Real = 297; # (K) #297
+    sft0::Real = 300; # (K) #297
     Gamma_s::Real = 5e-3; # (K/m)
     qft0::Real = 0.0; # (kg/kg)
     

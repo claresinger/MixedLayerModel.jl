@@ -16,7 +16,7 @@ function run_mlm(params; dt=3600.0*5.0, tspan=(0.0,3600.0*24.0*10.0))
     if params.fttype == fixedFT()
         params.qft0 = calc_qft0(params.RHft, params.Gamma_q, params.sft0, params.Gamma_s)
     end
-    qtM0 = 0.65 * q_sat(0.0, params.SST0);
+    qtM0 = 0.7 * q_sat(0.0, params.SST0);
     hM0 = MixedLayerModel.Cp * params.SST0 + MixedLayerModel.L0 * qtM0;
     zi0 = 1000.0;
     CF0 = 1.0;

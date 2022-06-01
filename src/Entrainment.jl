@@ -1,6 +1,6 @@
 export ent_type
 export fixed, enBal, bflux
-export Δs,  we
+export sv_jump,  we
 
 ###########
 # create structure for ent_type
@@ -21,15 +21,39 @@ function we(u, p, zb, LWP, etype::fixed)
 end
 
 """
+    sv_jump(u, p, LWP)
+
+    Δsv = Δs + Cp[(Rv/Rd - 1)(Tft*qvft - T*qv) + T*ql]
+
+    jump in virtual liquid static energy across inversion
+    proportional to buoyancy jump
+    used in energy balance entrainment
+"""
+function sv_jump(u, p, LWP)
+    zi, sM, qM, SST, CF = u;
+
+    T = (sM-g*zi)/Cp;
+    ql = q_l(zi, temp(zi, sM, qM), qM);
+    sft = sjump(u, p, LWP, p.fttype) + sM;
+    Tft = (sft-g*zi)/Cp;
+    qft = qjump(u, p, LWP, p.fttype) + qM;
+
+    Δsv = (sft-sM) + Cp*((Rv/Rd - 1)*(Tft*qft - T*qM) + ql*T);
+    return Δsv
+end
+
+"""
     we(u, p, zb, LWP, etype::enBal)
 
     entrainment velocity obtained via energy balance requirement
-    w = ΔR / (Δs_vli * ρref)
+    w = ΔR / (Δsv * ρref)
+    Δsv = the jump in virtual liquid static energy
+    sv = Cp*Tv + g*z - Lv*ql = s + Cp(Tv - T)
 """
 function we(u, p, zb, LWP, etype::enBal)
     zi, sM, qM, SST, CF = u;
     ΔR = calc_cloudtop_RAD(u, p, LWP, p.rtype);
-    w = (ΔR / ρref(SST)) / sjump(u, p, LWP, p.fttype);
+    w = (ΔR / ρref(SST)) / sv_jump(u, p, LWP);
     return w
 end
 

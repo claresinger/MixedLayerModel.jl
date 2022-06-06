@@ -1,5 +1,5 @@
 using OrdinaryDiffEq
-using SteadyStateDiffEq
+#using SteadyStateDiffEq
 
 # steptol = 1e-6;
 # termtol = 1e-9;
@@ -7,7 +7,7 @@ using SteadyStateDiffEq
 steptol = 1e-3;
 termtol = 1e-6;
 
-RHsurf = 0.65;
+RHsurf = 0.7;
 
 """
     run_mlm(params; dt=x, tspan=(0.0,x))
@@ -21,7 +21,7 @@ function run_mlm(params; dt=3600.0*5.0, tspan=(0.0,3600.0*24.0*10.0))
     end
     qtM0 = RHsurf * q_sat(0.0, params.SST0);
     hM0 = MixedLayerModel.Cp * params.SST0 + MixedLayerModel.L0 * qtM0;
-    zi0 = 1100.0;
+    zi0 = 1000.0;
     CF0 = 1.0;
     u0 = [zi0, hM0, qtM0, params.SST0, CF0]; 
     prob = ODEProblem(ODEFunction(mlm, tgrad=(du, u, p, t) -> fill!(du, 0.0)), 

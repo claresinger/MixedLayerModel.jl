@@ -6,6 +6,7 @@ export upCO2, climatology
 
     # baseline CO2
     CO2::Real = 400; # (ppm)
+    ECS::Real = 3.0 # (K / co2 doubling)
     
     # subsidence strength
     D::Real = 6.0e-6; # (1/s)
@@ -20,16 +21,24 @@ export upCO2, climatology
     OHU::Real = 10.0; # (W/m2)
 
     # tropical column params
-    # AreaFrac = 0.065;
-    RHtrop = 0.8;
-    Ts400 = 300.0; # (K)
-    
+    # AreaFrac::Real = 0.065;
+    RHtrop0::Real = 0.8;
+    Ts400::Real = 300.0; # (K)
+    RHtropft::Real = 0.2;
+
+    # fixed radiation
+    ΔR::Real = 80.0;
+
+    # fixed surface fluxes
+    SHF::Real = 10.0;
+    LHF::Real = 80.0;
+
     # default types
     etype::ent_type = enBal();
     ftype::flux_type = varFlux();
     rtype::rad_type = varRad();
     stype::sst_type = fixSST();
-    fttype::ft_type = co2dep();
+    fttype::ft_type = twocol();
 end
 
 @with_kw mutable struct climatology
@@ -53,6 +62,13 @@ end
     V::Real = 10.0; # (m/s)
     CTh::Real = 8e-4;
     CTq::Real = 8e-4;
+
+    # fixed radiation
+    ΔR::Real = 80.0;
+
+    # fixed surface fluxes
+    SHF::Real = 10.0;
+    LHF::Real = 80.0;
 
     # default types
     etype::ent_type = enBal();

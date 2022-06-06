@@ -7,6 +7,7 @@ include("../experiments/plot_transient_solution.jl")
 dt = 12.0;
 tmax = 40.0;
 
+ENV["GKSwstype"]="nul"
 mkpath("figures/");
 
 # test climatology config

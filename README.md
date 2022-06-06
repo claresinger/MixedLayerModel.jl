@@ -14,7 +14,7 @@ Atmospheric mixed-layer model for subtropical stratocumulus clouds and their res
 [docs-dev-img]: https://img.shields.io/badge/docs-dev-blue.svg
 [docs-dev-url]: https://claresinger.github.io/MixedLayerModel.jl/dev/
 
-[codecov-img]: https://codecov.io/gh/claresinger/MixedLayerModel.jl/branch/main/graph/badge.svg
+[codecov-img]: https://codecov.io/gh/claresinger/MixedLayerModel.jl/branch/main/graph/badge.svg?token=WXZR7WNW3T
 [codecov-url]: https://codecov.io/gh/claresinger/MixedLayerModel.jl
 
 [gha-ci-img]: https://github.com/claresinger/MixedLayerModel.jl/workflows/ci/badge.svg

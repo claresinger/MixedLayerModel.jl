@@ -1,12 +1,9 @@
-push!(LOAD_PATH, joinpath(@__DIR__, ".."))
-
-using MixedLayerModel
-using MixedLayerModel:psurf, Cp, L0
-
+# test pressure <= psurf
 @test pres(0.0, 290.0) == psurf
 @test pres(0.0, 300.0) == psurf
 @test pres(200.0, 300.0) < psurf
 
+# test liquid water specific humidity >= 0
 @test q_l(200.0, 288.0, 12e-3) > 0
 @test q_l(200.0, 288.0, 8e-3) == 0.0
 

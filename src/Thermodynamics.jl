@@ -43,15 +43,6 @@ function q_sat(z, T)
 end
 
 """
-    q_v(z, T, qt)
-
-    as the minimum between the total specific humidty and saturation specific humidity
-"""
-function q_v(z, T, qt)
-    return min(qt, q_sat(z,T));
-end
-
-"""
     q_l(z, T, qt)
 
     as difference between total specific humidity and saturation specific humidity
@@ -67,7 +58,7 @@ end
     uses saturation adjustment on the enthalpy
 """
 function temp(z, h, qt)
-    h_act(T) = Cp*T + g*z + L0*q_v(z,T,qt);
+    h_act(T) = Cp*T + g*z + L0*(qt - q_l(z,T,qt));
     f(x) = h - h_act(x);
     Tqt = (h - g*z - L0*qt) / Cp;
     return find_zero(f, eltype(h)(Tqt), Order1(), atol=0.1)
@@ -136,7 +127,6 @@ end
 
 """
     moist_adiabat(Tsurf, zft, p)
-
     calculate moist adiabat given a surface temperature (Tsurf),
     up to an altitude zft, with the parameters p
     - first calculates the zLCL
@@ -144,7 +134,7 @@ end
     returns (T,z) profile
 """
 function moist_adiabat(Tsurf, zft, p)
-    qsurf = p.RHtrop * q_sat(0, Tsurf); # surface humidity
+    qsurf = p.RHtrop0 * q_sat(0, Tsurf); # surface humidity
     # find LCL
     f(x) = q_sat(x, Tsurf - x * Γd) - qsurf;
     if f(0) < 0

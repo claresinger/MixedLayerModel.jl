@@ -1,8 +1,5 @@
 using OrdinaryDiffEq
 
-# steptol = 1e-6;
-# termtol = 1e-9;
-
 steptol = 1e-3;
 termtol = 1e-6;
 

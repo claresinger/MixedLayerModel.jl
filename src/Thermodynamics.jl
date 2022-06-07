@@ -114,9 +114,9 @@ end
 function calc_qft0(RHft, Gamma_q, sft0, Gamma_s)
     zft = 1000.0;
     sft = sft0 + Gamma_s * zft;
-    Tft(qft0) = temp(zft, sft, qft0 + Gamma_q*zft);
-    f(qft0) = qft0 - RHft*q_sat(zft, Tft(qft0));
-    qft0 = find_zero(f, (0.0,0.1), Bisection());
+    Tft = (sft - g*zft) / Cp;
+    qft = RHft * q_sat(zft, Tft);
+    qft0 = qft - Gamma_q*zft;
     return qft0
 end
 
@@ -137,7 +137,7 @@ end
     returns (T,z) profile
 """
 function moist_adiabat(Tsurf, zft, p)
-    qsurf = p.RHtrop * q_sat(0, Tsurf); # surface humidity
+    qsurf = p.RHtrop0 * q_sat(0, Tsurf); # surface humidity
     # find LCL
     f(x) = q_sat(x, Tsurf - x * Γd) - qsurf;
     if f(0) < 0

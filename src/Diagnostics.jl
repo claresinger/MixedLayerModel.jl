@@ -13,6 +13,7 @@ export calc_OHU
 function calc_bflux(u, p, zarr, etype::bflux)
     zi, sM, qM, SST, CF = u;
     zb = calc_LCL(u);
+    LWP = incloud_LWP(u, zb);
 
     z1 = zarr[zarr .< zb];
     z2 = intersect(zarr[zarr .>= zb], zarr[zarr .< zi];)

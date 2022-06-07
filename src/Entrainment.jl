@@ -86,7 +86,7 @@ function we(u, p, zb, LWP, etype::bflux)
     I1 = A1 * (-(zb^2)/(2*zi)) + B1 * ((-zi^2 + zb^2)/(2*zi));
     
     A = 2.0;
-    α = (2.5 * A) / (zi * Δs(u, p, LWP));
+    α = (2.5 * A) / (zi * sv_jump(u, p, LWP));
     w = α*I0 / (1 - α*I1)
     return w
 end

@@ -10,13 +10,9 @@ struct varRad <: rad_type end
 struct fixRad <: rad_type end
 
 """
-    free-tropospheric temperature
-    parameterized as a function of CO2 
-    fit to LES results
-    this is the effective emissions temperature
-    it gets warmer with increasing CO2 as the troposphere
-    gets optically thicker and the effective level of emissions
-    gets lower / closer to the cloud top 
+    ΔTa(u, p, LWP)
+    writes the difference between cloud-top temperature and downwelling emission
+    temperature as a function of CO2 and H2O above-cloud
 """
 function ΔTa(u, p, LWP)
     zi, sM, qM, SST, CF = u;
@@ -38,9 +34,9 @@ function calc_surf_RAD(u, p, LWP)
     SW_net = WVtrans * (1-CF*αc) * (1-α_ocean) * S_subtr;
 
     # LW_net linear with SST with coefficient dependent on log(CO2)
-    # greenhouse effect
-    a0, b0, a1, b1 = [-1537.0,  4.88, -276.0, 0.88];
-    LW_net = CF * (a0 + b0*SST) + (1-CF) * (a1 + b1*SST);
+    # direct greenhouse effect in subtropical clear-sky
+    a0, a1, a2, b1, b2 = [12.4, -1020, 3.1, -270, 0.86];
+    LW_net = (1-CF)*(a0*log(p.CO2/400) + a1 + a2*SST) + CF*(b1 + b2*SST);
 
     return SW_net + LW_net
 end
@@ -75,9 +71,10 @@ end
     fit from LES experiments
 """
 function cloud_albedo(LWP)
-    m = 0.795;
-    Lx = 19.136*1e-3;
-    αc = m * (1 - Lx/(Lx+LWP));
+    # m = 0.795;
+    # Lx = 19.136*1e-3;
+    # αc = m * (1 - Lx/(Lx+LWP));
+    αc = 0.8;
     return αc
 end
 
@@ -90,19 +87,26 @@ end
     based on Stephens 1978 part II: eq 15 and 16
 """
 function cloud_emissivity(LWP)
-    a0 = 0.15 * 1e3; # m^2/kg
-    ϵc = 1 - exp(-a0 * LWP); 
+    # a0 = 0.15 * 1e3; # m^2/kg
+    # ϵc = 1 - exp(-a0 * LWP); 
+    ϵc = 1.0;
     return ϵc
 end
 
+"""
+    trop_sst(u, p, LWP)
+    tropical SST specified as a deviation from a base state p.Ts400
+    with warming from export from the subtropics (proportional to all-sky albedo)
+    and warming directly from GHG that depends on the ECS parameter
+"""
 function trop_sst(u, p, LWP)
     zi, sM, qM, SST, CF = u;
 
     # proportionality factor for 
     # tropical temperature increase 
     # relative to albedo decrease
-    a_export = 0.2;
-    αc0 = cloud_albedo(0.1);
+    a_export = -0.1;
+    αc0 = cloud_albedo(50e-3);
     CF0 = 1.0;
     Δαc = cloud_albedo(LWP) - αc0;
     ΔCF = CF - CF0;

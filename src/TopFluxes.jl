@@ -10,6 +10,8 @@ struct co2dep <: ft_type end
 struct fixedFT <: ft_type end
 struct twocol <: ft_type end
 
+zft = 1500;
+
 # """
 #     qjump(u, p, LWP, p.fttype::sstdep)
 #     defines the inversion jump for qt 
@@ -40,7 +42,8 @@ struct twocol <: ft_type end
 function qjump(u, p, LWP, fttype::co2dep)
     zi, sM, qM, SST, CF = u;
     qj = -2.19e-6 * p.CO2 - 4.04e-3; # kg/kg
-    qj /= min(1, CF*2.5)
+    qj /= min(1, CF*2.5);
+    qj = max(qj, 2e-3 - qM);
     return qj
 end
 
@@ -51,7 +54,7 @@ end
 """
 function sjump(u, p, LWP, fttype::co2dep)
     zi, sM, qM, SST, CF = u;
-    sj = -6.07 * p.CO2 + 157.0; # m^2/s^2 = J/kg
+    sj = (-6.07 + 2.5*2.19) * p.CO2 + (157.0 + 2.5e3*4.04); # m^2/s^2 = J/kg
     sj /= min(1, CF*1.5)
     return sj
 end
@@ -89,10 +92,8 @@ end
 function qjump(u, p, LWP, fttype::twocol)
     zi, sM, qM, SST, CF = u;
     SST_trop = trop_sst(u, p, LWP);
-    #zft = zi;
-    zft = 1500;
     Tft = temp_ft(SST_trop, zft, p);
-    qft = p.RHft * q_sat(zft, Tft);
+    qft = p.RHtropft * q_sat(zft, Tft);
     qj = qft - qM;
     return qj
 end
@@ -103,8 +104,6 @@ end
 function sjump(u, p, LWP, fttype::twocol)
     zi, sM, qM, SST, CF = u;
     SST_trop = trop_sst(u, p, LWP);
-    #zft = zi;
-    zft = 1500;
     Tft = temp_ft(SST_trop, zft, p);
     sft = Cp*Tft + g*zft;
     sj = sft - sM;

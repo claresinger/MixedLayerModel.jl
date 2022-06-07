@@ -19,7 +19,7 @@ par.V = 6.5 # m/s
 
 par.RHft = 0.27; # (-)
 par.Gamma_q = 0.0; # (kg/kg/m)
-par.sft0 = 310; # (K)
+par.sft0 = 310*Cp; # (K)
 par.Gamma_s = 0.0; # (K/m)
 
 dt = 12.0;

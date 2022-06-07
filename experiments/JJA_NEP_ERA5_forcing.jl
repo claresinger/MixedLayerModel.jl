@@ -53,7 +53,7 @@ for (j,lat) in enumerate(ds["lat"])
 
         println(ds["s+"][i,j], "\t", 1e-2*ds["RH+"][i,j];)
 
-        par.sft0 = 310; #ds["sst"][i,j] + 15;
+        par.sft0 = 310*Cp; #(ds["sst"][i,j] + 15)*Cp;
         par.RHft = 0.2;
 
         dt, tmax = 12, 40;

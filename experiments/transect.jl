@@ -43,12 +43,12 @@ for (i,loni) in enumerate(lon)
         par.D = ds["D500"][j];
         # par.Tft = par.SST0 + 10;
         # par.Tft = ds["T500"][j] + 30;
-        # par.sft0 = (Cp*ds["T500"][j] + g*1000)/Cp;
+        # par.sft0 = Cp*ds["T500"][j] + g*1000;
         # par.RHft = 0.2;
         # par.D = 6e-6;
-        par.sft0 = par.SST0 + (g*1000)/Cp;
+        par.sft0 = Cp*par.SST0 + g*1000;
         par.Gamma_q = 0.0;
-        par.Gamma_s = g/Cp; # (K/m)
+        par.Gamma_s = (Cp*-5e-3) + g; # (K/m)
 
         # println(loni)
         # println(par)

@@ -34,7 +34,7 @@ for (i,Xi) in enumerate(X_arr)
     par.RHft = RHft_arr[3] # (-), RHft_arr[3]
 
     par.Gamma_q = 0.0; # (kg/kg/m)
-    par.sft0 = 305; # (K)
+    par.sft0 = 305*Cp; # (K)
     par.Gamma_s = 0.0; # (K/m)
 
     # run to equilibrium

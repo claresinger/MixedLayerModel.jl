@@ -113,7 +113,7 @@ end
     and ft dry static energy lapse rate
 """
 function calc_qft0(RHft, Gamma_q, sft0, Gamma_s)
-    zft = 900.0;
+    zft = 1000.0;
     qft(x) = x + Gamma_q * zft;
     hft(x) = Cp * (sft0 + Gamma_s * zft) + L0 * qft(x);
     Tft(x) = temp(zft, hft(x), qft(x));

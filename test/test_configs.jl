@@ -38,16 +38,16 @@ for entrainment in (enBal(), bflux())
             du = zeros(5);
             mlm(du, uf, par, 0.0);
 
-            println(uf)
             @test all(uf .> 0)
             @test zb <= uf[1]
             @test all(du/uf .< 1e-3)
 
-            new_u = sol.u
             pathname = "main_figures/climatology_";
             filename = pathname*string(entrainment)*string(fluxes)*string(radiation)*"_sol400.jld2";
-            load(filename)
-            @test all(new_u == sol.u)
+            mainsol = load(filename)["mainsol"]
+            println(sol.u[end])
+            println(mainsol.u[end])
+            @test all(isapprox.(sol.u[end], mainsol.u[end], rtol = 1e-5))
         end
     end
 end
@@ -75,16 +75,16 @@ for entrainment in (enBal(), bflux())
             du = zeros(5);
             mlm(du, uf, par, 0.0);
 
-            println(uf)
             @test all(uf .> 0)
             @test zb <= uf[1]
             @test all(du/uf .< 1e-3)
 
-            new_u = sol.u
             pathname = "main_figures/upCO2_";
             filename = pathname*string(entrainment)*string(sst)*string(freetrop)*"_sol400.jld2";
-            load(filename)
-            @test all(new_u == sol.u)
+            mainsol = load(filename)["mainsol"]
+            println(sol.u[end])
+            println(mainsol.u[end])
+            @test all(isapprox.(sol.u[end], mainsol.u[end], rtol = 1e-5))
         end
     end
 end

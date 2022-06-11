@@ -1,7 +1,9 @@
 include("../experiments/mlm_solve_funcs.jl")
 include("../experiments/plot_transient_solution.jl")
 
-makeplot = false
+using FileIO
+
+makeplot = true
 
 if makeplot
     dt = 6.0;
@@ -29,6 +31,8 @@ for entrainment in (enBal(), bflux())
             pathname = "figures/climatology_";
             filename = pathname*string(entrainment)*string(fluxes)*string(radiation)*"_sol400.png";
             makeplot ? plot_sol(sol, filename) : println("no plots")
+            filename = pathname*string(entrainment)*string(fluxes)*string(radiation)*"_sol400.jld2";
+            makeplot ? save(filename, Dict("sol" => sol)) : println("no save")
             uf = sol.u[end];
             zb = calc_LCL(uf);
             du = zeros(5);
@@ -38,6 +42,12 @@ for entrainment in (enBal(), bflux())
             @test all(uf .> 0)
             @test zb <= uf[1]
             @test all(du/uf .< 1e-3)
+
+            new_u = sol.u
+            pathname = "main_figures/climatology_";
+            filename = pathname*string(entrainment)*string(fluxes)*string(radiation)*"_sol400.jld2";
+            load(filename)
+            @test all(new_u == sol.u)
         end
     end
 end
@@ -58,6 +68,8 @@ for entrainment in (enBal(), bflux())
             pathname = "figures/upCO2_";
             filename = pathname*string(entrainment)*string(sst)*string(freetrop)*"_sol400.png";
             makeplot ? plot_sol(sol, filename) : println("no plots")
+            filename = pathname*string(entrainment)*string(sst)*string(freetrop)*"_sol400.jld2";
+            makeplot ? save(filename, Dict("sol" => sol)) : println("no save")
             uf = sol.u[end];
             zb = calc_LCL(uf);
             du = zeros(5);
@@ -67,6 +79,12 @@ for entrainment in (enBal(), bflux())
             @test all(uf .> 0)
             @test zb <= uf[1]
             @test all(du/uf .< 1e-3)
+
+            new_u = sol.u
+            pathname = "main_figures/upCO2_";
+            filename = pathname*string(entrainment)*string(sst)*string(freetrop)*"_sol400.jld2";
+            load(filename)
+            @test all(new_u == sol.u)
         end
     end
 end

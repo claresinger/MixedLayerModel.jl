@@ -56,6 +56,7 @@ function sjump(u, p, LWP, fttype::co2dep)
     zi, sM, qM, SST, CF = u;
     sj = (-6.07 + 2.5*2.19) * p.CO2 + (157.0 + 2.5e3*4.04); # m^2/s^2 = J/kg
     sj /= min(1, CF*1.5)
+    sj = max(sj, Cp*SST + g*zi - sM)
     return sj
 end
 

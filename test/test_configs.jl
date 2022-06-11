@@ -42,13 +42,15 @@ for entrainment in (enBal(), bflux())
             @test zb <= uf[1]
             @test all(du/uf .< 1e-3)
 
-            pathname = "main_figures/climatology_";
-            filename = pathname*string(entrainment)*string(fluxes)*string(radiation)*"_sol400.jld2";
-            mainsol = load(filename)["mainsol"]
-            println(sol.u[end])
-            println(mainsol.u[end])
-            @test isapprox(sol.u[end][1], mainsol.u[end][1], rtol = 1e-2)
-            println()
+            if makeplot
+                pathname = "main_figures/climatology_";
+                filename = pathname*string(entrainment)*string(fluxes)*string(radiation)*"_sol400.jld2";
+                mainsol = load(filename)["mainsol"]
+                println(sol.u[end])
+                println(mainsol.u[end])
+                @test isapprox(sol.u[end][1], mainsol.u[end][1], rtol = 0.1)
+                println()
+            end
         end
     end
 end
@@ -80,13 +82,15 @@ for entrainment in (enBal(), bflux())
             @test zb <= uf[1]
             @test all(du/uf .< 1e-3)
 
-            pathname = "main_figures/upCO2_";
-            filename = pathname*string(entrainment)*string(sst)*string(freetrop)*"_sol400.jld2";
-            mainsol = load(filename)["mainsol"]
-            println(sol.u[end])
-            println(mainsol.u[end])
-            @test isapprox(sol.u[end][1], mainsol.u[end][1], rtol = 1e-2)
-            println()
+            if makeplot
+                pathname = "main_figures/upCO2_";
+                filename = pathname*string(entrainment)*string(sst)*string(freetrop)*"_sol400.jld2";
+                mainsol = load(filename)["mainsol"]
+                println(sol.u[end])
+                println(mainsol.u[end])
+                @test isapprox(sol.u[end][1], mainsol.u[end][1], rtol = 0.1)
+                println()
+            end
         end
     end
 end

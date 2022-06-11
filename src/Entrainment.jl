@@ -23,24 +23,21 @@ end
 """
     sv_jump(u, p, LWP)
 
-    Δsv = Δs + Cp[(Rv/Rd - 1)(Tft*qvft - T*qv) + T*ql]
+    Δsv = Δs + CpΔTv - CpΔT
+        = Δs + Cp(Rv/Rd - 1)(Tft*qft - T_zi*qM) + Cp(Rv/Rd)(T_zi*ql_zi)
 
     jump in virtual liquid static energy across inversion
     proportional to buoyancy jump
     used in energy balance entrainment
 """
 function sv_jump(u, p, LWP)
-    # zi, sM, qM, SST, CF = u;
-    # T = (sM-g*zi)/Cp;
-    # ql = q_l(zi, temp(zi, sM, qM), qM);
-    # sft = sjump(u, p, LWP, p.fttype) + sM;
-    # Tft = (sft-g*zi)/Cp;
-    # qft = qjump(u, p, LWP, p.fttype) + qM;
-    # Δsv = (sft-sM) + Cp*((Rv/Rd - 1)*(Tft*qft - T*qM) + ql*T);
-
-    qj = qjump(u, p, LWP, p.fttype);
-    sj = sjump(u, p, LWP, p.fttype);
-    Δsv = sj + (1-μ)*L0*qj;
+    zi, sM, qM, SST, CF = u;
+    T_zi = temp(zi, sM, qM);
+    ql_zi = q_l(zi, T_zi, qM);
+    sft = sjump(u, p, LWP, p.fttype) + sM;
+    Tft = (sft-g*zi)/Cp;
+    qft = qjump(u, p, LWP, p.fttype) + qM;
+    Δsv = (sft-sM) + Cp*(Rv/Rd-1)*(Tft*qft - T_zi*qM) + Cp*(Rv/Rd)*(T_zi*ql_zi);
     return Δsv
 end
 

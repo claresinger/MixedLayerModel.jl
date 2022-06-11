@@ -47,7 +47,8 @@ for entrainment in (enBal(), bflux())
             mainsol = load(filename)["mainsol"]
             println(sol.u[end])
             println(mainsol.u[end])
-            @test all(isapprox.(sol.u[end], mainsol.u[end], rtol = 1e-5))
+            @test isapprox(sol.u[end][1], mainsol.u[end][1], rtol = 1e-2)
+            println()
         end
     end
 end
@@ -84,7 +85,8 @@ for entrainment in (enBal(), bflux())
             mainsol = load(filename)["mainsol"]
             println(sol.u[end])
             println(mainsol.u[end])
-            @test all(isapprox.(sol.u[end], mainsol.u[end], rtol = 1e-5))
+            @test isapprox(sol.u[end][1], mainsol.u[end][1], rtol = 1e-2)
+            println()
         end
     end
 end

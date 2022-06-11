@@ -30,15 +30,17 @@ end
     used in energy balance entrainment
 """
 function sv_jump(u, p, LWP)
-    zi, sM, qM, SST, CF = u;
+    # zi, sM, qM, SST, CF = u;
+    # T = (sM-g*zi)/Cp;
+    # ql = q_l(zi, temp(zi, sM, qM), qM);
+    # sft = sjump(u, p, LWP, p.fttype) + sM;
+    # Tft = (sft-g*zi)/Cp;
+    # qft = qjump(u, p, LWP, p.fttype) + qM;
+    # Δsv = (sft-sM) + Cp*((Rv/Rd - 1)*(Tft*qft - T*qM) + ql*T);
 
-    T = (sM-g*zi)/Cp;
-    ql = q_l(zi, temp(zi, sM, qM), qM);
-    sft = sjump(u, p, LWP, p.fttype) + sM;
-    Tft = (sft-g*zi)/Cp;
-    qft = qjump(u, p, LWP, p.fttype) + qM;
-
-    Δsv = (sft-sM) + Cp*((Rv/Rd - 1)*(Tft*qft - T*qM) + ql*T);
+    qj = qjump(u, p, LWP, p.fttype);
+    sj = sjump(u, p, LWP, p.fttype);
+    Δsv = sj + (1-μ)*L0*qj;
     return Δsv
 end
 

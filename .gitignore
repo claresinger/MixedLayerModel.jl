@@ -1,10 +1,12 @@
-experiments/*output/
-experiments/*figures/
-figures/
-test/figures/
 docs/build/
+
 *Manifest.toml
+
 *.cov
 *.ipynb_checkpoints/
 *.vscode/
+
+*.txt
+*.jld2
+*.png
 *.nc

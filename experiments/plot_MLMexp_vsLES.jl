@@ -88,7 +88,8 @@ for (i, co2i) in enumerate(co2)
     zbi = dat["zb"];
     zi[i], zb[i], sst[i] = zii, zbi, ssti;
     lhf[i], ent[i], dR[i] = dat["LHF"], dat["we"]*1e3, dat["ΔR"];
-    Δs_vli[i] = Δs(uf, p, p.fttype)*1e-3;
+    LWPi = incloud_LWP(uf, zbi);
+    Δs_vli[i] = sv_jump(uf, p, LWPi)*1e-3;
     
     # uf = [zii, hM, qM, ssti, 1];
     # cf[i] = 1;

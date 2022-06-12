@@ -51,7 +51,7 @@ N = length(co2);
 
 zi, zb, ent = zeros(N), zeros(N), zeros(N);
 cf, lwp, sst, lhf = zeros(N), zeros(N), zeros(N), zeros(N);
-dR, Δs_vli = zeros(N), zeros(N);
+dR = zeros(N);
 
 for (i, co2i) in enumerate(co2)
     if i == 1
@@ -66,7 +66,6 @@ for (i, co2i) in enumerate(co2)
     zbi = dat["zb"];
     zi[i], zb[i], sst[i], cf[i] = zii, zbi, ssti, cfi;
     lhf[i], ent[i], dR[i] = dat["LHF"], dat["we"]*1e3, dat["ΔR"];
-    Δs_vli[i] = Δs(uf, par, par.fttype)*1e-3;
     lwp[i] = incloud_LWP(uf, zb[i]) * 1e3;
 end
 S = (lhf./dR).*((zi.-zb)./zi);
@@ -83,7 +82,7 @@ N = length(co2);
 
 zi, zb, ent = zeros(N), zeros(N), zeros(N);
 cf, lwp, sst, lhf = zeros(N), zeros(N), zeros(N), zeros(N);
-dR, Δs_vli = zeros(N), zeros(N);
+dR = zeros(N);
 
 for (i, co2i) in enumerate(co2)
     file = "experiments/output/"*exp_path*"co2_downstep_"*string(co2i)*".jld2"
@@ -94,7 +93,6 @@ for (i, co2i) in enumerate(co2)
     zbi = dat["zb"];
     zi[i], zb[i], sst[i], cf[i] = zii, zbi, ssti, cfi;
     lhf[i], ent[i], dR[i] = dat["LHF"], dat["we"]*1e3, dat["ΔR"];
-    Δs_vli[i] = Δs(uf, par, par.fttype)*1e-3;
     lwp[i] = incloud_LWP(uf, zb[i]) * 1e3;
 end
 S = (lhf./dR).*((zi.-zb)./zi);

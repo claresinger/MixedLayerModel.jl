@@ -26,6 +26,8 @@ end
     Δsv = Δs + CpΔTv - CpΔT
         = Δs + Cp(Rv/Rd - 1)(Tft*qft - T_zi*qM) + Cp(Rv/Rd)(T_zi*ql_zi)
 
+    Tv = (Rd*(1-qt) + Rv*qv)/Rd * T
+
     jump in virtual liquid static energy across inversion
     proportional to buoyancy jump
     used in energy balance entrainment
@@ -34,9 +36,11 @@ function sv_jump(u, p, LWP)
     zi, sM, qM, SST, CF = u;
     T_zi = temp(zi, sM, qM);
     ql_zi = q_l(zi, T_zi, qM);
+    
     sft = sjump(u, p, LWP, p.fttype) + sM;
     Tft = (sft-g*zi)/Cp;
     qft = qjump(u, p, LWP, p.fttype) + qM;
+    
     Δsv = (sft-sM) + Cp*(Rv/Rd-1)*(Tft*qft - T_zi*qM) + Cp*(Rv/Rd)*(T_zi*ql_zi);
     return Δsv
 end

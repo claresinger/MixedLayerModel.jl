@@ -15,6 +15,8 @@ else
     tmax = 1.0;
 end
 
+rtol = 1e-3
+
 # test climatology config
 par = climatology();
 for entrainment in (enBal(), bflux())
@@ -48,7 +50,7 @@ for entrainment in (enBal(), bflux())
                 mainsol = load(filename)["mainsol"]
                 println(sol.u[end])
                 println(mainsol.u[end])
-                @test isapprox(sol.u[end][1], mainsol.u[end][1], rtol = 0.1)
+                @test isapprox(sol.u[end][1], mainsol.u[end][1], rtol = rtol)
                 println()
             end
         end
@@ -88,7 +90,7 @@ for entrainment in (enBal(), bflux())
                 mainsol = load(filename)["mainsol"]
                 println(sol.u[end])
                 println(mainsol.u[end])
-                @test isapprox(sol.u[end][1], mainsol.u[end][1], rtol = 0.1)
+                @test isapprox(sol.u[end][1], mainsol.u[end][1], rtol = rtol)
                 println()
             end
         end

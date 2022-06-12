@@ -20,17 +20,19 @@ struct bflux <: ent_type end
 """
 function sv_jump(u, p, LWP)
     zi, hM, qM, SST, CF = u;
-    T_zi = (hM - g*zi - L0*qM)/Cp;
+    T_zi = temp(zi, hM, qM);
     ql_zi = q_l(zi, T_zi, qM);
+    sM = hM - L0*qM;
     
     hft = hjump(u, p, LWP, p.fttype) + hM;
     qft = qjump(u, p, LWP, p.fttype) + qM;
     Tft = (hft - g*zi - L0*qft)/Cp;
+    sft = hft - L0*qft;
 
     Tv_ft = (Rd*(1-qft) + Rv*qft)/Rd * Tft;
     Tv_M = (Rd*(1-qM) + Rv*(qM-ql_zi))/Rd * T_zi;
-    Δsv = Cp*(Tv_ft - Tv_M);
-
+    
+    Δsv = (sft - sM) + Cp*(Tv_ft - Tv_M) - Cp*(Tft - T_zi);
     return Δsv
 end
 

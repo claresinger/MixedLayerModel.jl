@@ -3,7 +3,7 @@ include("../experiments/plot_transient_solution.jl")
 
 using FileIO
 
-makeplot = true
+makeplot = false
 
 if makeplot
     dt = 6.0;

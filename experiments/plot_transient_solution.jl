@@ -16,7 +16,7 @@ function plot_sol(sol, filename)
     zb = zeros(length(t));
     ΔR = zeros(length(t));
     LWP = zeros(length(t));
-    Δsvl = zeros(length(t));
+    Δsv = zeros(length(t));
     ent = zeros(length(t));
     for (i,si) in enumerate(S)
         zb[i] = calc_LCL(sol.u[i]);
@@ -24,7 +24,7 @@ function plot_sol(sol, filename)
         S[i] = calc_S(sol.u[i], par, zb[i], LWP[i]);
         LHF[i] = calc_LHF(sol.u[i], par);
         ΔR[i] = calc_cloudtop_RAD(sol.u[i], par, LWP[i], par.rtype);
-        Δsvl[i] = Δs(sol.u[i], par, LWP[i]);
+        Δsv[i] = sv_jump(sol.u[i], par, LWP[i]);
         ent[i] = we(sol.u[i], par, zb[i], LWP[i], par.etype);
     end 
     plot(size=(1200,800), layout=(6,2), dpi=200, left_margin = 5Plots.mm);
@@ -35,7 +35,7 @@ function plot_sol(sol, filename)
     plot!(t, sst, line=2, marker=:circle, legend=false, subplot=4, ylabel="SST [K]");
     plot!(t, cf * 1e2, line=2, marker=:circle, legend=false, subplot=5, ylabel="CF [%]");
     plot!(t, LWP .* cf * 1e3, line=2, marker=:circle, legend=false, subplot=6, ylabel="LWP [g/m2]");
-    plot!(t, Δsvl * 1e-3, line=2, marker=:circle, legend=false, subplot=7, ylabel="Δs (kJ/kg)");
+    plot!(t, Δsv * 1e-3, line=2, marker=:circle, legend=false, subplot=7, ylabel="Δsv (kJ/kg)");
     plot!(t, ent*1e3, line=2, marker=:circle, legend=false, subplot=8, ylabel="we (mm/s)")
     plot!(t, LHF, line=2, marker=:circle, legend=false, subplot=9, ylabel="LHF [W/m2]");
     plot!(t, ΔR, line=2, marker=:circle, legend=false, subplot=10, ylabel="ΔR [W/m2]");

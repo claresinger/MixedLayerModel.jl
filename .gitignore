@@ -6,7 +6,7 @@ docs/build/
 *.ipynb_checkpoints/
 *.vscode/
 
-*.nc
 *.txt
-*.png
 *.jld2
+*.png
+*.nc

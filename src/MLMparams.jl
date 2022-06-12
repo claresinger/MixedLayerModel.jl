@@ -54,8 +54,8 @@ end
     # params for fixedFT inverson specification
     RHft::Real = 0.25;
     Gamma_q::Real = -3e-6; # (kg/kg/m)
-    sft0::Real = 300*Cp; # (K * J/K/kg), Tft0=300 (K)
-    Gamma_s::Real = Cp*-5e-3 + g; # (K/m * J/K/kg), dT/dz=-5e-3 (K/m)
+    sft0::Real = 300*Cp; # (K * J/K/kg), Tft0 = 300 (K)
+    Gamma_s::Real = Cp*-5e-3 + g; # (K/m * J/K/kg), dT/dz=-5 K/km
     qft0::Real = 0.0; # (kg/kg)
     
     # params for interactive surface fluxes

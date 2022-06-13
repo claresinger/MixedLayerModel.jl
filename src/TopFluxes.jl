@@ -1,5 +1,5 @@
 export sstdep, co2dep, fixedFT, twocol
-export hjump, qjump, H_zi, Q_zi
+export sjump, qjump, S_zi, Q_zi
 
 ###########
 # create structure for fttype
@@ -18,20 +18,20 @@ zft = 1500;
 #         via linear regression to LES results
 # """
 # function qjump(u, p, LWP, fttype::sstdep)
-#     zi, hM, qM, SST, CF = u;
-#     qj = p.qj_m * (SST-290) + p.qj_b; # kg/kg
+#     zi, sM, qM, SST, CF = u;
+#     qj = p.qj_m * (SST-p.SST0) + p.qj_b; # kg/kg
 #     return qj
 # end
 
 # """
-#     hjump(u, p, LWP, p.fttype::sstdep)
-#     defines the inversion jump for h 
+#     sjump(u, p, LWP, p.fttype::sstdep)
+#     defines the inversion jump for s
 #         via linear regression to LES results
 # """
-# function hjump(u, p, LWP, fttype::sstdep)
-#     zi, hM, qM, SST, CF = u;
-#     hj = p.hj_m * (SST-290) + p.hj_b; # m^2/s^2 = J/kg
-#     return hj
+# function sjump(u, p, LWP, fttype::sstdep)
+#     zi, sM, qM, SST, CF = u;
+#     sj = p.sj_m * (SST-p.SST0) + p.sj_b; # m^2/s^2 = J/kg
+#     return sj
 # end
 
 """
@@ -40,7 +40,7 @@ zft = 1500;
         via linear regression to LES results
 """
 function qjump(u, p, LWP, fttype::co2dep)
-    zi, hM, qM, SST, CF = u;
+    zi, sM, qM, SST, CF = u;
     qj = -2.19e-6 * p.CO2 - 4.04e-3; # kg/kg
     qj /= min(1, CF*2.5);
     qj = max(qj, 2e-3 - qM);
@@ -48,16 +48,16 @@ function qjump(u, p, LWP, fttype::co2dep)
 end
 
 """
-    hjump(u, p, LWP, p.fttype::co2dep)
-    defines the inversion jump for h 
+    sjump(u, p, LWP, p.fttype::co2dep)
+    defines the inversion jump for s
         via linear regression to LES results
 """
-function hjump(u, p, LWP, fttype::co2dep)
-    zi, hM, qM, SST, CF = u;
-    hj = -6.07 * p.CO2 + 157.0; # m^2/s^2 = J/kg
-    hj /= min(1, CF*1.5);
-    hj = max(hj, Cp*SST+g*zi+L0*(qM+qjump(u,p,LWP,p.fttype)) - hM);
-    return hj
+function sjump(u, p, LWP, fttype::co2dep)
+    zi, sM, qM, SST, CF = u;
+    sj = (-6.07 + 2.5*2.19) * p.CO2 + (157.0 + 2.5e3*4.04); # m^2/s^2 = J/kg
+    sj /= min(1, CF*1.5)
+    sj = max(sj, Cp*SST + g*zi - sM)
+    return sj
 end
 
 """
@@ -66,7 +66,7 @@ end
     minimum value of qft of 2 g/kg
 """
 function qjump(u, p, LWP, fttype::fixedFT)
-    zi, hM, qM, SST, CF = u;
+    zi, sM, qM, SST, CF = u;
     qft = p.qft0 + p.Gamma_q * zi;
     qft = max(qft, 2e-3);
     qj = qft - qM;
@@ -74,16 +74,14 @@ function qjump(u, p, LWP, fttype::fixedFT)
 end
 
 """
-    hjump(u, p, LWP, p.fttype::fixedFT)
-    defines h+(z) in free troposphere -- given Gamma_s and Gamma_q
+    sjump(u, p, LWP, p.fttype::fixedFT)
+    defines s+(z) in free troposphere -- given Gamma_s and Gamma_q
 """
-function hjump(u, p, LWP, fttype::fixedFT)
-    zi, hM, qM, SST, CF = u;
+function sjump(u, p, LWP, fttype::fixedFT)
+    zi, sM, qM, SST, CF = u;
     sft = p.sft0 + p.Gamma_s * zi;
-    qft = qjump(u, p, LWP, p.fttype) + qM;
-    hft = sft + L0 * qft;
-    hj = hft - hM;
-    return hj
+    sj = sft - sM;
+    return sj
 end
 
 """
@@ -93,35 +91,35 @@ end
     and saturation calculated at Tft and fixed 1500 m 
 """
 function qjump(u, p, LWP, fttype::twocol)
-    zi, hM, qM, SST, CF = u;
-    Tft = temp_ft(trop_sst(u, p, LWP), zft, p);
+    zi, sM, qM, SST, CF = u;
+    SST_trop = trop_sst(u, p, LWP);
+    Tft = temp_ft(SST_trop, zft, p);
     qft = p.RHtropft * q_sat(zft, Tft);
     qj = qft - qM;
     return qj
 end
 
 """
-    hjump(u, p, LWP, p.fttype::twocol)
+    sjump(u, p, LWP, p.fttype::twocol)
 """
-function hjump(u, p, LWP, fttype::twocol)
-    zi, hM, qM, SST, CF = u;
-    qft = qjump(u, p, LWP, p.fttype) + qM;
-    Tft = temp_ft(trop_sst(u, p, LWP), zft, p);
-    hft = Cp*Tft + g*zft + L0*qft;
-    hj = hft - hM;
-    return hj
+function sjump(u, p, LWP, fttype::twocol)
+    zi, sM, qM, SST, CF = u;
+    SST_trop = trop_sst(u, p, LWP);
+    Tft = temp_ft(SST_trop, zft, p);
+    sft = Cp*Tft + g*zft;
+    sj = sft - sM;
+    return sj
 end
 
 """
-    H_zi(u, p, ent, LWP)
+    S_zi(u, p, ent, LWP)
 
     moist enthalpy flux into the mixed-layer from above at z=zi
-    H_zi = -we * (hft - hM)
+    S_zi = -we * (sft - sM)
 """
-function H_zi(u, p, ent, LWP)
-    hj = hjump(u, p, LWP, p.fttype);
-    Hzi = -ent * hj;
-    return Hzi
+function S_zi(u, p, ent, LWP)
+    sj = sjump(u, p, LWP, p.fttype);
+    return -ent * sj
 end
 
 """
@@ -132,6 +130,5 @@ end
 """
 function Q_zi(u, p, ent, LWP)
     qj = qjump(u, p, LWP, p.fttype);
-    Qzi = -ent * qj;
-    return Qzi
+    return -ent * qj
 end

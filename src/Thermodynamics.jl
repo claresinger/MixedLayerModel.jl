@@ -54,16 +54,15 @@ function q_l(z, T, qt)
 end
 
 """
-    temp(z, h, qt)
+    temp(z, s, qt)
 
     uses saturation adjustment on the enthalpy
 """
-function temp(z, h, qt)
-    h_act(T) = Cp*T + g*z + L0*(qt - q_l(z,T,qt));
-    f(x) = h - h_act(x);
-    Tqt = (h - g*z - L0*qt) / Cp;
-    T = find_zero(f, eltype(h)(Tqt), Order1(), atol=0.1);
-    return T
+function temp(z, s, qt)
+    s_act(T) = Cp*T + g*z - L0*q_l(z,T,qt);
+    f(x) = s - s_act(x);
+    Tguess = (s - g*z) / Cp;
+    return find_zero(f, eltype(s)(Tguess), Order1(), atol=0.1)
 end
 
 """
@@ -72,9 +71,9 @@ end
     calculate the lifiting condensation level
 """
 function calc_LCL(u)
-    zi, hM, qtM, SST, CF = u;
+    zi, sM, qtM, SST, CF = u;
 
-    f(z) = qtM - q_sat(z,temp(z, hM, qtM));
+    f(z) = qtM - q_sat(z,temp(z, sM, qtM));
     if f(0) > 0
         zb = 0.0;
     elseif f(zi) < 0
@@ -92,11 +91,11 @@ end
     calulcate the in-cloud liquid water path
 """
 function incloud_LWP(u, zb)
-    zi, hM, qtM, SST, CF = u;
+    zi, sM, qtM, SST, CF = u;
 
     dz = 1.0;
     z = zb:dz:zi;
-    T = temp.(z,hM,qtM);
+    T = temp.(z,sM,qtM);
     ρ = rho.(z,T);
     ql = q_l.(z,T,qtM);
     liq_wat_path = sum(ρ .* ql .* dz);
@@ -114,12 +113,10 @@ end
 """
 function calc_qft0(RHft, Gamma_q, sft0, Gamma_s)
     zft = 1000.0;
-    qft(x) = x + Gamma_q * zft;
-    hft(x) = (sft0 + Gamma_s * zft) + L0 * qft(x);
-    Tft(x) = temp(zft, hft(x), qft(x));
-    f(x) = x - q_sat(zft, Tft(x)) * RHft;
-    qft0 = find_zero(f, (0.0,0.1), Bisection());
-    qft0 = qft0 - Gamma_q * zft;
+    sft = sft0 + Gamma_s * zft;
+    Tft = (sft - g*zft) / Cp;
+    qft = RHft * q_sat(zft, Tft);
+    qft0 = qft - Gamma_q*zft;
     return qft0
 end
 

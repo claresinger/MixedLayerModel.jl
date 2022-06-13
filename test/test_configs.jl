@@ -15,6 +15,8 @@ else
     tmax = 1.0;
 end
 
+rtol = 1e-3
+
 # test climatology config
 par = climatology();
 for entrainment in (enBal(), bflux())
@@ -28,20 +30,29 @@ for entrainment in (enBal(), bflux())
             println(entrainment, fluxes, radiation)
 
             u0, sol = run_mlm(par, dt=3600.0*dt, tspan=(0.0,3600.0*24.0*tmax));
-            pathname = "main_figures/climatology_";
+            pathname = "figures/climatology_";
             filename = pathname*string(entrainment)*string(fluxes)*string(radiation)*"_sol400.png";
             makeplot ? plot_sol(sol, filename) : println("no plots")
             filename = pathname*string(entrainment)*string(fluxes)*string(radiation)*"_sol400.jld2";
-            makeplot ? save(filename, Dict("mainsol" => sol)) : println("no save")
+            makeplot ? save(filename, Dict("sol" => sol)) : println("no save")
             uf = sol.u[end];
             zb = calc_LCL(uf);
             du = zeros(5);
             mlm(du, uf, par, 0.0);
 
-            println(uf)
             @test all(uf .> 0)
             @test zb <= uf[1]
             @test all(du/uf .< 1e-3)
+
+            if makeplot
+                pathname = "main_figures/climatology_";
+                filename = pathname*string(entrainment)*string(fluxes)*string(radiation)*"_sol400.jld2";
+                mainsol = load(filename)["mainsol"]
+                println(sol.u[end])
+                println(mainsol.u[end])
+                @test isapprox(sol.u[end][1], mainsol.u[end][1], rtol = rtol)
+                println()
+            end
         end
     end
 end
@@ -59,20 +70,29 @@ for entrainment in (enBal(), bflux())
             println(entrainment, sst, freetrop)
 
             u0, sol = run_mlm(par, dt=3600.0*dt, tspan=(0.0,3600.0*24.0*tmax));
-            pathname = "main_figures/upCO2_";
+            pathname = "figures/upCO2_";
             filename = pathname*string(entrainment)*string(sst)*string(freetrop)*"_sol400.png";
             makeplot ? plot_sol(sol, filename) : println("no plots")
             filename = pathname*string(entrainment)*string(sst)*string(freetrop)*"_sol400.jld2";
-            makeplot ? save(filename, Dict("mainsol" => sol)) : println("no save")
+            makeplot ? save(filename, Dict("sol" => sol)) : println("no save")
             uf = sol.u[end];
             zb = calc_LCL(uf);
             du = zeros(5);
             mlm(du, uf, par, 0.0);
 
-            println(uf)
             @test all(uf .> 0)
             @test zb <= uf[1]
             @test all(du/uf .< 1e-3)
+
+            if makeplot
+                pathname = "main_figures/upCO2_";
+                filename = pathname*string(entrainment)*string(sst)*string(freetrop)*"_sol400.jld2";
+                mainsol = load(filename)["mainsol"]
+                println(sol.u[end])
+                println(mainsol.u[end])
+                @test isapprox(sol.u[end][1], mainsol.u[end][1], rtol = rtol)
+                println()
+            end
         end
     end
 end

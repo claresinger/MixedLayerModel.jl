@@ -13,7 +13,7 @@ Cp = 1004.0         # heat capacity at constant pressure (J/K/kg)
 σ_SB = 5.67e-8      # stefan-boltzmann constant (W/m^2/K^4)
 ρw = 1e3            # density of water (kg/m^3)
 Cw = 4.19e3         # (heat capacity of water (J/kg/K) 
-Γd = g/Cp           # dry adiabatic lapse rate (K/m)
+Γd = g / Cp         # dry adiabatic lapse rate
 
 # definitions
 pref = 100000.0     # reference pressure (Pa = J/m^3)

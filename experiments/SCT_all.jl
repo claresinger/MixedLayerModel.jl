@@ -24,7 +24,7 @@ for (i, sitei) in enumerate(site)
     dat = load(file);
     uf = dat["uf"];
     par = dat["p"];
-    zii, hM, qM, ssti, cfi = uf;
+    zii, sM, qM, ssti, cfi = uf;
     zbi = dat["zb"];
     zi[i], zb[i], sst[i], cf[i] = zii, zbi, ssti, cfi;
     lhf[i], ent[i], dR[i] = dat["LHF"], dat["we"]*1e3, dat["ΔR"];

@@ -7,7 +7,7 @@ function plot_sol(sol, filename)
     ## plot and save
     t = sol.t / 3600.0 / 24.0;
     zi = getindex.(sol.u,1);
-    hM = getindex.(sol.u,2);
+    sM = getindex.(sol.u,2);
     qtM = getindex.(sol.u,3);
     sst = getindex.(sol.u,4);
     cf = getindex.(sol.u,5);
@@ -30,7 +30,7 @@ function plot_sol(sol, filename)
     plot(size=(1200,800), layout=(6,2), dpi=200, left_margin = 5Plots.mm);
     plot!(t, zi, line=2, marker=:circle, legend=false, subplot=1, ylabel="zi, zb [m]");
     plot!(t, zb, line=2, marker=:circle, legend=false, subplot=1);
-    plot!(t, hM * 1e-3, line=2, marker=:circle, legend=false, subplot=2, ylabel="hM [kJ/kg]"); 
+    plot!(t, sM * 1e-3, line=2, marker=:circle, legend=false, subplot=2, ylabel="sM [kJ/kg]"); 
     plot!(t, qtM * 1e3, line=2, marker=:circle, legend=false, subplot=3, ylabel="qtM [g/kg]");
     plot!(t, sst, line=2, marker=:circle, legend=false, subplot=4, ylabel="SST [K]");
     plot!(t, cf * 1e2, line=2, marker=:circle, legend=false, subplot=5, ylabel="CF [%]");

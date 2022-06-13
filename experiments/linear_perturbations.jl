@@ -62,7 +62,7 @@ for (j,X0) in enumerate(X0_arr)
 
         # extract end state
         uf = sol.u[end];
-        zi, hM, qM, SST, CFi = uf;
+        zi, sM, qM, SST, CFi = uf;
         zb = calc_LCL(uf);
         LWPi = incloud_LWP(uf, zb);
         CF_arr[j,i] = CFi;

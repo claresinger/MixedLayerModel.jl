@@ -30,7 +30,7 @@ ENV["GKSwstype"]="nul"
 u0, sol = run_mlm(par, dt=3600.0*dt, tspan=(0.0,3600.0*24.0*tmax));
 t = sol.t / 3600.0 / 24.0;
 zi = getindex.(sol.u,1);
-hM = getindex.(sol.u,2) * 1e-3;
+sM = getindex.(sol.u,2) * 1e-3;
 qtM = getindex.(sol.u,3) * 1e3;
 sst = getindex.(sol.u,4);
 cf = getindex.(sol.u,5);
@@ -49,7 +49,7 @@ end
 plot(size=(1200,800), layout=(5,2), dpi=200, left_margin = 5Plots.mm);
 plot!(t, zi, marker="o-", legend=false, subplot=1, ylabel="zi, zb [m]");
 plot!(t, zb, marker="o-", legend=false, subplot=1);
-plot!(t, hM, marker="o-", legend=false, subplot=2, ylabel="hM [kJ/kg]"); 
+plot!(t, sM, marker="o-", legend=false, subplot=2, ylabel="sM [kJ/kg]"); 
 plot!(t, qtM, marker="o-", legend=false, subplot=3, ylabel="qtM [g/kg]");
 plot!(t, sst, marker="o-", legend=false, subplot=4, ylabel="SST [K]");
 plot!(t, cf * 1e2, marker="o-", legend=false, subplot=5, ylabel="CF [%]");
@@ -65,10 +65,10 @@ savefig(replace(path, "output"=>"figures")*"sol_mean.png");
 uf = sol.u[end];
 du = zeros(5);
 mlm(du, uf, par, 0.0);
-zi,hM,qM,SST = uf;
+zi,sM,qM,SST = uf;
 zb = calc_LCL(uf);
 LWP = incloud_LWP(uf, zb);
-RH = min(qM / q_sat(0.0, temp(0.0, hM, qM)), 1.0);
+RH = min(qM / q_sat(0.0, temp(0.0, sM, qM)), 1.0);
 println(uf);
 println(du);
 

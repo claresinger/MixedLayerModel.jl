@@ -7,7 +7,7 @@ include("mlm_solve_funcs.jl")
 include("plot_transient_solution.jl")
 
 # define path to save file (which experiment are you running?)
-path = "experiments/output/fix_ϵc_Ttrop/";
+path = "experiments/output/switch_h_to_sl/";
 
 # define OHU from 400 ppm simulation
 par = upCO2();
@@ -15,7 +15,7 @@ par.etype = enBal();
 par.fttype = twocol();
 par.rtype = varRad();
 par.stype = fixSST();
-dt = 6.0;
+dt = 12.0;
 tmax = 40.0;
 
 ## solve and plot
@@ -29,17 +29,17 @@ plot_sol(sol, filename);
 uf = sol.u[end];
 du = zeros(5);
 mlm(du, uf, par, 0.0);
-zi,hM,qM,SST,CF = uf;
+zi,sM,qM,SST,CF = uf;
 zb = calc_LCL(uf);
 LWP = incloud_LWP(uf, zb);
-RH = min(qM / q_sat(0.0, temp(0.0, hM, qM)), 1.0);
+RH = min(qM / q_sat(0.0, temp(0.0, sM, qM)), 1.0);
 println(uf);
 println(du);
 println("cloud base: ",zb)
 println("LWP: ", LWP);
 println("tropical sst: ", trop_sst(uf, par, LWP));
 println("ft T: ", temp_ft(trop_sst(uf, par, LWP), zi, par));
-println("cloud top T: ", temp(zi, hM, qM));
+println("cloud top T: ", temp(zi, sM, qM));
 println("ft qt: ", qjump(uf, par, LWP, par.fttype) + qM);
 
 output = Dict("p" => par, "u0" => u0, "uf" => uf, "du/u" => du./uf, 

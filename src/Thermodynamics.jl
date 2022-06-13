@@ -1,7 +1,6 @@
 export ρref, pres, q_sat, q_v, q_l, temp, rho
 export incloud_LWP, calc_LCL
 export Γs, moist_adiabat, temp_ft
-export calc_qft0
 
 """
     ρref(T)    
@@ -53,15 +52,15 @@ function q_l(z, T, qt)
 end
 
 """
-    temp(z, h, qt)
+    temp(z, s, qt)
 
     uses saturation adjustment on the enthalpy
 """
-function temp(z, h, qt)
-    h_act(T) = Cp*T + g*z + L0*(qt - q_l(z,T,qt));
-    f(x) = h - h_act(x);
-    Tqt = (h - g*z - L0*qt) / Cp;
-    return find_zero(f, eltype(h)(Tqt), Order1(), atol=0.1)
+function temp(z, s, qt)
+    s_act(T) = Cp*T + g*z - L0*q_l(z,T,qt);
+    f(x) = s - s_act(x);
+    Tguess = (s - g*z) / Cp;
+    return find_zero(f, eltype(s)(Tguess), Order1(), atol=0.1)
 end
 
 """
@@ -70,9 +69,9 @@ end
     calculate the lifiting condensation level
 """
 function calc_LCL(u)
-    zi, hM, qtM, SST, CF = u;
+    zi, sM, qtM, SST, CF = u;
 
-    f(z) = qtM - q_sat(z,temp(z, hM, qtM));
+    f(z) = qtM - q_sat(z,temp(z, sM, qtM));
     if f(0) > 0
         zb = 0.0;
     elseif f(zi) < 0
@@ -90,32 +89,14 @@ end
     calulcate the in-cloud liquid water path
 """
 function incloud_LWP(u, zb)
-    zi, hM, qtM, SST, CF = u;
+    zi, sM, qtM, SST, CF = u;
 
     dz = 1.0;
     z = zb:dz:zi;
-    T = temp.(z,hM,qtM);
+    T = temp.(z,sM,qtM);
     ρ = rho.(z,T);
     ql = q_l.(z,T,qtM);
     return sum(ρ .* ql .* dz)
-end
-
-"""
-    calc_qft0(RHft, Gamma_q, sft0, Gamma_s)
-
-    calculate the initial free-tropospheric humidity given
-    ft RH, ft humidity lapse rate, initial ft dry static energy, 
-    and ft dry static energy lapse rate
-"""
-function calc_qft0(RHft, Gamma_q, sft0, Gamma_s)
-    zft = 1000.0;
-    sft = sft0 + Gamma_s * zft;
-    qft(qft0) = qft0 + Gamma_q * zft;
-    hft(qft0) = sft + L0*qft(qft0);
-    Tft(qft0) = temp(zft, hft(qft0), qft(qft0));
-    f(qft0) = qft0 - RHft * q_sat(zft, Tft(qft0));
-    qft0 = find_zero(f, (0.0,0.1), Bisection());
-    return qft0
 end
 
 """

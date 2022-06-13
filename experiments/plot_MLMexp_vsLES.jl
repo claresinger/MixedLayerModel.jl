@@ -83,17 +83,12 @@ for (i, co2i) in enumerate(co2)
     dat = load(file);
     uf = dat["uf"];
     p = dat["p"];
-    zii, hM, qM, ssti, cfi = uf;
-    #zii, hM, qM, ssti = uf;
+    zii, sM, qM, ssti, cfi = uf;
     zbi = dat["zb"];
     zi[i], zb[i], sst[i] = zii, zbi, ssti;
     lhf[i], ent[i], dR[i] = dat["LHF"], dat["we"]*1e3, dat["ΔR"];
     LWPi = incloud_LWP(uf, zbi);
     Δs_vli[i] = sv_jump(uf, p, LWPi)*1e-3;
-    
-    # uf = [zii, hM, qM, ssti, 1];
-    # cf[i] = 1;
-    # lwp[i] = incloud_LWP(uf) * 1e3;
 
     cf[i] = cfi;
     lwp[i] = incloud_LWP(uf, zb[i]) * 1e3;

@@ -15,6 +15,8 @@ else
     tmax = 1.0;
 end
 
+rtol = 1e-3
+
 # test climatology config
 par = climatology();
 for entrainment in (enBal(), bflux())
@@ -84,7 +86,7 @@ for entrainment in (enBal(), bflux())
 
             if makeplot
                 pathname = "main_figures/upCO2_";
-                filename = pathname*string(entrainment)*string(fluxes)*string(radiation)*"_sol400.jld2";
+                filename = pathname*string(entrainment)*string(sst)*string(freetrop)*"_sol400.jld2";
                 mainsol = load(filename)["mainsol"]
                 println(sol.u[end])
                 println(mainsol.u[end])

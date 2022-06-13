@@ -15,7 +15,7 @@ struct fixRad <: rad_type end
     temperature as a function of CO2 and H2O above-cloud
 """
 function ΔTa(u, p, LWP)
-    zi, hM, qM, SST, CF = u;
+    zi, sM, qM, SST, CF = u;
     qft = qjump(u, p, LWP, p.fttype) + qM;
     #ΔT = 16.0 + 3.0*log(p.CO2) + 8.9*log(qft); # co2 and qft
     ΔT = -10.1 + 3.1*log(p.CO2) + 5.3*log(qft);
@@ -28,7 +28,7 @@ end
     calculate net SW and LW radiation at the surface
 """
 function calc_surf_RAD(u, p, LWP)
-    zi, hM, qM, SST, CF = u;
+    zi, sM, qM, SST, CF = u;
 
     # shortwave calculation
     αc = cloud_albedo(LWP);
@@ -63,8 +63,8 @@ end
     gives ΔR ≈ 75 W/m2 for 400 ppm CO2
 """
 function calc_cloudtop_RAD(u, p, LWP, rtype::varRad)
-    zi, hM, qM, SST, CF = u;
-    Tct = temp(zi,hM,qM);
+    zi, sM, qM, SST, CF = u;
+    Tct = temp(zi,sM,qM);
     ϵc_up = cloud_emissivity(LWP);
     Teff = Tct + ΔTa(u, p, LWP);
     ΔR = CF * σ_SB * ϵc_up * (Tct^4 - Teff^4);
@@ -108,7 +108,7 @@ end
     and warming directly from GHG that depends on the ECS parameter
 """
 function trop_sst(u, p, LWP)
-    zi, hM, qM, SST, CF = u;
+    zi, sM, qM, SST, CF = u;
 
     # proportionality factor for 
     # tropical temperature increase 

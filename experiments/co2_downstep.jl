@@ -52,10 +52,10 @@ plot_sol(sol, filename);
 uf = sol.u[end];
 du = zeros(5);
 mlm(du, uf, par, 0.0);
-zi,hM,qM,SST,CF = uf;
+zi,sM,qM,SST,CF = uf;
 zb = calc_LCL(uf);
 LWP = incloud_LWP(uf, zb);
-RH = min(qM / q_sat(0.0, temp(0.0, hM, qM)), 1.0);
+RH = min(qM / q_sat(0.0, temp(0.0, sM, qM)), 1.0);
 println(uf);
 println(du);
 println("cloud base: ",zb)

@@ -6,7 +6,7 @@ export upCO2, climatology
 
     # baseline CO2
     CO2::Real = 400; # (ppm)
-    ECS::Real = 3.0 # (K / co2 doubling)
+    ECS::Real = 3.0; # (K / co2 doubling)
     
     # subsidence strength
     D::Real = 6.0e-6; # (1/s)
@@ -27,11 +27,11 @@ export upCO2, climatology
     RHtropft::Real = 0.2;
 
     # fixed radiation
-    ΔR::Real = 80.0;
+    ΔR::Real = 80.0; # (W/m2)
 
     # fixed surface fluxes
-    SHF::Real = 10.0;
-    LHF::Real = 80.0;
+    SHF::Real = 10.0; # (W/m2)
+    LHF::Real = 80.0; # (W/m2)
 
     # default types
     etype::ent_type = enBal();
@@ -49,11 +49,9 @@ end
     D::Real = 6.0e-6; # (1/s)
     
     # params for fixedFT inverson specification
-    RHft::Real = 0.25;
-    Gamma_q::Real = -3e-6; # (kg/kg/m)
-    sft0::Real = 300*Cp; # (K * J/K/kg), Tft0 = 300 K
+    sft0::Real = 300*Cp; # (K * J/K/kg), Tft0 = 300 (K)
     Gamma_s::Real = Cp*-5e-3 + g; # (K/m * J/K/kg), dT/dz=-5 K/km
-    qft0::Real = 0.0; # (kg/kg)
+    RHft::Real = 0.25;
     
     # params for interactive surface fluxes
     SST0::Real = 290.; # (K)

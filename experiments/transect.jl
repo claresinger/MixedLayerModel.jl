@@ -78,7 +78,7 @@ for (i,loni) in enumerate(lon)
 
         # t = sol.t / 3600.0 / 24.0;
         # zi = getindex.(sol.u,1);
-        # hM = getindex.(sol.u,2) * 1e-3;
+        # sM = getindex.(sol.u,2) * 1e-3;
         # qtM = getindex.(sol.u,3) * 1e3;
         # sst = getindex.(sol.u,4);
         # cf = getindex.(sol.u,5);
@@ -103,7 +103,7 @@ for (i,loni) in enumerate(lon)
         # p = plot(size=(1200,800), layout=(6,2), dpi=200, left_margin = 5Plots.mm);
         # plot!(t, zi, marker="o-", legend=false, subplot=1, ylabel="zi, zb [m]");
         # plot!(t, zb, marker="o-", legend=false, subplot=1);
-        # plot!(t, hM, marker="o-", legend=false, subplot=2, ylabel="hM [kJ/kg]"); 
+        # plot!(t, sM, marker="o-", legend=false, subplot=2, ylabel="sM [kJ/kg]"); 
         # plot!(t, qtM, marker="o-", legend=false, subplot=3, ylabel="qtM [g/kg]");
         # plot!(t, sst, marker="o-", legend=false, subplot=4, ylabel="SST [K]");
         # plot!(t, cf * 1e2, marker="o-", legend=false, subplot=5, ylabel="CF [%]");

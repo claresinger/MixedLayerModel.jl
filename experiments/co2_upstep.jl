@@ -9,11 +9,11 @@ include("plot_transient_solution.jl")
 
 # use command line argument to set co2
 # newCO2 = parse(Float64,ARGS[1]);
-newCO2 = 1400.0;
+newCO2 = 800.0;
 println(newCO2);
 
 # load initial condition from file
-path = "experiments/output/fix_ϵc_Ttrop/";
+path = "experiments/output/switch_h_to_sl/";
 restarttry1 = path*"co2_upstep_"*string(Int(newCO2-100))*".jld2";
 restarttry2 = path*"co2_upstep_"*string(Int(newCO2-200))*".jld2";
 restarttry3 = path*"co2_upstep_"*string(Int(newCO2-400))*".jld2";
@@ -52,10 +52,10 @@ plot_sol(sol, filename);
 uf = sol.u[end];
 du = zeros(5);
 mlm(du, uf, par, 0.0);
-zi,hM,qM,SST,CF = uf;
+zi,sM,qM,SST,CF = uf;
 zb = calc_LCL(uf);
 LWP = incloud_LWP(uf, zb);
-RH = min(qM / q_sat(0.0, temp(0.0, hM, qM)), 1.0);
+RH = min(qM / q_sat(0.0, temp(0.0, sM, qM)), 1.0);
 println(uf);
 println(du);
 println("cloud base: ",zb)

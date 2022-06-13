@@ -1,5 +1,5 @@
 export ent_type
-export fixed, enBal, bflux
+export enBal, bflux
 export sv_jump,  we
 
 ###########
@@ -33,16 +33,6 @@ function sv_jump(u, p, LWP)
     
     Δsv = (sft-sM) + Cp*(Rv/Rd-1)*(Tft*qft - T_zi*qM) + Cp*(Rv/Rd)*(T_zi*ql_zi);
     return Δsv
-end
-
-"""
-    we(u, p, zb, LWP, etype::fixed)
-
-    fixed entrainment velocity of 7 mm/s
-""" 
-function we(u, p, zb, LWP, etype::fixed)
-    w = 0.007; # 7 mm/s
-    return w
 end
 
 """

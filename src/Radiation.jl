@@ -17,8 +17,8 @@ struct fixRad <: rad_type end
 function ΔTa(u, p, LWP)
     zi, hM, qM, SST, CF = u;
     qft = qjump(u, p, LWP, p.fttype) + qM;
-    #qft = qft/2;
-    ΔT = 16.0 + 3.0*log(p.CO2) + 8.9*log(qft); # co2 and qft
+    #ΔT = 16.0 + 3.0*log(p.CO2) + 8.9*log(qft); # co2 and qft
+    ΔT = -10.1 + 3.1*log(p.CO2) + 5.3*log(qft);
     return ΔT
 end
 
@@ -65,11 +65,9 @@ end
 function calc_cloudtop_RAD(u, p, LWP, rtype::varRad)
     zi, hM, qM, SST, CF = u;
     Tct = temp(zi,hM,qM);
-    #ϵc_up = cloud_emissivity(LWP);
-    ϵc_up = 1.0;
+    ϵc_up = cloud_emissivity(LWP);
     Teff = Tct + ΔTa(u, p, LWP);
     ΔR = CF * σ_SB * ϵc_up * (Tct^4 - Teff^4);
-    ΔR = max(ΔR, 1.0);
     return ΔR
 end
 
@@ -127,9 +125,9 @@ function trop_sst(u, p, LWP)
     # ECS = °C per CO2 doubling 
     ΔT_greenhouse = p.ECS / log(2) * log(p.CO2 / 400);
 
-    # T_trop = p.Ts400 + ΔT_export + ΔT_greenhouse;
+    T_trop = p.Ts400 + ΔT_export + ΔT_greenhouse;
     # T_trop = (p.Ts400 - 5) + ΔT_export + ΔT_greenhouse;
     # T_trop = (p.Ts400 - 5 - p.SST0) + SST;
-    T_trop = p.Ts400 - 5;
+    # T_trop = p.Ts400 - 5;
     return T_trop
 end

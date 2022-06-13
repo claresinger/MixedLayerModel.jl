@@ -68,7 +68,7 @@ end
 function qjump(u, p, LWP, fttype::fixedFT)
     zi, hM, qM, SST, CF = u;
     qft = p.qft0 + p.Gamma_q * zi;
-    qft = max(qft, 2e-3);
+    # qft = max(qft, 2e-3);
     qj = qft - qM;
     return qj
 end
@@ -85,6 +85,30 @@ function hjump(u, p, LWP, fttype::fixedFT)
     hj = hft - hM;
     return hj
 end
+
+# """
+#     qjump(u, p, LWP, p.fttype::fixedFT)
+#     defines qt+(z) in free troposphere -- given Gamma_q
+#     minimum value of qft of 2 g/kg
+# """
+# function qjump(u, p, LWP, fttype::fixedFT)
+#     zi, hM, qM, SST, CF = u;
+#     Tft = temp(zi, hM, qM) + p.ΔTft
+#     qft = p.RHft * q_sat(zi, Tft);
+#     qj = qft - qM;
+#     return qj
+# end
+
+# """
+#     hjump(u, p, LWP, p.fttype::fixedFT)
+#     defines h+(z) in free troposphere -- given Gamma_s and Gamma_q
+# """
+# function hjump(u, p, LWP, fttype::fixedFT)
+#     zi, hM, qM, SST, CF = u;
+#     Tzi = temp(zi, hM, qM);
+#     hj = Cp*p.ΔTft + L0*(qjump(u, p, LWP, p.fttype) - q_l(zi, Tzi, qM));
+#     return hj
+# end
 
 """
     qjump(u, p, LWP, p.fttype::twocol)

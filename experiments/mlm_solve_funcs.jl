@@ -12,8 +12,10 @@ termtol = 1e-6;
 function run_mlm(params; dt=3600.0*5.0, tspan=(0.0,3600.0*24.0*10.0))
     qtM0 = 0.7 * q_sat(0.0, params.SST0);
     sM0 = MixedLayerModel.Cp * params.SST0;
-    zi0 = 1000.0;
-    CF0 = 1.0;
+    # zi0 = 1000.0;
+    # CF0 = 1.0;
+    zi0 = 2000.0;
+    CF0 = 0.2;
     u0 = [zi0, sM0, qtM0, params.SST0, CF0]; 
     prob = ODEProblem(ODEFunction(mlm, tgrad=(du, u, p, t) -> fill!(du, 0.0)), 
             u0, 

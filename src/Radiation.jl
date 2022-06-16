@@ -79,10 +79,10 @@ end
     goes between 0 and 0.8
 """
 function cloud_albedo(LWP)
-    # m = 0.795;
-    # Lx = 19.136*1e-3;
-    # αc = m * (1 - Lx/(Lx+LWP));
-    αc = 0.8;
+    m = 0.795;
+    Lx = 19.136*1e-3;
+    αc = m * (1 - Lx/(Lx+LWP));
+    # αc = 0.8;
     return αc
 end
 
@@ -95,9 +95,9 @@ end
     based on Stephens 1978 part II: eq 15 and 16
 """
 function cloud_emissivity(LWP)
-    # a0 = 0.15 * 1e3; # m^2/kg
-    # ϵc = 1 - exp(-a0 * LWP); 
-    ϵc = 1.0;
+    a0 = 0.15 * 1e3; # m^2/kg
+    ϵc = 1 - exp(-a0 * LWP); 
+    # ϵc = 1.0;
     return ϵc
 end
 

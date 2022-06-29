@@ -21,7 +21,7 @@ for Ts in 295:5:315
         markershape=:circle, markerstrokewidth=0, label=Ts)
 end
 
-ds = Dataset("experiments/LES_temp_profiles.nc")
+ds = Dataset("experiments/data/LES_temp_profiles.nc")
 p_LES = ds["pressure"]
 T_LES = ds["temperature"]
 co2_LES = ds["co2"]

@@ -10,7 +10,7 @@ using MixedLayerModel: Rd, Rv, L0, T0, Cp, δ, ϵ, μ
 ENV["GKSwstype"]="nul"
 
 # plot LES
-ds = Dataset("experiments/LES_steadystate_all_upsteps.nc");
+ds = Dataset("experiments/data/LES_steadystate_all_upsteps.nc");
 max = 6;
 co2 = Float64.(ds["CO2"][1:max]);
 zi = Float64.(ds["zi"][1:max]);

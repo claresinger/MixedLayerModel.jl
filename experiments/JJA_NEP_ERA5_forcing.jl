@@ -21,7 +21,7 @@ par.Gamma_q = 0.0; # (kg/kg/m)
 par.Gamma_s = 0.0; # (K/m)
 
 # load boundary conditions from file
-file = "experiments/JJA_NEP_boundary_conditions_from_reanalysis.nc";
+file = "experiments/data/JJA_NEP_boundary_conditions_from_reanalysis.nc";
 ds = Dataset(file, "r");
 
 #println(ds)

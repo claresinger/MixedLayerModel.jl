@@ -18,7 +18,7 @@ par.fttype = fixedFT();
 par.etype = enBal();
 
 # load boundary conditions from file
-file = "experiments/transect_BCs_JJA_NEP.nc";
+file = "experiments/data/transect_BCs_JJA_NEP.nc";
 ds = Dataset(file, "r");
 # println(ds)
 
@@ -124,7 +124,7 @@ end
 # plot!(lon, zb_ss, subplot=2, marker=:o, legend=false, ylabel="zb, zi (m)")
 # plot!(lon, cf_ss*100, subplot=3, marker=:o, legend=false, ylabel="CF (%)", xlabel="longitude")
 # plot!(lon, real_cf*100, subplot=3, marker=:o, color=:black)
-# file = "experiments/transect_BCs_JJA_NEP.nc";
-# savefig(replace(file, "/"=>"/figures/", "_BCs_"=>"_", ".nc"=>".png"));
+# file = "experiments/data/transect_BCs_JJA_NEP.nc";
+# savefig(replace(file, "data/"=>"figures/", "_BCs_"=>"_", ".nc"=>".png"));
 
 close(ds)

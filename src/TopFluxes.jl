@@ -1,4 +1,4 @@
-export sstdep, co2dep, fixedFT, twocol
+export sstdep, co2dep, fixEIS, fixedFT, twocol
 export sjump, qjump, S_zi, Q_zi
 
 ###########
@@ -7,6 +7,7 @@ export sjump, qjump, S_zi, Q_zi
 abstract type ft_type end
 # struct sstdep <: ft_type end
 struct co2dep <: ft_type end
+struct fixEIS <: ft_type end
 struct fixedFT <: ft_type end
 struct twocol <: ft_type end
 
@@ -57,6 +58,30 @@ function sjump(u, p, LWP, fttype::co2dep)
     sj = (-6.07 + 2.5*2.19) * p.CO2 + (157.0 + 2.5e3*4.04); # m^2/s^2 = J/kg
     sj /= min(1, CF*1.5)
     sj = max(sj, Cp*SST + g*zi - sM)
+    return sj
+end
+
+"""
+    qjump(u, p, LWP, p.fttype::fixEIS)
+    defines qft from p.RHft and Tft(sft)
+"""
+function qjump(u, p, LWP, fttype::fixEIS)
+    zi, sM, qM, SST, CF = u;
+    sft = sjump(u, p, LWP, p.fttype) + sM;
+    qft = p.RHft * q_sat(zi, (sft - g*zi)/Cp);
+    qj = qft - qM;
+    return qj
+end
+
+"""
+    sjump(u, p, LWP, p.fttype::fixEIS)
+    defines s+(z) in free troposphere -- given Gamma_s and Gamma_q
+"""
+function sjump(u, p, LWP, fttype::fixEIS)
+    zi, sM, qM, SST, CF = u;
+    Tft = p.SST0 + p.EIS + p.dTdz*zi;
+    sft = Cp*Tft + g*zi;
+    sj = sft - sM;
     return sj
 end
 
@@ -113,7 +138,7 @@ end
 """
     S_zi(u, p, ent, LWP)
 
-    moist enthalpy flux into the mixed-layer from above at z=zi
+    energy flux into the mixed-layer from above at z=zi
     S_zi = -we * (sft - sM)
 """
 function S_zi(u, p, ent, LWP)

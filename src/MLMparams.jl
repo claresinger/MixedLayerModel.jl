@@ -53,6 +53,10 @@ end
     Gamma_s::Real = Cp*-5e-3 + g; # (K/m * J/K/kg), dT/dz=-5 K/km
     RHft::Real = 0.25;
     
+    # for fixEIS inversion
+    EIS::Real = 10.0; # (K)
+    dTdz::Real = -5e-3 # (decreases by 5 K/km)
+    
     # params for interactive surface fluxes
     SST0::Real = 290.; # (K)
     V::Real = 10.0; # (m/s)

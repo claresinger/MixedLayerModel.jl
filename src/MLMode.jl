@@ -68,8 +68,8 @@ function dSSTdt(u, p, LWP, stype::varSST)
     RAD = calc_surf_RAD(u, p, LWP);
     SHF = calc_SHF(u, p);
     LHF = calc_LHF(u, p);   
-    c = ρw * Cw * p.Hw;
-    return (1/c) * (RAD - SHF - LHF - p.OHU)
+    τ_SST = ρw * Cw * p.Hw;
+    return (RAD - SHF - LHF - p.OHU) / τ_SST
 end
 
 """
@@ -91,9 +91,10 @@ end
 
     define the coupled ODE
       dzi/dt = we - D*zi
-      dsM/dt = -dE/dz = 1/zi * (Szi - S0 + dR/rho)
-      dqM/dt = -dW/dz = 1/zi * (Qzi - Q0)
-      dSST/dt = 1/c * (SWnet - LWnet - SHF - LHF - OHU)
+      dsM/dt = -dE/dz = -1/zi * (Szi - S0 + dR/rho)
+      dqM/dt = -dW/dz = -1/zi * (Qzi - Q0)
+      dSST/dt = (SWnet - LWnet - SHF - LHF - OHU) / τ_SST
+      dCF/dt = (CF' - CF) / τ_CF
 """
 function mlm(du, u, p, t)
     zb = calc_LCL(u);
@@ -109,4 +110,5 @@ function mlm(du, u, p, t)
     # println(u)
     # println(zb)
     # println(du)
+    # println()
 end

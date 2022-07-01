@@ -54,7 +54,7 @@ end
 """
     temp(z, s, qt)
 
-    uses saturation adjustment on the enthalpy
+    uses saturation adjustment on the liquid water static energy (s)
 """
 function temp(z, s, qt)
     s_act(T) = Cp*T + g*z - L0*q_l(z,T,qt);
@@ -90,13 +90,17 @@ end
 """
 function incloud_LWP(u, zb)
     zi, sM, qtM, SST, CF = u;
-
-    dz = 1.0;
-    z = zb:dz:zi;
-    T = temp.(z,sM,qtM);
-    ρ = rho.(z,T);
-    ql = q_l.(z,T,qtM);
-    return sum(ρ .* ql .* dz)
+    if zb >= zi
+        icLWP = 0.0
+    else
+        dz = 1.0;
+        z = zb:dz:zi;
+        T = temp.(z,sM,qtM);
+        ρ = rho.(z,T);
+        ql = q_l.(z,T,qtM);
+        icLWP = sum(ρ .* ql .* dz);
+    end
+    return icLWP
 end
 
 """

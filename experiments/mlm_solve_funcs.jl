@@ -16,7 +16,7 @@ function run_mlm(params; init=1, dt=3600.0*5.0, tspan=(0.0,3600.0*24.0*10.0))
         zi0 = 1000.0;
         CF0 = 1.0;
     else
-        zi0 = 1500.0;
+        zi0 = 1000.0;
         CF0 = 0.2;
     end 
     u0 = [zi0, sM0, qtM0, params.SST0, CF0]; 

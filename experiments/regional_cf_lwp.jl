@@ -14,7 +14,7 @@ par = climatology();
 par.rtype = varRad();
 par.stype = fixSST();
 par.ftype = varFlux();
-par.fttype = fixedFT();
+par.fttype = fixEIS();
 par.etype = enBal();
 
 # load boundary conditions from file
@@ -40,27 +40,18 @@ for (i1,loni) in enumerate(lon)
     for (i2, lati) in enumerate(lat)
         local j1 = i1*skip1
         local j2 = i2*skip2
-        if i1 == 12 && i2 == 6
+        if i1 > 0 #i1 == 12 && i2 == 6
             println(i1, ", ", i2)
             println(j1, ", ", j2)
 
             par.SST0 = ds["sst"][j1,j2];
+            par.V = ds["WS"][j1,j2];
             println(par.SST0)
-
-            # par.OHU = -5;
             # par.LHF = ds["LHF"][j1,j2];
-            # par.SHF = 1.0;
             # par.SHF = ds["SHF"][j1,j2];
-
-            # par.D = 6e-6;
-            # par.RHft = 0.2;
-            
             par.D = ds["D500"][j1,j2];
             par.RHft = ds["RH500"][j1,j2];
-
-            EIS = 10.0; # (K)
-            par.sft0 = Cp*(par.SST0 + EIS); # 10 (K) jump
-            par.Gamma_s = (Cp*-5e-3) + g; # (K/m)
+            par.EIS = 10.0;
 
             dt, tmax = 24, 50;
             u0, sol = run_mlm(par, dt=3600.0*dt, tspan=(0.0,3600.0*24.0*tmax));
@@ -78,34 +69,80 @@ for (i1,loni) in enumerate(lon)
             sst_ss[i1, i2] = par.SST0;
             real_cf[i1, i2] = ds["allsc"][j1, j2];
 
-            if i1 == 12 && i2 == 6
-                t = sol.t / 3600.0 / 24.0;
-                zi = getindex.(sol.u,1);
-                zb = [calc_LCL(uk) for uk in sol.u];
-                cf = getindex.(sol.u,5);
-                local p = plot(size=(600,300), layout=(2,1), dpi=200,
-                    left_margin = 5Plots.mm, bottom_margin = 5Plots.mm);
-                plot!(t, zi, marker="o-", legend=false, subplot=1, ylabel="zi, zb [m]");
-                plot!(t, zb, marker="o-", legend=false, subplot=1);
-                plot!(t, cf * 1e2, marker="o-", legend=false, subplot=2, 
-                    ylabel="CF [%]", xlabel="Time [days]");
-                savefig("experiments/figures/box_JJA_NEP_"*string(i1)*"+"*string(i2)*".png")
-            end
+            # if i1 == 12 && i2 == 6
+            #     t = sol.t / 3600.0 / 24.0;
+            #     zi = getindex.(sol.u,1);
+            #     zb = [calc_LCL(uk) for uk in sol.u];
+            #     cf = getindex.(sol.u,5);
+            #     local p = plot(size=(600,300), layout=(2,1), dpi=200,
+            #         left_margin = 5Plots.mm, bottom_margin = 5Plots.mm);
+            #     plot!(t, zi, marker="o-", legend=false, subplot=1, ylabel="zi, zb [m]");
+            #     plot!(t, zb, marker="o-", legend=false, subplot=1);
+            #     plot!(t, cf * 1e2, marker="o-", legend=false, subplot=2, 
+            #         ylabel="CF [%]", xlabel="Time [days]");
+            #     savefig("experiments/figures/box_JJA_NEP_"*string(i1)*"+"*string(i2)*".png")
+            # end
         end
     end
 end
 
-p1 = contourf(lon, lat, cf_ss, c=:Greens, clims=(0,1), 
-    title="NEP JJA", xlabel="lon", ylabel="lat",
-    colorbar_title="Cloud fraction")
-p2 = contourf(lon, lat, lwp_ss*1e3, c=:Blues, clims=(0,1000), 
-    title="NEP JJA", xlabel="lon", ylabel="lat",
-    colorbar_title="In-cloud LWP [g/m2]")
-p3 = contourf(lon, lat, lwp_ss.*cf_ss*1e3, c=:Blues, clims=(0,1000), 
-    title="NEP JJA", xlabel="lon", ylabel="lat",
-    colorbar_title="All-sky LWP [g/m2]")
+# p1 = contourf(lon, lat, cf_ss, c=:Greens, clims=(0,1), 
+#     title="NEP JJA", xlabel="lon", ylabel="lat",
+#     colorbar_title="Cloud fraction")
+# p2 = contourf(lon, lat, lwp_ss*1e3, c=:Blues, clims=(0,1000), 
+#     title="NEP JJA", xlabel="lon", ylabel="lat",
+#     colorbar_title="In-cloud LWP [g/m2]")
+# p3 = contourf(lon, lat, lwp_ss.*cf_ss*1e3, c=:Blues, clims=(0,1000), 
+#     title="NEP JJA", xlabel="lon", ylabel="lat",
+#     colorbar_title="All-sky LWP [g/m2]")
 
-plot(p1, p2, p3, layout=(3,1), size=(800,1000), dpi=200)
-savefig("experiments/figures/box_JJA_NEP.png")
+# plot(p1, p2, p3, layout=(3,1), size=(800,1000), dpi=200)
 
+p1 = contourf(lon, lat, cf_ss', c=:Greens, clims=(0,1), 
+    title="Predicted Cloud Fraction", xlabel="lon", ylabel="lat",
+    left_margin=15Plots.mm)
+p2 = contourf(lon, lat, real_cf', c=:Greens, clims=(0,1), 
+    title="CASSCAD Observed Cloud Fraction", xlabel="lon", ylabel="lat",
+    left_margin=15Plots.mm)
+p3 = contourf(lon, lat, (cf_ss .- real_cf)', c=:bluesreds, clims=(-0.5,0.5), 
+    title="Difference, Predicted - Observed", xlabel="lon", ylabel="lat",
+    left_margin=15Plots.mm)
+
+plot(p1, p2, p3, layout=(3,1), size=(600,900), dpi=200)
+savefig("experiments/figures/CF_compare_box_JJA_NEP.png")
+
+close(ds)
+
+# create output netcdf file
+mkpath("experiments/tmp/")
+ds = Dataset("experiments/tmp/cloud_fraction_compare.nc","c")
+
+# Define the dimension "lon" and "lat" with the size N and M resp.
+defDim(ds,"lon",N)
+defDim(ds,"lat",M)
+defVar(ds,"lon",lon,("lon",))
+defVar(ds,"lat",lat,("lat",))
+
+# Define the variables
+v = defVar(ds,"zi",zi_ss,("lon","lat"))
+v.attrib["units"] = "m"
+v.attrib["long_name"] = "cloud top height"
+
+v = defVar(ds,"zb",zb_ss,("lon","lat"))
+v.attrib["units"] = "m"
+v.attrib["long_name"] = "cloud base height"
+
+v = defVar(ds,"cf",cf_ss,("lon","lat"))
+v.attrib["units"] = "-"
+v.attrib["long_name"] = "cloud fraction"
+
+v = defVar(ds,"lwp",lwp_ss,("lon","lat"))
+v.attrib["units"] = "kg/m2"
+v.attrib["long_name"] = "in-cloud liquid water path"
+
+v = defVar(ds,"obs_cf",real_cf,("lon","lat"))
+v.attrib["units"] = "-"
+v.attrib["long_name"] = "observed cloud fraction (CASCCAD)"
+
+print(ds)
 close(ds)

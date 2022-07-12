@@ -12,9 +12,9 @@ include("mlm_solve_funcs.jl")
 # set up MLM params
 par = climatology();
 par.rtype = varRad();
-par.stype = varSST();
-par.ftype = fixFlux();
-par.fttype = fixedFT();
+par.stype = fixSST();
+par.ftype = varFlux();
+par.fttype = fixEIS();
 par.etype = enBal();
 
 # load boundary conditions from file
@@ -22,58 +22,85 @@ file = "experiments/data/transect_BCs_JJA_NEP.nc";
 ds = Dataset(file, "r");
 # println(ds)
 
-lon = ds["lon"][1:5:end]
+skipi = 1
+lon = ds["lon"][1:skipi:end]
 N = length(lon)
 sst_ss = zeros(N)
 real_cf = zeros(N)
 zi_ss = zeros(N)
 qtM_ss = zeros(N)
-cf_ss = zeros(N)
 zb_ss = zeros(N)
 lwp_ss = zeros(N)
+lhf_ss = zeros(N)
+Tsurf_ss = zeros(N)
+
+cf_ss = zeros(N)
+cf_ss_min = zeros(N)
+cf_ss_max = zeros(N)
+cf_ss_onlySST = zeros(N)
+cf_ss_onlyEIS = zeros(N)
 
 for (i,loni) in enumerate(lon)
-    local j = i*5
-    if i == 1
+    local j = i*skipi
+    if i > 0 
+        # mean of all parameters, mean cf
         par.SST0 = ds["sst"][j];
-
-        par.OHU = -5;
-        par.LHF = ds["LHF"][j];
-        par.SHF = 1.0;
-        # par.SHF = ds["SHF"][j];
-
-        # par.D = 6e-6;
-        # par.RHft = 0.2;
-        
+        par.V = ds["WS"][j];
         par.D = ds["D500"][j];
         par.RHft = ds["RH500"][j];
-
-        EIS = 10.0; # (K)
-        par.sft0 = Cp*(par.SST0 + EIS); # 10 (K) jump
-        par.Gamma_s = (Cp*-5e-3) + g; # (K/m)
-
-        # println(loni)
-        # println(par)
-        
-        dt, tmax = 24, 100;
-        u0, sol = run_mlm(par, dt=3600.0*dt, tspan=(0.0,3600.0*24.0*tmax));
+        par.EIS = ds["EIS"][j];        
+        dt, tmax = 24, 50;
+        u0, sol = run_mlm(par, init=1, dt=3600.0*dt, tspan=(0.0,3600.0*24.0*tmax));
         uf = sol.u[end];
-        du = zeros(5);
-        mlm(du, uf, par, 0.0);
 
-        println(j)
-        println(uf)
-        println(calc_OHU(uf, par, incloud_LWP(uf, calc_LCL(uf)), par.stype))
-        println()
+        # save for file
         zi_ss[i] = uf[1];
+        Tsurf_ss[i] = uf[2] / Cp;
         qtM_ss[i] = uf[3];
         cf_ss[i] = uf[5];
         zb_ss[i] = calc_LCL(uf);
         lwp_ss[i] = incloud_LWP(uf, zb_ss[i]);
+        lhf_ss[i] = calc_LHF(uf, par);
         sst_ss[i] = par.SST0;
         real_cf[i] = ds["allsc"][j];
 
-        if i in (1, 10, 20)
+        # minimum cf 
+        par.SST0 = ds["sst"][j] + ds["sst_std"][j];
+        par.V = ds["WS"][j] + ds["WS_std"][j];
+        par.D = ds["D500"][j] - ds["D500_std"][j];
+        par.RHft = ds["RH500"][j] - ds["RH500_std"][j];
+        par.EIS = ds["EIS"][j] - ds["EIS_std"][j];
+        u0, sol_min = run_mlm(par, dt=3600.0*dt, tspan=(0.0,3600.0*24.0*tmax));
+        cf_ss_min[i] = sol_min.u[end][5];
+
+        # maximum cf
+        par.SST0 = ds["sst"][j] - ds["sst_std"][j];
+        par.V = ds["WS"][j] - ds["WS_std"][j];
+        par.D = ds["D500"][j] + ds["D500_std"][j];
+        par.RHft = ds["RH500"][j] + ds["RH500_std"][j];
+        par.EIS = ds["EIS"][j] + ds["EIS_std"][j];
+        u0, sol_max = run_mlm(par, dt=3600.0*dt, tspan=(0.0,3600.0*24.0*tmax));
+        cf_ss_max[i] = sol_max.u[end][5];
+
+        # only SST
+        par.SST0 = ds["sst"][j];
+        par.V = mean(ds["WS"]);
+        par.D = mean(ds["D500"]);
+        par.RHft = mean(ds["RH500"]);
+        par.EIS = ds["EIS"][1];
+        u0, sol_onlySST = run_mlm(par, dt=3600.0*dt, tspan=(0.0,3600.0*24.0*tmax));
+        cf_ss_onlySST[i] = sol_onlySST.u[end][5];
+
+        # only EIS
+        par.SST0 = ds["sst"][1];
+        par.V = mean(ds["WS"]);
+        par.D = mean(ds["D500"]);
+        par.RHft = mean(ds["RH500"]);
+        par.EIS = ds["EIS"][j];
+        u0, sol_onlyEIS = run_mlm(par, dt=3600.0*dt, tspan=(0.0,3600.0*24.0*tmax));
+        cf_ss_onlyEIS[i] = sol_onlyEIS.u[end][5];
+
+        if uf[5] > 0.15 && uf[5] < 0.75
             t = sol.t / 3600.0 / 24.0;
             zi = getindex.(sol.u,1);
             sM = getindex.(sol.u,2) * 1e-3;
@@ -105,6 +132,8 @@ for (i,loni) in enumerate(lon)
             plot!(t, qtM, marker="o-", legend=false, subplot=3, ylabel="qtM [g/kg]");
             plot!(t, sst, marker="o-", legend=false, subplot=4, ylabel="SST [K]");
             plot!(t, cf * 1e2, marker="o-", legend=false, subplot=5, ylabel="CF [%]");
+            plot!(sol_min.t/3600.0/24.0, getindex.(sol_min.u,5) * 1e2, marker="o-", legend=false, subplot=5);
+            plot!(sol_max.t/3600.0/24.0, getindex.(sol_max.u,5) * 1e2, marker="o-", legend=false, subplot=5);
             plot!(t, cf .* LWP * 1e3, marker="o-", legend=false, subplot=6, ylabel="mean LWP [g/m2]");
             plot!(t, LHF, marker="o-", legend=false, subplot=7, ylabel="(S/L)HF [W/m2]");
             plot!(t, SHF, marker="o-", legend=false, subplot=7);
@@ -113,18 +142,136 @@ for (i,loni) in enumerate(lon)
             plot!(t, S, marker="o-", legend=false, subplot=10, ylabel="S [-]", xlabel="time [days]");
             plot!(t, Δsv / Cp, marker="o-", legend=false, subplot=11, ylabel="Δsv/Cp [K]");
             plot!(t, ent*1e3, marker="o-", legend=false, subplot=12, ylabel="we [mm/s]")
-            savefig("experiments/figures/transect_JJA_NEP_i"*string(i)*".png")
+            savefig("experiments/figures/cfmip/transect_JJA_NEP_i"*string(i)*".png")
         end
     end
 end
 
-# p = plot(size=(600,600), layout=(3,1), dpi=200, left_margin = 5Plots.mm, show=true);
-# plot!(lon, sst_ss, subplot=1, marker=:o, color=:black, legend=false, ylabel="SST (K)")
-# plot!(lon, zi_ss, subplot=2, marker=:o)
-# plot!(lon, zb_ss, subplot=2, marker=:o, legend=false, ylabel="zb, zi (m)")
-# plot!(lon, cf_ss*100, subplot=3, marker=:o, legend=false, ylabel="CF (%)", xlabel="longitude")
-# plot!(lon, real_cf*100, subplot=3, marker=:o, color=:black)
-# file = "experiments/data/transect_BCs_JJA_NEP.nc";
-# savefig(replace(file, "data/"=>"figures/", "_BCs_"=>"_", ".nc"=>".png"));
+println()
+println(cf_ss_min)
+println(cf_ss)
+println(cf_ss_max)
 
+p = plot(size=(600,400), layout=(2,1), dpi=300, show=true,
+    left_margin = 5Plots.mm, right_margin = 15Plots.mm);
+# plot observed SST
+plot!(lon, ds["sst"][1:skipi:end], subplot=1, legend=false,
+    lw=2, color=:magenta, yguidefontcolor=:magenta, ytickfontcolor=:magenta,
+    marker=:circle, msw=0,
+    ylabel="SST [K]", ribbon=ds["sst_std"][1:skipi:end], fillalpha=0.3)
+# plot observed EIS
+plot!(twinx(), lon, ds["EIS"][1:skipi:end], lw=2, legend=false,
+        color=:green, yguidefontcolor=:green, ytickfontcolor=:green,
+        marker=:circle, msw=0,
+        ylabel="EIS [K]", ribbon=ds["EIS_std"][1:skipi:end], fillalpha=0.3)
+
+# plot observed CF
+plot!(lon, ds["allsc"][1:skipi:end]*100, subplot=2, legend=:topleft,
+    lw=2, color=:black, marker=:circle, msw=0, label="Obs",
+    ribbon=ds["allsc_std"][1:skipi:end]*100, fillalpha=0.3)
+
+# predicted CF with range
+plot!(lon, cf_ss*100, subplot=2, lw=2, ylim=(0,90), 
+    ylabel="CF [%]", color=1, marker=:circle, msw=0, label="ERA5 BCs",
+    ribbon=((cf_ss-cf_ss_min)*100, (cf_ss_max-cf_ss)*100), fillalpha=0.3)
+
+tkloc, tkstr = xticks(p)[1]
+plot!(xticks=(tkloc, chop.(tkstr,head=1,tail=0).*" °W"))
+
+savefig("experiments/figures/cfmip/JJA_NEP_transect.png");
+
+### only SST and only EIS too
+p = plot(size=(600,400), layout=(2,1), dpi=300, show=true,
+    left_margin = 5Plots.mm, right_margin = 15Plots.mm);
+# plot observed SST
+plot!(lon, ds["sst"][1:skipi:end], subplot=1, legend=false,
+    lw=2, color=:magenta, yguidefontcolor=:magenta, ytickfontcolor=:magenta,
+    marker=:circle, msw=0,
+    ylabel="SST [K]", ribbon=ds["sst_std"][1:skipi:end], fillalpha=0.3)
+# plot observed EIS
+plot!(twinx(), lon, ds["EIS"][1:skipi:end], lw=2, legend=false,
+        color=:green, yguidefontcolor=:green, ytickfontcolor=:green,
+        marker=:circle, msw=0,
+        ylabel="EIS [K]", ribbon=ds["EIS_std"][1:skipi:end], fillalpha=0.3)
+
+# plot observed CF
+plot!(lon, ds["allsc"][1:skipi:end]*100, subplot=2, legend=:topleft,
+    lw=2, color=:black, marker=:circle, msw=0, label="Obs",
+    ribbon=ds["allsc_std"][1:skipi:end]*100, fillalpha=0.3)
+
+# predicted CF with range
+plot!(lon, cf_ss*100, subplot=2, lw=2, ylim=(0,90), 
+    ylabel="CF [%]", color=1, marker=:circle, msw=0, label="ERA5 BCs",
+    ribbon=((cf_ss-cf_ss_min)*100, (cf_ss_max-cf_ss)*100), fillalpha=0.3)
+
+# predicted CF from only varying SST or EIS
+plot!(lon, cf_ss_onlySST*100, subplot=2, lw=2, marker=:circle, msw=0, color=:magenta, label="only SST")
+plot!(lon, cf_ss_onlyEIS*100, subplot=2, lw=2, marker=:circle, msw=0, color=:green, label="only EIS")
+
+tkloc, tkstr = xticks(p)[1]
+plot!(xticks=(tkloc, chop.(tkstr,head=1,tail=0).*" °W"))
+
+savefig("experiments/figures/cfmip/JJA_NEP_transect_1var.png");
+
+close(ds)
+
+
+# create output netcdf file
+mkpath("experiments/tmp/")
+ds = Dataset("experiments/tmp/transect_output.nc","c")
+
+# Define the dimension "lon" of size N
+defDim(ds,"lon",N)
+defVar(ds,"lon",lon,("lon",))
+
+# Define the variables
+v = defVar(ds,"zi",zi_ss,("lon",))
+v.attrib["units"] = "m"
+v.attrib["long_name"] = "cloud top height"
+
+v = defVar(ds,"zb",zb_ss,("lon",))
+v.attrib["units"] = "m"
+v.attrib["long_name"] = "cloud base height"
+
+v = defVar(ds,"LHF",lhf_ss,("lon",))
+v.attrib["units"] = "W/m2"
+v.attrib["long_name"] = "surface latent heat flux"
+
+v = defVar(ds,"Tsurf",Tsurf_ss,("lon",))
+v.attrib["units"] = "K"
+v.attrib["long_name"] = "surface air temperature"
+
+v = defVar(ds,"sst",sst_ss,("lon",))
+v.attrib["units"] = "K"
+v.attrib["long_name"] = "sea surface temperature"
+
+v = defVar(ds,"cf",cf_ss,("lon",))
+v.attrib["units"] = "-"
+v.attrib["long_name"] = "cloud fraction"
+
+v = defVar(ds,"cf_min",cf_ss_min,("lon",))
+v.attrib["units"] = "-"
+v.attrib["long_name"] = "min cloud fraction"
+
+v = defVar(ds,"cf_max",cf_ss_max,("lon",))
+v.attrib["units"] = "-"
+v.attrib["long_name"] = "max cloud fraction"
+
+v = defVar(ds,"cf_onlySST",cf_ss_onlySST,("lon",))
+v.attrib["units"] = "-"
+v.attrib["long_name"] = "cloud fraction from only vary SST"
+
+v = defVar(ds,"cf_onlyEIS",cf_ss_onlyEIS,("lon",))
+v.attrib["units"] = "-"
+v.attrib["long_name"] = "cloud fraction from only vary EIS"
+
+v = defVar(ds,"lwp",lwp_ss,("lon",))
+v.attrib["units"] = "kg/m2"
+v.attrib["long_name"] = "in-cloud liquid water path"
+
+v = defVar(ds,"obs_cf",real_cf,("lon",))
+v.attrib["units"] = "-"
+v.attrib["long_name"] = "observed cloud fraction (CASCCAD)"
+
+# print(ds)
 close(ds)

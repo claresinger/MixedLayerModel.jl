@@ -16,7 +16,8 @@ function allsky_lwp(par)
     zb_ss = calc_LCL(uf);
     ic_lwp_ss = incloud_LWP(uf, zb_ss);
     lwp = ic_lwp_ss*cf_ss;
-    return lwp
+    swcre = calc_SWCRE(uf);
+    return lwp, swcre
 end
 
 # load boundary conditions from file
@@ -44,6 +45,13 @@ ddRH = zeros(N, M)
 ddEIS = zeros(N, M)
 ddCO2 = zeros(N, M)
 
+dCREdSST = zeros(N, M)
+dCREdV = zeros(N, M)
+dCREdD = zeros(N, M)
+dCREdRH = zeros(N, M)
+dCREdEIS = zeros(N, M)
+dCREdCO2 = zeros(N, M)
+
 for (i1,loni) in enumerate(lon)
     for (i2, lati) in enumerate(lat)
         local j1 = i1*skip1
@@ -54,89 +62,92 @@ for (i1,loni) in enumerate(lon)
 
             par.SST0 = ds["sst"][j1,j2];
             par.V = ds["WS"][j1,j2];
-            # par.LHF = ds["LHF"][j1,j2];
-            # par.SHF = ds["SHF"][j1,j2];
             par.D = ds["D500"][j1,j2];
             par.RHft = ds["RH500"][j1,j2];
-            par.EIS = 10.0;
+            par.EIS = ds["EIS"][j1,j2];
 
             # base state
-            lwp0 = allsky_lwp(par);
+            lwp0, swcre0 = allsky_lwp(par);
 
             # sst
-            stdSST = ds["sst_std"][j1,j2];
+            stdSST = ds["sst_std"][j1,j2] / 2;
             par.SST0 = ds["sst"][j1,j2] - stdSST;
-            lwpm = allsky_lwp(par);
+            lwpm, swcrem = allsky_lwp(par);
             par.SST0 = ds["sst"][j1,j2] + stdSST;
-            lwpp = allsky_lwp(par);
-            ddSST[i1,i2] = mean(diff([lwpm, lwp0, lwpp]));
+            lwpp, swcrep = allsky_lwp(par);
+            ddSST[i1,i2] = lwpp - lwpm;
+            dCREdSST[i1, i2] = swcrep - swcrem;
 
             # V
-            stdV = ds["WS_std"][j1,j2];
+            stdV = ds["WS_std"][j1,j2] / 2;
             par.V = ds["WS"][j1,j2] - stdV;
-            lwpm = allsky_lwp(par);
+            lwpm, swcrem = allsky_lwp(par);
             par.V = ds["WS"][j1,j2] + stdV;
-            lwpp = allsky_lwp(par);
-            ddV[i1,i2] = mean(diff([lwpm, lwp0, lwpp]));
+            lwpp, swcrep = allsky_lwp(par);
+            ddV[i1,i2] = lwpp - lwpm;
+            dCREdV[i1, i2] = swcrep - swcrem;
 
             # D
-            stdD = ds["D500_std"][j1,j2] / 10;
+            stdD = ds["D500_std"][j1,j2] / 2;
             par.D = ds["D500"][j1,j2] - stdD;
-            lwpm = allsky_lwp(par);
+            lwpm, swcrem = allsky_lwp(par);
             par.D = ds["D500"][j1,j2] + stdD;
-            lwpp = allsky_lwp(par);
-            ddD[i1,i2] = mean(diff([lwpm, lwp0, lwpp]));
+            lwpp, swcrep = allsky_lwp(par);
+            ddD[i1,i2] = lwpp - lwpm;
+            dCREdD[i1, i2] = swcrep - swcrem;
 
             # RH
-            stdRH = ds["RH500_std"][j1,j2];
+            stdRH = ds["RH500_std"][j1,j2] / 2;
             par.RHft = ds["RH500"][j1,j2] - stdRH;
-            lwpm = allsky_lwp(par);
+            lwpm, swcrem = allsky_lwp(par);
             par.RHft = ds["RH500"][j1,j2] + stdRH;
-            lwpp = allsky_lwp(par);
-            ddRH[i1,i2] = mean(diff([lwpm, lwp0, lwpp]));
+            lwpp, swcrep = allsky_lwp(par);
+            ddRH[i1,i2] = lwpp - lwpm;
+            dCREdRH[i1, i2] = swcrep - swcrem;
 
             # EIS
-            EIS0 = 10.0;
-            stdEIS = 1.0;
-            par.EIS = EIS0 - stdEIS;
-            lwpm = allsky_lwp(par);
-            par.EIS = EIS0 + stdEIS;
-            lwpp = allsky_lwp(par);
-            ddEIS[i1,i2] = mean(diff([lwpm, lwp0, lwpp]));
+            stdEIS = ds["EIS_std"][j1,j2] / 2;
+            par.EIS = ds["EIS"][j1,j2] - stdEIS;
+            lwpm, swcrem = allsky_lwp(par);
+            par.EIS = ds["EIS"][j1,j2] + stdEIS;
+            lwpp, swcrep = allsky_lwp(par);
+            ddEIS[i1,i2] = lwpp - lwpm;
+            dCREdEIS[i1, i2] = swcrep - swcrem;
 
             # CO2
-            stdCO2 = 100.0;
+            stdCO2 = 100.0 / 2;
             par.CO2 = par0.CO2 - stdCO2;
-            lwpm = allsky_lwp(par);
+            lwpm, swcrem = allsky_lwp(par);
             par.CO2 = par0.CO2 + stdCO2;
-            lwpp = allsky_lwp(par);
-            ddCO2[i1,i2] = mean(diff([lwpm, lwp0, lwpp]));
+            lwpp, swcrep = allsky_lwp(par);
+            ddCO2[i1,i2] = lwpp - lwpm;
+            dCREdCO2[i1, i2] = swcrep - swcrem;
         end
     end
 end
 
-println(lon)
-println(lat)
-println(ddSST)
-println(ddV)
-println(ddD)
-println(ddRH)
-println(ddEIS)
-println(ddCO2)
+# println(lon)
+# println(lat)
+# println(ddSST)
+# println(ddV)
+# println(ddD)
+# println(ddRH)
+# println(ddEIS)
+# println(ddCO2)
 
 cmap = :bluesreds
-clims = (-0.2,0.2)
+clims = (-0.5,0.5)
 
 p1 = contourf(lon, lat, ddSST', c=cmap, clims=clims, 
     title="ΔLWP / σSST", xlabel="lon", ylabel="lat",
     left_margin=15Plots.mm, right_margin=10Plots.mm,
     bottom_margin=15Plots.mm, top_margin=10Plots.mm)
 p2 = contourf(lon, lat, ddV', c=cmap, clims=clims, 
-    title="ΔLWP / σV", xlabel="lon", ylabel="lat",
+    title="ΔLWP / σWS", xlabel="lon", ylabel="lat",
     left_margin=15Plots.mm, right_margin=10Plots.mm,
     bottom_margin=15Plots.mm, top_margin=10Plots.mm)
 p3 = contourf(lon, lat, ddD', c=cmap, clims=clims, 
-    title="ΔLWP / (σD500/10)", xlabel="lon", ylabel="lat",
+    title="ΔLWP / σD500", xlabel="lon", ylabel="lat",
     left_margin=15Plots.mm, right_margin=10Plots.mm,
     bottom_margin=15Plots.mm, top_margin=10Plots.mm)
 p4 = contourf(lon, lat, ddRH', c=cmap, clims=clims, 
@@ -177,7 +188,7 @@ v = defVar(ds,"dLWPdV",ddV,("lon","lat"))
 v.attrib["long_name"] = "ΔLWP / σV"
 
 v = defVar(ds,"dLWPdD",ddD,("lon","lat"))
-v.attrib["long_name"] = "ΔLWP / (σD500/10)"
+v.attrib["long_name"] = "ΔLWP / σD500"
 
 v = defVar(ds,"dLWPdRH",ddRH,("lon","lat"))
 v.attrib["long_name"] = "ΔLWP / σRH500"
@@ -187,6 +198,25 @@ v.attrib["long_name"] = "ΔLWP / σEIS"
 
 v = defVar(ds,"dLWPdCO2",ddCO2,("lon","lat"))
 v.attrib["long_name"] = "ΔLWP / 100 ppm CO2"
+
+## dSWCRE
+v = defVar(ds,"dSWCREdSST",dCREdSST,("lon","lat"))
+v.attrib["long_name"] = "ΔSWCRE / σSST"
+
+v = defVar(ds,"dSWCREdV",dCREdV,("lon","lat"))
+v.attrib["long_name"] = "ΔSWCRE / σV"
+
+v = defVar(ds,"dSWCREdD",dCREdD,("lon","lat"))
+v.attrib["long_name"] = "ΔSWCRE / σD500"
+
+v = defVar(ds,"dSWCREdRH",dCREdRH,("lon","lat"))
+v.attrib["long_name"] = "ΔSWCRE / σRH500"
+
+v = defVar(ds,"dSWCREdEIS",dCREdEIS,("lon","lat"))
+v.attrib["long_name"] = "ΔSWCRE / σEIS"
+
+v = defVar(ds,"dSWCREdCO2",dCREdCO2,("lon","lat"))
+v.attrib["long_name"] = "ΔSWCRE / 100 ppm CO2"
 
 print(ds)
 close(ds)

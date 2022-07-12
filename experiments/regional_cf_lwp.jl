@@ -30,28 +30,33 @@ N, M = length(lon), length(lat)
 println(N, " ", M)
 sst_ss = zeros(N, M)
 real_cf = zeros(N, M)
+real_cf_std = zeros(N, M)
 zi_ss = zeros(N, M)
+Tsurf_ss = zeros(N, M)
 qtM_ss = zeros(N, M)
-cf_ss = zeros(N, M)
 zb_ss = zeros(N, M)
 lwp_ss = zeros(N, M)
+lhf_ss = zeros(N, M)
+cf_ss = zeros(N, M)
+cf_ss_min = zeros(N, M)
+cf_ss_max = zeros(N, M)
 
 for (i1,loni) in enumerate(lon)
     for (i2, lati) in enumerate(lat)
         local j1 = i1*skip1
         local j2 = i2*skip2
-        if i1 > 0 #i1 == 12 && i2 == 6
+        if i1 > 0
             println(i1, ", ", i2)
             println(j1, ", ", j2)
 
             par.SST0 = ds["sst"][j1,j2];
             par.V = ds["WS"][j1,j2];
-            println(par.SST0)
             # par.LHF = ds["LHF"][j1,j2];
             # par.SHF = ds["SHF"][j1,j2];
-            par.D = ds["D500"][j1,j2];
+            # println(par.SST0, " ", par.LHF)
+            par.D = max(ds["D500"][j1,j2], 5e-7);
             par.RHft = ds["RH500"][j1,j2];
-            par.EIS = 10.0;
+            par.EIS = ds["EIS"][j1,j2];
 
             dt, tmax = 24, 50;
             u0, sol = run_mlm(par, dt=3600.0*dt, tspan=(0.0,3600.0*24.0*tmax));
@@ -62,26 +67,48 @@ for (i1,loni) in enumerate(lon)
             println(uf)
             println(du)
             zi_ss[i1, i2] = uf[1];
+            Tsurf_ss[i1, i2] = uf[2] / Cp;
             qtM_ss[i1, i2] = uf[3];
             cf_ss[i1, i2] = uf[5];
             zb_ss[i1, i2] = calc_LCL(uf);
             lwp_ss[i1, i2] = incloud_LWP(uf, zb_ss[i1, i2]);
+            lhf_ss[i1,i2] = calc_LHF(uf, par);
             sst_ss[i1, i2] = par.SST0;
             real_cf[i1, i2] = ds["allsc"][j1, j2];
+            real_cf_std[i1, i2] = ds["allsc_std"][j1, j2];
 
-            # if i1 == 12 && i2 == 6
-            #     t = sol.t / 3600.0 / 24.0;
-            #     zi = getindex.(sol.u,1);
-            #     zb = [calc_LCL(uk) for uk in sol.u];
-            #     cf = getindex.(sol.u,5);
-            #     local p = plot(size=(600,300), layout=(2,1), dpi=200,
-            #         left_margin = 5Plots.mm, bottom_margin = 5Plots.mm);
-            #     plot!(t, zi, marker="o-", legend=false, subplot=1, ylabel="zi, zb [m]");
-            #     plot!(t, zb, marker="o-", legend=false, subplot=1);
-            #     plot!(t, cf * 1e2, marker="o-", legend=false, subplot=2, 
-            #         ylabel="CF [%]", xlabel="Time [days]");
-            #     savefig("experiments/figures/box_JJA_NEP_"*string(i1)*"+"*string(i2)*".png")
-            # end
+            # min cf
+            println(ds["D500"][j1,j2], " ", ds["D500_std"][j1,j2])
+            par.SST0 = ds["sst"][j1,j2] + ds["sst_std"][j1,j2];
+            par.V = ds["WS"][j1,j2] + ds["WS_std"][j1,j2];
+            par.D = max(ds["D500"][j1,j2] - ds["D500_std"][j1,j2], 5e-7);
+            par.RHft = ds["RH500"][j1,j2] - ds["RH500_std"][j1,j2];
+            par.EIS = ds["EIS"][j1,j2] - ds["EIS_std"][j1,j2];
+            u0, sol_min = run_mlm(par, dt=3600.0*dt, tspan=(0.0,3600.0*24.0*tmax));
+            cf_ss_min[i1, i2] = sol_min.u[end][5];
+
+            # max cf
+            par.SST0 = ds["sst"][j1,j2] - ds["sst_std"][j1,j2];
+            par.V = ds["WS"][j1,j2] - ds["WS_std"][j1,j2];
+            par.D = max(ds["D500"][j1,j2] + ds["D500_std"][j1,j2], 5e-7);
+            par.RHft = ds["RH500"][j1,j2] + ds["RH500_std"][j1,j2];
+            par.EIS = ds["EIS"][j1,j2] + ds["EIS_std"][j1,j2];
+            u0, sol_max = run_mlm(par, dt=3600.0*dt, tspan=(0.0,3600.0*24.0*tmax));
+            cf_ss_max[i1, i2] = sol_max.u[end][5];
+
+            if (i1 == 12 && i2 == 6) #|| (i1 == 1 && i2 == 1)
+                t = sol.t / 3600.0 / 24.0;
+                zi = getindex.(sol.u,1);
+                zb = [calc_LCL(uk) for uk in sol.u];
+                cf = getindex.(sol.u,5);
+                local p = plot(size=(600,300), layout=(2,1), dpi=400,
+                    left_margin = 5Plots.mm, bottom_margin = 5Plots.mm);
+                plot!(t, zi, marker="o-", legend=false, subplot=1, ylabel="zi, zb [m]");
+                plot!(t, zb, marker="o-", legend=false, subplot=1);
+                plot!(t, cf * 1e2, marker="o-", legend=false, subplot=2, 
+                    ylabel="CF [%]", xlabel="Time [days]");
+                savefig("experiments/figures/box_JJA_NEP_"*string(i1)*"+"*string(i2)*".png")
+            end
         end
     end
 end
@@ -132,9 +159,29 @@ v = defVar(ds,"zb",zb_ss,("lon","lat"))
 v.attrib["units"] = "m"
 v.attrib["long_name"] = "cloud base height"
 
+v = defVar(ds,"LHF",lhf_ss,("lon","lat"))
+v.attrib["units"] = "W/m2"
+v.attrib["long_name"] = "surface latent heat flux"
+
+v = defVar(ds,"Tsurf",Tsurf_ss,("lon","lat"))
+v.attrib["units"] = "K"
+v.attrib["long_name"] = "surface air temperature"
+
+v = defVar(ds,"sst",sst_ss,("lon","lat"))
+v.attrib["units"] = "K"
+v.attrib["long_name"] = "sea surface temperature"
+
 v = defVar(ds,"cf",cf_ss,("lon","lat"))
 v.attrib["units"] = "-"
 v.attrib["long_name"] = "cloud fraction"
+
+v = defVar(ds,"cf_min",cf_ss_min,("lon","lat"))
+v.attrib["units"] = "-"
+v.attrib["long_name"] = "min cloud fraction"
+
+v = defVar(ds,"cf_max",cf_ss_max,("lon","lat"))
+v.attrib["units"] = "-"
+v.attrib["long_name"] = "max cloud fraction"
 
 v = defVar(ds,"lwp",lwp_ss,("lon","lat"))
 v.attrib["units"] = "kg/m2"
@@ -144,5 +191,9 @@ v = defVar(ds,"obs_cf",real_cf,("lon","lat"))
 v.attrib["units"] = "-"
 v.attrib["long_name"] = "observed cloud fraction (CASCCAD)"
 
-print(ds)
+v = defVar(ds,"obs_cf_std",real_cf_std,("lon","lat"))
+v.attrib["units"] = "-"
+v.attrib["long_name"] = "observed cloud fraction std (CASCCAD)"
+
+# print(ds)
 close(ds)

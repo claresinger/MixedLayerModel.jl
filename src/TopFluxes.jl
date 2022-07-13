@@ -43,13 +43,13 @@ function qjump(u, p, LWP, fttype::co2dep)
     zi, sM, qM, SST, CF = u;
     qj = -2.19e-6 * p.CO2 - 4.04e-3; # kg/kg
     qj /= min(1, CF*2.5);
-    # qj = max(qj, 2e-3 - qM);
-    # println("qj: ", qj*1e3, " ", (qj+qM)*1e3, " ", qM*1e3)
+    if qj + qM < 2e-3
+        println("~~~~~~~~~~~~SMALL QFT~~~~~~~~~~~~~~~~")
+    end
+    qj = max(qj, 2e-3 - qM);
 
     # [-0.00468956  0.00172823  0.01020646]
     # qj = -0.0047 - log(p.CO2/400)*0.0017 - (CFmax-CF)*0.01
-    # qj = -0.0047 - log(p.CO2/400)*0.0017 - (CFmax-CF)*0.02
-    
     # if qj + qM < 2e-3
     #     println("~~~~~~~~~~~~SMALL QFT~~~~~~~~~~~~~~~~")
     # end
@@ -78,11 +78,9 @@ function sjump(u, p, LWP, fttype::co2dep)
     hj /= min(1, CF*1.5);
     qj = qjump(u, p, LWP, p.fttype);
     sj = hj - L0*qj;
-    # println("sj: ", sj/Cp, " ", hj/Cp, " ", qj*1e3)
 
     # 10051.39210848   404.81418053  3024.85246107
     # sj = 10050 - log(p.CO2/400)*405 - (CFmax-CF)*3025
-    # sj = 10050 - log(p.CO2/400)*405 - (CFmax-CF)*3000
     return sj
 end
 

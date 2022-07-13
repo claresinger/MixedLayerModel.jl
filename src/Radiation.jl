@@ -37,9 +37,8 @@ function calc_surf_RAD(u, p, LWP)
 
     # LW_net linear with SST with coefficient dependent on log(CO2)
     # direct greenhouse effect in subtropical clear-sky
-    # a0, a1, a2, b1, b2 = [12.4, -1020, 3.1, -270, 0.86];
-    # LW_net = (1-CF)*(a0*log(p.CO2/400) + a1 + a2*SST) + CF*(b1 + b2*SST);
-    LW_net = -30.0;
+    a0, a1, a2, b1, b2 = [12.4, -1020, 3.1, -270, 0.86];
+    LW_net = (1-CF)*(a0*log(p.CO2/400) + a1 + a2*SST) + CF*(b1 + b2*SST);
 
     return SW_net + LW_net
 end
@@ -69,7 +68,7 @@ function calc_cloudtop_RAD(u, p, LWP, rtype::varRad)
     ϵc_up = cloud_emissivity(LWP);
     Teff = Tct + ΔTa(u, p, LWP);
     ΔR = CF * σ_SB * ϵc_up * (Tct^4 - Teff^4);
-    # ΔR = max(ΔR, 10)
+    ΔR = max(ΔR, 1)
     return ΔR
 end
 

@@ -14,10 +14,10 @@ function run_mlm(params; init=1, dt=3600.0*5.0, tspan=(0.0,3600.0*24.0*10.0))
     sM0 = MixedLayerModel.Cp * params.SST0;
     if init == 1
         zi0 = 1000.0;
-        CF0 = 0.8;
+        CF0 = MixedLayerModel.CFmax;
     else
         zi0 = 1000.0;
-        CF0 = 0.1;
+        CF0 = MixedLayerModel.CFmin;
     end 
     u0 = [zi0, sM0, qtM0, params.SST0, CF0]; 
     prob = ODEProblem(ODEFunction(mlm, tgrad=(du, u, p, t) -> fill!(du, 0.0)), 

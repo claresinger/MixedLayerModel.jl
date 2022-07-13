@@ -16,9 +16,9 @@ struct fixRad <: rad_type end
 """
 function ΔTa(u, p, LWP)
     zi, sM, qM, SST, CF = u;
-    qft = qjump(u, p, LWP, p.fttype) + qM;
-    #ΔT = 16.0 + 3.0*log(p.CO2) + 8.9*log(qft); # co2 and qft
-    ΔT = -10.1 + 3.1*log(p.CO2) + 5.3*log(qft);
+    # qft = qjump(u, p, LWP, p.fttype) + qM;
+    # ΔT = -10.1 + 3.1*log(p.CO2) + 5.3*log(qft);
+    ΔT = -22.5 + 0.008*p.CO2
     return ΔT
 end
 
@@ -37,8 +37,9 @@ function calc_surf_RAD(u, p, LWP)
 
     # LW_net linear with SST with coefficient dependent on log(CO2)
     # direct greenhouse effect in subtropical clear-sky
-    a0, a1, a2, b1, b2 = [12.4, -1020, 3.1, -270, 0.86];
-    LW_net = (1-CF)*(a0*log(p.CO2/400) + a1 + a2*SST) + CF*(b1 + b2*SST);
+    # a0, a1, a2, b1, b2 = [12.4, -1020, 3.1, -270, 0.86];
+    # LW_net = (1-CF)*(a0*log(p.CO2/400) + a1 + a2*SST) + CF*(b1 + b2*SST);
+    LW_net = -30.0;
 
     return SW_net + LW_net
 end
@@ -68,6 +69,7 @@ function calc_cloudtop_RAD(u, p, LWP, rtype::varRad)
     ϵc_up = cloud_emissivity(LWP);
     Teff = Tct + ΔTa(u, p, LWP);
     ΔR = CF * σ_SB * ϵc_up * (Tct^4 - Teff^4);
+    # ΔR = max(ΔR, 10)
     return ΔR
 end
 
@@ -82,7 +84,6 @@ function cloud_albedo(LWP)
     m = 0.795;
     Lx = 19.136*1e-3;
     αc = m * (1 - Lx/(Lx+LWP));
-    # αc = 0.8;
     return αc
 end
 
@@ -97,7 +98,6 @@ end
 function cloud_emissivity(LWP)
     a0 = 0.15 * 1e3; # m^2/kg
     ϵc = 1 - exp(-a0 * LWP); 
-    # ϵc = 1.0;
     return ϵc
 end
 
@@ -114,20 +114,22 @@ function trop_sst(u, p, LWP)
     # tropical temperature increase 
     # relative to albedo decrease
     a_export = -0.1;
+    CF0 = CFmax;
     αc0 = cloud_albedo(50e-3);
-    CF0 = 1.0;
     Δαc = cloud_albedo(LWP) - αc0;
+    # println(Δαc)
     ΔCF = CF - CF0;
-    ΔT_export = a_export * (1-α_ocean) * S_trop/4 * (αc0 * ΔCF + CF0 * Δαc);
+    ΔT_export = a_export * (1-α_ocean) * S_subtr/4 * (αc0 * ΔCF + CF0 * Δαc);
 
     # increase in tropical temperature from
     # direct greenhouse warming in tropics
     # ECS = °C per CO2 doubling 
     ΔT_greenhouse = p.ECS / log(2) * log(p.CO2 / 400);
 
+    # println(ΔT_export, " ", ΔT_greenhouse)
+
     T_trop = p.Ts400 + ΔT_export + ΔT_greenhouse;
-    # T_trop = (p.Ts400 - 5) + ΔT_export + ΔT_greenhouse;
-    # T_trop = (p.Ts400 - 5 - p.SST0) + SST;
-    # T_trop = p.Ts400 - 5;
+    # T_trop = p.Ts400;
+
     return T_trop
 end

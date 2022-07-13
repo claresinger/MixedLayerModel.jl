@@ -12,8 +12,17 @@ newCO2 = parse(Float64,ARGS[1]);
 # newCO2 = 200.0;
 println(newCO2);
 
+par = upCO2();
+par.CO2 = newCO2;
+par.etype = enBal();
+par.fttype = co2dep();
+par.rtype = varRad();
+par.stype = varSST();
+par.Hw = 0.1;
+dt, tmax = 48.0, 50.0;
+
 # load initial condition from file
-path = "experiments/output/Teff_co2_h2o/";
+path = "experiments/output/cfmip_modCF/";
 restarttry1 = path*"co2_downstep_"*string(Int(newCO2+50))*".jld2";
 restarttry2 = path*"co2_downstep_"*string(Int(newCO2+100))*".jld2";
 restarttry3 = path*"co2_downstep_"*string(Int(newCO2+200))*".jld2";
@@ -30,16 +39,8 @@ u0 = output["uf"];
 OHU = output["OHU"];
 println("restarting from CO2 = "*string(output["p"].CO2));
 
-# set OHU, increase CO2, let SST evolve and check cloud changes
-par = upCO2();
-par.Hw = 0.1;
+# set OHU
 par.OHU = OHU;
-par.CO2 = newCO2;
-par.etype = enBal();
-par.fttype = twocol();
-par.rtype = varRad();
-par.stype = varSST();
-dt, tmax = 12.0, 40.0;
 
 # solve and plot
 ENV["GKSwstype"]="nul"

@@ -20,11 +20,15 @@ export upCO2, climatology
     Hw::Real = 1.0; # (m)
     OHU::Real = 10.0; # (W/m2)
 
+    # for fixEIS inversion
+    EIS::Real = 10.0; # (K)
+    dTdz::Real = -5e-3; # (decreases by 5 K/km)
+
     # tropical column params
     # AreaFrac::Real = 0.065;
     RHtrop0::Real = 0.8;
     Ts400::Real = 300.0; # (K)
-    RHtropft::Real = 0.2;
+    RHft::Real = 0.2;
 
     # fixed radiation
     ΔR::Real = 80.0; # (W/m2)
@@ -55,7 +59,7 @@ end
     
     # for fixEIS inversion
     EIS::Real = 10.0; # (K)
-    dTdz::Real = -5e-3 # (decreases by 5 K/km)
+    dTdz::Real = -5e-3; # (decreases by 5 K/km)
     
     # params for interactive surface fluxes
     SST0::Real = 290.; # (K)

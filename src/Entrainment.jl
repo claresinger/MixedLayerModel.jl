@@ -23,22 +23,16 @@ struct bflux <: ent_type end
     used in energy balance entrainment
 """
 function sv_jump(u, p, LWP)
-    # zi, sM, qM, SST, CF = u;
-    # T_zi = temp(zi, sM, qM);
-    # ql_zi = q_l(zi, T_zi, qM);
+    zi, sM, qM, SST, CF = u;
+    T_zi = temp(zi, sM, qM);
+    ql_zi = q_l(zi, T_zi, qM);
     
-    # sft = sjump(u, p, LWP, p.fttype) + sM;
-    # Tft = (sft-g*zi)/Cp;
-    # qft = qjump(u, p, LWP, p.fttype) + qM;
+    sft = sjump(u, p, LWP, p.fttype) + sM;
+    Tft = (sft-g*zi)/Cp;
+    qft = qjump(u, p, LWP, p.fttype) + qM;
     
-    # Δsv = (sft-sM) + Cp*(Rv/Rd-1)*(Tft*qft - T_zi*qM) + Cp*(Rv/Rd)*(T_zi*ql_zi);
-
-    Δs = sjump(u, p, LWP, p.fttype);
-    Δqt = qjump(u, p, LWP, p.fttype);
-    Δh = Δs + L0*Δqt;
-    Δsvl = Δh - μ*L0*Δqt;
-
-    return Δsvl
+    Δsv = (sft-sM) + Cp*(Rv/Rd-1)*(Tft*qft - T_zi*qM) + Cp*(Rv/Rd)*(T_zi*ql_zi);
+    return Δsv
 end
 
 """

@@ -25,17 +25,21 @@ def map_plot(ax, data, var):
         cmap=cmap,extend="both"
         )
     ax.set_title(data.variables[var].attrs["long_name"])
-    cb = plt.colorbar(h,ax=ax,shrink=0.6)
     ax.add_feature(cfeature.LAND, zorder=1, facecolor='black', edgecolor='black')
-    return ax
+    return h,ax
 
 ds = xr.open_dataset("partial_derivatives.nc")
-fig, axes = plt.subplots(nrows = 3, ncols = 2, figsize=(8,6), constrained_layout=True,
+fig, axes = plt.subplots(nrows = 2, ncols = 3, figsize=(15,6), constrained_layout=True,
                 sharex=True, sharey=True, subplot_kw={'projection':ccrs.PlateCarree()})
 keys = list(ds.keys())[6:]
 print(keys)
+letters = ["a","b","c","d","e","f","g","h"]
 
+plt.rcParams.update({"font.size":18})
 for i, var in enumerate(keys):
     ax = axes.flatten()[i]
-    ax = map_plot(ax, ds, var)
+    h,ax = map_plot(ax, ds, var)
+    ax.set_title(letters[i]+")", fontweight="bold", loc="left")
+cax = fig.add_axes([1.01,0.25,0.015,0.5])
+cb = plt.colorbar(h,cax=cax,label="$\\Delta$SWCRE [W m$^{-2}$]")
 plt.savefig("box_linear_perturb_JJA_NEP.png", dpi=200, bbox_inches="tight", facecolor="w")

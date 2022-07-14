@@ -18,6 +18,8 @@ function ΔTa(u, p, LWP)
     zi, sM, qM, SST, CF = u;
     # qft = qjump(u, p, LWP, p.fttype) + qM;
     # ΔT = -10.1 + 3.1*log(p.CO2) + 5.3*log(qft);
+    
+    # TODO without proper twocol FT do this:
     ΔT = -23 + 0.01*p.CO2;
     return ΔT
 end
@@ -39,6 +41,8 @@ function calc_surf_RAD(u, p, LWP)
     # direct greenhouse effect in subtropical clear-sky
     # a0, a1, a2, b1, b2 = [12.4, -1020, 3.1, -270, 0.86];
     # LW_net = (1-CF)*(a0*log(p.CO2/400) + a1 + a2*SST) + CF*(b1 + b2*SST);
+    
+    # TODO simplify the LW and keep constant
     LW_net = -30;
 
     return SW_net + LW_net
@@ -107,6 +111,7 @@ end
     with warming from export from the subtropics (proportional to all-sky albedo)
     and warming directly from GHG that depends on the ECS parameter
 """
+# TODO this whole thing!
 function trop_sst(u, p, LWP)
     zi, sM, qM, SST, CF = u;
 

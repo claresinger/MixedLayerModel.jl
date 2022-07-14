@@ -21,7 +21,7 @@ par.stype = varSST();
 dt, tmax = 48.0, 50.0;
 
 # load initial condition from file
-path = "experiments/output/cfmip_modCF_newCF/";
+path = "experiments/output/cfmip_modCF_tauCF/";
 restarttry1 = path*"co2_downstep_"*string(Int(newCO2+50))*".jld2";
 restarttry2 = path*"co2_downstep_"*string(Int(newCO2+100))*".jld2";
 restarttry3 = path*"co2_downstep_"*string(Int(newCO2+200))*".jld2";

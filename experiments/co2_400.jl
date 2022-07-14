@@ -7,7 +7,7 @@ include("mlm_solve_funcs.jl")
 include("plot_transient_solution.jl")
 
 # define path to save file (which experiment are you running?)
-path = "experiments/output/cfmip_modCF_newCF/";
+path = "experiments/output/cfmip_modCF_tauCF/";
 
 # define OHU from 400 ppm simulation
 par = upCO2();

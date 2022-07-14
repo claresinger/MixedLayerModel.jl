@@ -20,7 +20,7 @@ pref = 100000.0     # reference pressure (Pa = J/m^3)
 psurf = 101780.0    # surface pressure (Pa = J/m^3)
 S_subtr = 471.0     # solar flux in subtropics (W/m^2)
 α_ocean = 0.1       # surface albedo of ocean water
-CFmax = 1         # maximum cloud fraction
+CFmax = 1           # maximum cloud fraction
 CFmin = 0.2         # minimum cloud fraction
 
 # thermodynamic constants

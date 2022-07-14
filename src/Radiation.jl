@@ -116,19 +116,16 @@ function trop_sst(u, p, LWP)
     CF0 = CFmax;
     αc0 = cloud_albedo(50e-3);
     Δαc = cloud_albedo(LWP) - αc0;
-    # println(Δαc)
     ΔCF = CF - CF0;
     ΔT_export = a_export * (1-α_ocean) * S_subtr/4 * (αc0 * ΔCF + CF0 * Δαc);
-
+    
     # increase in tropical temperature from
     # direct greenhouse warming in tropics
     # ECS = °C per CO2 doubling 
     ΔT_greenhouse = p.ECS / log(2) * log(p.CO2 / 400);
-
+    
     # println(ΔT_export, " ", ΔT_greenhouse)
-
     T_trop = p.Ts400 + ΔT_export + ΔT_greenhouse;
     # T_trop = p.Ts400;
-
     return T_trop
 end

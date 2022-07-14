@@ -7,6 +7,7 @@ using Plots
 include("mlm_solve_funcs.jl")
 include("plot_transient_solution.jl")
 
+println()
 # use command line argument to set co2
 newCO2 = parse(Float64,ARGS[1]);
 # newCO2 = 200.0;
@@ -21,10 +22,10 @@ par.stype = varSST();
 dt, tmax = 48.0, 50.0;
 
 # load initial condition from file
-path = "experiments/output/cfmip_modCF_tauCF/";
-restarttry1 = path*"co2_downstep_"*string(Int(newCO2+50))*".jld2";
-restarttry2 = path*"co2_downstep_"*string(Int(newCO2+100))*".jld2";
-restarttry3 = path*"co2_downstep_"*string(Int(newCO2+200))*".jld2";
+path = "experiments/output/cfmip_modCF_surfRAD/";
+restarttry1 = path*"co2_downstep_"*string(Int(newCO2+100))*".jld2";
+restarttry2 = path*"co2_downstep_"*string(Int(newCO2+200))*".jld2";
+restarttry3 = path*"co2_upstep_"*string(Int(newCO2))*".jld2";
 if isfile(restarttry1)
     output = load(restarttry1);
 elseif isfile(restarttry2)
@@ -36,7 +37,7 @@ else
 end
 u0 = output["uf"];
 OHU = output["OHU"];
-println("restarting from CO2 = "*string(output["p"].CO2));
+# println("restarting from CO2 = "*string(output["p"].CO2));
 
 # set OHU
 par.OHU = OHU;

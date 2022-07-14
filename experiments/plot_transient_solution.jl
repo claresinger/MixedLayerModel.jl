@@ -45,4 +45,22 @@ function plot_sol(sol, filename)
     plot!(t, (zi .- zb) ./ zi, line=2, marker=:circle, legend=false, subplot=11, ylabel="zc/zi [-]", xlabel="time [days]");
     plot!(t, S, line=2, marker=:circle, legend=false, subplot=12, ylabel="S [-]", xlabel="time [days]");
     savefig(filename);
+
+    ### AGU plots
+    if (cf[1] > 0.5) && (cf[end] < 0.5)
+        Plots.scalefontsizes(1.5)
+        plot(size=(1000,500), layout=(2,2), dpi=200, left_margin = 5Plots.mm, bottom_margin=10Plots.mm);
+        plot!(t, ΔR, marker="o-", legend=false, subplot=1, 
+                ylabel="ΔR [W/m\$^2\$]", ylim=[0,60]);
+        plot!(t, sst, marker="o-", legend=false, subplot=2, 
+                ylabel="SST [K]", ylim=[290,315]);
+        plot!(t, S, marker="o-", legend=false, subplot=3, xlabel="Time [days]",
+                ylabel="Decoupling, \$\\mathcal{D}\$", yscale=:log10,
+                yticks=([0.3,1,3], ["0.3","1","3"]), ylim=[0.25,3]);
+        plot!(t, cf * 1e2, marker="o-", legend=false, subplot=4, 
+                ylabel="CF [%]", xlabel="Time [days]", ylim=[0,100]);
+        savefig(replace(filename, "up"=>"AGU-up"))
+        Plots.scalefontsizes(1/1.5)
+    end
+    ### 
 end

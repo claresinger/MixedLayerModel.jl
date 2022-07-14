@@ -18,7 +18,7 @@ function ΔTa(u, p, LWP)
     zi, sM, qM, SST, CF = u;
     # qft = qjump(u, p, LWP, p.fttype) + qM;
     # ΔT = -10.1 + 3.1*log(p.CO2) + 5.3*log(qft);
-    ΔT = -22.5 + 0.008*p.CO2
+    ΔT = -23 + 0.01*p.CO2;
     return ΔT
 end
 
@@ -31,14 +31,15 @@ function calc_surf_RAD(u, p, LWP)
     zi, sM, qM, SST, CF = u;
 
     # shortwave calculation
+    WVtrans = exp(-10*qM);
     αc = cloud_albedo(LWP);
-    WVtrans = 1/exp(10*qM);
-    SW_net = WVtrans * (1-CF*αc) * (1-α_ocean) * S_subtr;
+    SW_net = WVtrans * (1 - (1-CF)*α_ocean - CF*αc) * S_subtr;
 
     # LW_net linear with SST with coefficient dependent on log(CO2)
     # direct greenhouse effect in subtropical clear-sky
-    a0, a1, a2, b1, b2 = [12.4, -1020, 3.1, -270, 0.86];
-    LW_net = (1-CF)*(a0*log(p.CO2/400) + a1 + a2*SST) + CF*(b1 + b2*SST);
+    # a0, a1, a2, b1, b2 = [12.4, -1020, 3.1, -270, 0.86];
+    # LW_net = (1-CF)*(a0*log(p.CO2/400) + a1 + a2*SST) + CF*(b1 + b2*SST);
+    LW_net = -30;
 
     return SW_net + LW_net
 end

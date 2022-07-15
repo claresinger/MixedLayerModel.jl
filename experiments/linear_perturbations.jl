@@ -7,39 +7,39 @@ using Plots
 
 include("mlm_solve_funcs.jl")
 
-# stratocumulus
-regime = "Sc"
-init = 1
-SST0 = 292;
-D0 = 5.5e-6;
-V0 = 10.0;
-RHft0 = 0.2;
-EIS0 = 10.0;
-CO20 = 400.0;
-ylimCF = (90,100)
-ylimLWP = (50,150)
-
-# # cumulus
-# regime = "Cu"
-# init = 0
-# SST0 = 300;
-# D0 = 3.0e-6;
+# # stratocumulus
+# regime = "Sc"
+# init = 1
+# SST0 = 290;
+# D0 = 5e-6;
 # V0 = 10.0;
 # RHft0 = 0.2;
 # EIS0 = 10.0;
 # CO20 = 400.0;
-# ylimCF = (15,50)
-# ylimLWP = (50,150)
+# ylimCF = (70,80)
+# ylimLWP = (75,175)
 
-N = 9 # 3 or 9
-_p1 = collect(range(99,101,N)) ./ 100;
+# cumulus
+regime = "Cu"
+init = 0
+SST0 = 300;
+D0 = 2.5e-6;
+V0 = 8.0;
+RHft0 = 0.2;
+EIS0 = 5.0;
+CO20 = 400.0;
+ylimCF = (5,20)
+ylimLWP = (50,150)
+
+N = 11 # 3 or 9
+_p2 = collect(range(98,102,N)) ./ 100;
 _p10 = collect(range(90,110,N)) ./ 100;
 _p20 = collect(range(80,120,N)) ./ 100;
 _p50 = collect(range(50,150,N)) ./ 100;
 
 X0_arr = [SST0, V0, D0, RHft0, EIS0, CO20];
-Xlabel_arr = ["SST (K)", "V (m/s)", "D x 10\$^6\$ (1/s)", "RH\$^{ft}\$", "EIS (K)", "CO\$_2\$ (ppm)"];
-perturb = [_p1, _p10, _p10, _p50, _p20, _p50];
+Xlabel_arr = ["SST [K]", "V [m s\$^{-1}\$]", "D [10\$^{-6}\$ s\$^{-1}\$]", "RH\$_+\$ [%]", "EIS [K]", "CO\$_2\$ [ppm]"];
+perturb = [_p2, _p10, _p10, _p20, _p20, _p50];
 
 CF_arr = zeros(length(X0_arr), N);
 LWP_arr = zeros(length(X0_arr), N);
@@ -53,17 +53,19 @@ for (j,X0) in enumerate(X0_arr)
     for (i,Xi) in enumerate(X_arr)
         # set up parameters
         local par = climatology();
+        par.rtype = varRad();
+        par.stype = fixSST();
+        par.ftype = varFlux();
+        par.fttype = fixEIS();
         par.etype = enBal();
+        par.dTdz = -6e-3; # K/km
 
         par.SST0 = (j == 1) ? Xi : SST0 # (K)
         par.V = (j == 2) ? Xi : V0 # m/s
         par.D = (j == 3) ? Xi : D0 # (1/s)
         par.RHft = (j == 4) ? Xi : RHft0 # (-)
-        EIS = (j == 5) ? Xi : EIS0 # (K)
+        par.EIS = (j == 5) ? Xi : EIS0 # (K)
         par.CO2 = (j == 6) ? Xi : CO20 # (ppm)
-
-        par.sft0 = (par.SST0 + EIS)*Cp; # (K)
-        par.Gamma_s = -6e-3*Cp + g; # (K/m)
 
         # run to equilibrium
         dt = 24.0;
@@ -93,65 +95,65 @@ ENV["GKSwstype"]="nul"
 # plot and save results
 j=1
 p1 = plot(X0_arr[j] .* perturb[j], CF_arr[j,:]*100, lw=2, label="",
-        color=:black,  yguidefontcolor=:black,
+        color=:black,  yguidefontcolor=:black, guidefontsize=16,
         ylim=ylimCF, ylabel="Cloud fraction [%]",
-        left_margin=15Plots.mm, right_margin=30Plots.mm,
+        left_margin=15Plots.mm, right_margin=0Plots.mm,
         bottom_margin=15Plots.mm, top_margin=5Plots.mm)
 plot!(twinx(), X0_arr[j] .* perturb[j], LWP_arr[j,:]*1e3, lw=2, label="",
         color=:blue, yguidefontcolor=:blue, ytickfontcolor=:blue,
-        ylim=ylimLWP, ylabel="In-cloud LWP [g/m\$^2\$]",
+        ylim=ylimLWP, yformatter=_->"", guidefontsize=16,
         xlabel=Xlabel_arr[j])
 j=2
 p2 = plot(X0_arr[j] .* perturb[j], CF_arr[j,:]*100, lw=2, label="",
-        color=:black,  yguidefontcolor=:black,
-        ylim=ylimCF, ylabel="Cloud fraction [%]",
-        left_margin=15Plots.mm, right_margin=30Plots.mm,
+        color=:black,  yguidefontcolor=:black, guidefontsize=16,
+        ylim=ylimCF, yformatter=_->"",
+        left_margin=0Plots.mm, right_margin=0Plots.mm,
         bottom_margin=15Plots.mm, top_margin=5Plots.mm)
 plot!(twinx(), X0_arr[j] .* perturb[j], LWP_arr[j,:]*1e3, lw=2, label="",
         color=:blue, yguidefontcolor=:blue, ytickfontcolor=:blue,
-        ylim=ylimLWP, ylabel="In-cloud LWP [g/m\$^2\$]",
+        ylim=ylimLWP, yformatter=_->"", guidefontsize=16,
         xlabel=Xlabel_arr[j])
 j=3
 p3 = plot(1e6 .* X0_arr[j] .* perturb[j], CF_arr[j,:]*100, lw=2, label="",
-        color=:black,  yguidefontcolor=:black,
-        ylim=ylimCF, ylabel="Cloud fraction [%]",
-        left_margin=15Plots.mm, right_margin=30Plots.mm,
+        color=:black,  yguidefontcolor=:black, guidefontsize=16,
+        ylim=ylimCF, yformatter=_->"",
+        left_margin=0Plots.mm, right_margin=30Plots.mm,
         bottom_margin=15Plots.mm, top_margin=5Plots.mm)
 plot!(twinx(), 1e6 .* X0_arr[j] .* perturb[j], LWP_arr[j,:]*1e3, lw=2, label="",
         color=:blue, yguidefontcolor=:blue, ytickfontcolor=:blue,
-        ylim=ylimLWP, ylabel="In-cloud LWP [g/m\$^2\$]",
+        ylim=ylimLWP, ylabel="In-cloud LWP [g/m\$^2\$]", guidefontsize=16,
         xlabel=Xlabel_arr[j])
 j=4
-p4 = plot(X0_arr[j] .* perturb[j], CF_arr[j,:]*100, lw=2, label="",
-        color=:black,  yguidefontcolor=:black,
+p4 = plot(1e2 .* X0_arr[j] .* perturb[j], CF_arr[j,:]*100, lw=2, label="",
+        color=:black,  yguidefontcolor=:black, guidefontsize=16,
         ylim=ylimCF, ylabel="Cloud fraction [%]",
-        left_margin=15Plots.mm, right_margin=30Plots.mm,
+        left_margin=15Plots.mm, right_margin=0Plots.mm,
         bottom_margin=15Plots.mm, top_margin=5Plots.mm)
-plot!(twinx(), X0_arr[j] .* perturb[j], LWP_arr[j,:]*1e3, lw=2, label="",
+plot!(twinx(), 1e2 .* X0_arr[j] .* perturb[j], LWP_arr[j,:]*1e3, lw=2, label="",
         color=:blue, yguidefontcolor=:blue, ytickfontcolor=:blue,
-        ylim=ylimLWP, ylabel="In-cloud LWP [g/m\$^2\$]",
+        ylim=ylimLWP, yformatter=_->"", guidefontsize=16,
         xlabel=Xlabel_arr[j])
 j=5
 p5 = plot(X0_arr[j] .* perturb[j], CF_arr[j,:]*100, lw=2, label="",
-        color=:black,  yguidefontcolor=:black,
-        ylim=ylimCF, ylabel="Cloud fraction [%]",
-        left_margin=15Plots.mm, right_margin=30Plots.mm,
+        color=:black,  yguidefontcolor=:black, guidefontsize=16,
+        ylim=ylimCF, yformatter=_->"",
+        left_margin=0Plots.mm, right_margin=0Plots.mm,
         bottom_margin=15Plots.mm, top_margin=5Plots.mm)
 plot!(twinx(), X0_arr[j] .* perturb[j], LWP_arr[j,:]*1e3, lw=2, label="",
         color=:blue, yguidefontcolor=:blue, ytickfontcolor=:blue,
-        ylim=ylimLWP, ylabel="In-cloud LWP [g/m\$^2\$]",
+        ylim=ylimLWP, yformatter=_->"", guidefontsize=16,
         xlabel=Xlabel_arr[j])
 j=6
 p6 = plot(X0_arr[j] .* perturb[j], CF_arr[j,:]*100, lw=2, label="",
-        color=:black,  yguidefontcolor=:black,
-        ylim=ylimCF, ylabel="Cloud fraction [%]",
-        left_margin=15Plots.mm, right_margin=30Plots.mm,
+        color=:black,  yguidefontcolor=:black, guidefontsize=16,
+        ylim=ylimCF, yformatter=_->"",
+        left_margin=0Plots.mm, right_margin=30Plots.mm,
         bottom_margin=15Plots.mm, top_margin=5Plots.mm)
 plot!(twinx(), X0_arr[j] .* perturb[j], LWP_arr[j,:]*1e3, lw=2, label="",
         color=:blue, yguidefontcolor=:blue, ytickfontcolor=:blue,
-        ylim=ylimLWP, ylabel="In-cloud LWP [g/m\$^2\$]",
+        ylim=ylimLWP, ylabel="In-cloud LWP [g/m\$^2\$]", guidefontsize=16,
         xlabel=Xlabel_arr[j])
-plot(p1, p2, p3, p4, p5, p6, layout=(2,3), size=(1600,800), dpi=200);
+plot(p1, p2, p3, p4, p5, p6, layout=(2,3), link=:y, size=(1200,600), dpi=200);
 
 path = "experiments/figures/linear_perturb/";
 mkpath(path);

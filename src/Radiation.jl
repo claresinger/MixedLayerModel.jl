@@ -16,11 +16,11 @@ struct fixRad <: rad_type end
 """
 function ΔTa(u, p, LWP)
     zi, sM, qM, SST, CF = u;
-    # qft = qjump(u, p, LWP, p.fttype) + qM;
-    # ΔT = -10.1 + 3.1*log(p.CO2) + 5.3*log(qft);
+    qft = qjump(u, p, LWP, p.fttype) + qM;
+    ΔT = -10.1 + 3.1*log(p.CO2) + 5.3*log(qft);
     
     # TODO without proper twocol FT do this:
-    ΔT = -22.5 + 0.008*p.CO2;
+    # ΔT = -22.5 + 0.008*p.CO2;
     return ΔT
 end
 

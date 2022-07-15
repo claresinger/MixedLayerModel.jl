@@ -5,33 +5,10 @@ export sjump, qjump, S_zi, Q_zi
 # create structure for fttype
 ###########
 abstract type ft_type end
-struct fixedFT <: ft_type end
 struct co2dep <: ft_type end
+struct fixedFT <: ft_type end
 struct fixEIS <: ft_type end
 struct twocol <: ft_type end
-
-"""
-    qjump(u, p, LWP, p.fttype::fixedFT)
-    defines qft from p.RHft and Tft(sft)
-"""
-function qjump(u, p, LWP, fttype::fixedFT)
-    zi, sM, qM, SST, CF = u;
-    sft = sjump(u, p, LWP, p.fttype) + sM;
-    qft = p.RHft * q_sat(zi, (sft - g*zi)/Cp);
-    qj = qft - qM;
-    return qj
-end
-
-"""
-    sjump(u, p, LWP, p.fttype::fixedFT)
-    defines s+(z) in free troposphere -- given Gamma_s and Gamma_q
-"""
-function sjump(u, p, LWP, fttype::fixedFT)
-    zi, sM, qM, SST, CF = u;
-    sft = p.sft0 + p.Gamma_s * zi;
-    sj = sft - sM;
-    return sj
-end
 
 """
     qjump(u, p, LWP, p.fttype::co2dep)
@@ -70,6 +47,17 @@ function sjump(u, p, LWP, fttype::co2dep)
 end
 
 """
+    sjump(u, p, LWP, p.fttype::fixedFT)
+    defines s+(z) in free troposphere -- given Gamma_s and Gamma_q
+"""
+function sjump(u, p, LWP, fttype::fixedFT)
+    zi, sM, qM, SST, CF = u;
+    sft = p.sft0 + p.Gamma_s * zi;
+    sj = sft - sM;
+    return sj
+end
+
+"""
     sjump(u, p, LWP, p.fttype::fixEIS)
     defines s+(z) in free troposphere given EIS and dTdz
 """
@@ -99,7 +87,7 @@ end
     specific humidity above cloud given fixed RHft
     and saturation calculated at Tft
 """
-function qjump(u, p, LWP, fttype::Union{twocol, fixEIS})
+function qjump(u, p, LWP, fttype::Union{twocol, fixEIS, fixedFT})
     zi, sM, qM, SST, CF = u;
     sft = sjump(u, p, LWP, p.fttype) + sM;
     Tft = (sft - g*zi)/Cp;

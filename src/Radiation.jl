@@ -20,7 +20,7 @@ function ΔTa(u, p, LWP)
     # ΔT = -10.1 + 3.1*log(p.CO2) + 5.3*log(qft);
     
     # TODO without proper twocol FT do this:
-    ΔT = -23 + 0.01*p.CO2;
+    ΔT = -22.5 + 0.008*p.CO2;
     return ΔT
 end
 
@@ -33,7 +33,7 @@ function calc_surf_RAD(u, p, LWP)
     zi, sM, qM, SST, CF = u;
 
     # shortwave calculation
-    WVtrans = exp(-10*qM);
+    WVtrans = exp(-10*qM); # TODO: WV abs coefficient
     αc = cloud_albedo(LWP);
     SW_net = WVtrans * (1 - (1-CF)*α_ocean - CF*αc) * S_subtr;
 

@@ -36,7 +36,7 @@ function dsMdt(u, p, ent, LWP)
 end
 
 """
-    dqMdt(u, p, ent)
+    dqMdt(u, p, ent, LWP)
 
     evolution of mixed-layer total water specific humidity, qM
     negative of the vertical water flux
@@ -50,7 +50,7 @@ function dqMdt(u, p, ent, LWP)
 end
 
 """
-    dSSTdt(u, p, LWP)
+    dSSTdt(u, p, LWP, p.stype)
 
     defined as 0 for fixSST
 """
@@ -59,7 +59,7 @@ function dSSTdt(u, p, LWP, stype::fixSST)
 end
 
 """
-    dSSTdt(u, p, LWP)
+    dSSTdt(u, p, LWP, p.stype)
 
     close surface energy budge for varSST
 """
@@ -68,18 +68,24 @@ function dSSTdt(u, p, LWP, stype::varSST)
     RAD = calc_surf_RAD(u, p, LWP);
     SHF = calc_SHF(u, p);
     LHF = calc_LHF(u, p);   
-    c = ρw * Cw * p.Hw;
-    return (1/c) * (RAD - SHF - LHF - p.OHU)
+    τ_SST = ρw * Cw * p.Hw;
+    dx = (RAD - SHF - LHF - p.OHU) / τ_SST;
+    
+    # TODO do this for energy export to tropics
+    dy = (p.SST0 - SST) / (10 * 3600 * 24);
+    return (dx + dy)
 end
 
 """
+    dCFdt(u, p, zb, LWP)
+
     calculation cloud fraction 
     determined as a logistic function of S, the stability parameter
 """
 function dCFdt(u, p, zb, LWP)
     zi, sM, qM, SST, CF = u;
     CFnew = cloud_fraction(u, p, zb, LWP);
-    τ_CF = 3600.0*24.0*1.0; # 1 days; cloud fraction adjustment timescale [seconds]
+    τ_CF = 3600.0*24.0*5; # TODO: 5 days; cloud fraction adjustment timescale [seconds]
     dCFdt = (CFnew - CF) / τ_CF;
     return dCFdt
 end
@@ -89,13 +95,12 @@ end
 
     define the coupled ODE
       dzi/dt = we - D*zi
-      dsM/dt = -dE/dz = 1/zi * (Szi - S0 + dR/rho)
-      dqM/dt = -dW/dz = 1/zi * (Qzi - Q0)
-      dSST/dt = 1/c * (SWnet - LWnet - SHF - LHF - OHU)
+      dsM/dt = -dE/dz = -1/zi * (Szi - S0 + dR/rho)
+      dqM/dt = -dW/dz = -1/zi * (Qzi - Q0)
+      dSST/dt = (SWnet - LWnet - SHF - LHF - OHU) / τ_SST
+      dCF/dt = (CF' - CF) / τ_CF
 """
 function mlm(du, u, p, t)
-    # println(t/3600/24)
-    # println(u)
     zb = calc_LCL(u);
     LWP = incloud_LWP(u, zb);
     ent = we(u, p, zb, LWP, p.etype);
@@ -104,4 +109,10 @@ function mlm(du, u, p, t)
     du[3] = dqMdt(u, p, ent, LWP)
     du[4] = dSSTdt(u, p, LWP, p.stype)
     du[5] = dCFdt(u, p, zb, LWP)
+    
+    # println(t/3600/24)
+    # println(u)
+    # println(zb)
+    # println(du)
+    # println()
 end

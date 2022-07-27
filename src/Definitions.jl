@@ -13,14 +13,17 @@ Cp = 1004.0         # heat capacity at constant pressure (J/K/kg)
 σ_SB = 5.67e-8      # stefan-boltzmann constant (W/m^2/K^4)
 ρw = 1e3            # density of water (kg/m^3)
 Cw = 4.19e3         # (heat capacity of water (J/kg/K) 
-Γd = g / Cp         # dry adiabatic lapse rate
+Γd = g / Cp         # dry adiabatic lapse rate (K/m)
 
 # definitions
 pref = 100000.0     # reference pressure (Pa = J/m^3)
 psurf = 101780.0    # surface pressure (Pa = J/m^3)
 S_subtr = 471.0     # solar flux in subtropics (W/m^2)
-S_trop = 355.0      # solar flux in tropics (W/m2)
 α_ocean = 0.1       # surface albedo of ocean water
+
+# TODO these params change between obs and LES (1 -> 0.2 vs 0.8 -> 0.1)
+CFmax = 0.8         # maximum cloud fraction
+CFmin = 0.1         # minimum cloud fraction
 
 # thermodynamic constants
 δ = (Rv-Rd)/Rd     

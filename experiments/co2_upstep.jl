@@ -7,13 +7,22 @@ using Plots
 include("mlm_solve_funcs.jl")
 include("plot_transient_solution.jl")
 
+println()
 # use command line argument to set co2
-# newCO2 = parse(Float64,ARGS[1]);
-newCO2 = 800.0;
+newCO2 = parse(Float64,ARGS[1]);
+# newCO2 = 1000.0;
 println(newCO2);
 
+par = upCO2();
+par.etype = enBal();
+par.fttype = co2dep();
+par.rtype = varRad();
+par.stype = varSST();
+par.CO2 = newCO2;
+dt, tmax = 48.0, 50.0;
+
 # load initial condition from file
-path = "experiments/output/switch_h_to_sl/";
+path = "experiments/output/cfmip_modCF_surfRAD/";
 restarttry1 = path*"co2_upstep_"*string(Int(newCO2-100))*".jld2";
 restarttry2 = path*"co2_upstep_"*string(Int(newCO2-200))*".jld2";
 restarttry3 = path*"co2_upstep_"*string(Int(newCO2-400))*".jld2";
@@ -30,16 +39,8 @@ u0 = output["uf"];
 OHU = output["OHU"];
 println("restarting from CO2 = "*string(output["p"].CO2));
 
-# set OHU, increase CO2, let SST evolve and check cloud changes
-par = upCO2();
-par.Hw = 0.1;
+# set OHU
 par.OHU = OHU;
-par.CO2 = newCO2;
-par.etype = enBal();
-par.fttype = twocol();
-par.rtype = varRad();
-par.stype = varSST();
-dt, tmax = 12.0, 40.0;
 
 # solve and plot
 ENV["GKSwstype"]="nul"
@@ -52,10 +53,10 @@ plot_sol(sol, filename);
 uf = sol.u[end];
 du = zeros(5);
 mlm(du, uf, par, 0.0);
-zi,hM,qM,SST,CF = uf;
+zi,sM,qM,SST,CF = uf;
 zb = calc_LCL(uf);
 LWP = incloud_LWP(uf, zb);
-RH = min(qM / q_sat(0.0, temp(0.0, hM, qM)), 1.0);
+RH = min(qM / q_sat(0.0, temp(0.0, sM, qM)), 1.0);
 println(uf);
 println(du);
 println("cloud base: ",zb)
@@ -70,18 +71,3 @@ output = Dict("p" => par, "u0" => u0, "uf" => uf, "du/u" => du./uf,
 "OHU" => calc_OHU(uf,par,LWP,par.stype))
 
 save(path*"co2_upstep_"*string(Int(newCO2))*".jld2", output)
-
-# # ### AGU plots
-# if (u0[5] > 0.5) && (uf[5] < 0.5)
-#     Plots.scalefontsizes(2)
-#     plot(size=(1000,500), layout=(2,2), dpi=200, left_margin = 5Plots.mm, bottom_margin=10Plots.mm);
-#     plot!(t, ΔR, marker="o-", legend=false, subplot=1, ylabel="ΔR [W/m\$^2\$]", ylim=[0,60]);
-#     plot!(t, S, marker="o-", legend=false, subplot=2, ylabel="Stability, \$S\$",
-#             yscale=:log10, yticks=([0.2,0.5,2,5], ["0.2","0.5","2","5"]), ylim=[0.2,5]);
-#     plot!(t, cf * 1e2, marker="o-", legend=false, subplot=3, ylabel="CF [%]", xlabel="Time [days]", ylim=[0,100]);
-#     plot!(t, sst, marker="o-", legend=false, subplot=4, ylabel="SST [K]", xlabel="Time [days]", ylim=[290,315]);
-#     mkpath(replace(path, "output"=>"figures"));
-#     savefig(replace(path, "output"=>"figures")*"AGU-up"*string(Int(newCO2))*"_t.png");
-#     Plots.scalefontsizes(1/2)
-# end
-# ### 

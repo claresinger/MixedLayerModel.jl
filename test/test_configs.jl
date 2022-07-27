@@ -26,7 +26,7 @@ for entrainment in (enBal(), bflux())
             par.ftype = fluxes;
             par.rtype = radiation;
             par.stype = fixSST();
-            par.fttype = fixedFT();
+            par.fttype = fixEIS();
             println(entrainment, fluxes, radiation)
 
             u0, sol = run_mlm(par, dt=3600.0*dt, tspan=(0.0,3600.0*24.0*tmax));

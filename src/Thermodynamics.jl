@@ -1,7 +1,6 @@
 export ρref, pres, q_sat, q_v, q_l, temp, rho
 export incloud_LWP, calc_LCL
 export Γs, moist_adiabat, temp_ft
-export calc_qft0
 
 """
     ρref(T)    
@@ -39,8 +38,7 @@ end
 """
 function q_sat(z, T)
     psat = e0 * exp(-L0/Rv * (1 / T - 1/T0));
-    qsat = Rd/Rv * psat / (pres(z,T) - psat);
-    return qsat
+    return Rd/Rv * psat / (pres(z,T) - psat)
 end
 
 """
@@ -56,7 +54,7 @@ end
 """
     temp(z, s, qt)
 
-    uses saturation adjustment on the enthalpy
+    uses saturation adjustment on the liquid water static energy (s)
 """
 function temp(z, s, qt)
     s_act(T) = Cp*T + g*z - L0*q_l(z,T,qt);
@@ -92,32 +90,17 @@ end
 """
 function incloud_LWP(u, zb)
     zi, sM, qtM, SST, CF = u;
-
-    dz = 1.0;
-    z = zb:dz:zi;
-    T = temp.(z,sM,qtM);
-    ρ = rho.(z,T);
-    ql = q_l.(z,T,qtM);
-    liq_wat_path = sum(ρ .* ql .* dz);
-
-    return liq_wat_path
-
-end
-
-"""
-    calc_qft0(RHft, Gamma_q, sft0, Gamma_s)
-
-    calculate the initial free-tropospheric humidity given
-    ft RH, ft humidity lapse rate, initial ft dry static energy, 
-    and ft dry static energy lapse rate
-"""
-function calc_qft0(RHft, Gamma_q, sft0, Gamma_s)
-    zft = 1000.0;
-    sft = sft0 + Gamma_s * zft;
-    Tft = (sft - g*zft) / Cp;
-    qft = RHft * q_sat(zft, Tft);
-    qft0 = qft - Gamma_q*zft;
-    return qft0
+    if zb >= zi
+        icLWP = 0.0
+    else
+        dz = 1.0;
+        z = zb:dz:zi;
+        T = temp.(z,sM,qtM);
+        ρ = rho.(z,T);
+        ql = q_l.(z,T,qtM);
+        icLWP = sum(ρ .* ql .* dz);
+    end
+    return icLWP
 end
 
 """

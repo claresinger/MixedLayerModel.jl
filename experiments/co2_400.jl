@@ -7,16 +7,15 @@ include("mlm_solve_funcs.jl")
 include("plot_transient_solution.jl")
 
 # define path to save file (which experiment are you running?)
-path = "experiments/output/switch_h_to_sl/";
+path = "experiments/output/cfmip_modCF_surfRAD/";
 
 # define OHU from 400 ppm simulation
 par = upCO2();
 par.etype = enBal();
-par.fttype = twocol();
+par.fttype = co2dep();
 par.rtype = varRad();
 par.stype = fixSST();
-dt = 12.0;
-tmax = 40.0;
+dt, tmax = 48.0, 50.0;
 
 ## solve and plot
 ENV["GKSwstype"]="nul"

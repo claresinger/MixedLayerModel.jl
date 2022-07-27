@@ -1,5 +1,6 @@
 export calc_bflux
 export calc_OHU
+export calc_SWCRE
 
 """
     calc_bflux(u, p, zarr, etype::bflux)
@@ -64,4 +65,13 @@ end
 """
 function calc_OHU(u, p, LWP, stype::varSST)
     return p.OHU
+end
+
+function calc_SWCRE(u)
+    zi, sM, qM, SST, CF = u;
+    zb = calc_LCL(u);
+    LWP = incloud_LWP(u, zb);
+    αc = cloud_albedo(LWP);
+    SWCRE = S_subtr * CF * (α_ocean - αc);
+    return SWCRE
 end

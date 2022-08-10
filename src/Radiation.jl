@@ -85,9 +85,9 @@ end
     goes between 0 and 0.8
 """
 function cloud_albedo(LWP)
-    m = 0.795;
-    Lx = 19.136*1e-3;
-    αc = m * (1 - Lx/(Lx+LWP));
+    αmax = 0.98;
+    Lx = 36e-3;
+    αc = αmax * (LWP)/(Lx + LWP);
     return αc
 end
 

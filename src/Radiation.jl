@@ -15,12 +15,12 @@ struct fixRad <: rad_type end
     temperature as a function of CO2 and H2O above-cloud
 """
 function ΔTa(u, p, LWP)
-    zi, sM, qM, SST, CF = u;
-    qft = qjump(u, p, LWP, p.fttype) + qM;
-    ΔT = -10.1 + 3.1*log(p.CO2) + 5.3*log(qft);
+    # zi, sM, qM, SST, CF = u;
+    # qft = qjump(u, p, LWP, p.fttype) + qM;
+    # ΔT = -10.1 + 3.1*log(p.CO2) + 5.3*log(qft);
     
     # TODO without proper twocol FT do this:
-    # ΔT = -22.5 + 0.008*p.CO2;
+    ΔT = -22.5 + 0.008*p.CO2;
     return ΔT
 end
 
@@ -82,7 +82,6 @@ end
 
     albedo of the cloud given LWP in kg/m^2
     fit from LES experiments
-    goes between 0 and 0.8
 """
 function cloud_albedo(LWP)
     αmax = 0.98;

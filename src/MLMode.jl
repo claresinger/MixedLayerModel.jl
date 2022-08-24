@@ -75,7 +75,7 @@ function dSSTdt(u, p, LWP, stype::varSST)
     dx = (RAD - SHF - LHF - p.OHU) / τ_SST;
     
     # TODO do this for energy export to tropics
-    dy = (p.SST0 - SST) / (10 * 3600 * 24);
+    dy = (p.SST0 - SST) / (5 * 3600 * 24);
     return (dx + dy)
 end
 

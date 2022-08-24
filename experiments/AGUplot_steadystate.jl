@@ -32,7 +32,7 @@ p_cf = scatter(co2, cf*100, color=c, marker=:x, markersize=ms, label="",
                 xticks=([400, 800, 1200, 1600]), xlim=[100,1700], ylim=[0,110])
 p_sst = scatter(co2, sst, color=c, marker=:x, markersize=ms, label="", 
                 ylabel="SST [K]",
-                xticks=([400, 800, 1200, 1600]), xlim=[100,1700], ylim=[285, 315])
+                xticks=([400, 800, 1200, 1600]), xlim=[100,1700], ylim=[286, 312])
 plot!(p_dR, co2, dR, linewidth=2, linestyle=:dot, color=c, label="")
 plot!(p_decoup, co2, S, linewidth=2, linestyle=:dot, color=c, label="")
 plot!(p_cf, co2, cf*100, linewidth=2, linestyle=:dot, color=c, label="")
@@ -61,8 +61,8 @@ plot!(p_sst, co2, sst, linewidth=2, linestyle=:dot, color=c, label="")
 ###################
 
 exp_path = "cumulus_ventilation_log10e-3/"
-co2u = [200, 300, 400, 600, 800, 1000, 1200, 1400];
-co2d = [1400, 1200, 1000, 800, 600, 400, 300, 200];
+co2u = [200, 300, 400, 600, 800, 1000, 1200, 1400, 1500, 1600];
+co2d = [1600, 1500, 1400, 1200, 1000, 800, 600, 400, 300, 200];
 
 N = length(co2u);
 zi, zb, ent = zeros(N), zeros(N), zeros(N);

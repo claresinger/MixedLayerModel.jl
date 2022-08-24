@@ -150,6 +150,9 @@ end
     go up dry adiabat to LCL and then saturated adiabat
 """
 function temp_ft(Tsurf, zft, p)
+    if zft < 10
+        println(zft)
+    end
     T, z = moist_adiabat(Tsurf, zft, p);
     return T[end]
 end

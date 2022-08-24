@@ -60,9 +60,9 @@ plot!(p_sst, co2, sst, linewidth=2, linestyle=:dot, color=c, label="")
 
 ###################
 
-exp_path = "remove_cf_radcool_twocol/"
-co2u = [200, 300, 400, 600, 800, 1000, 1200, 1400, 1500, 1600];
-co2d = [1600, 1500, 1400, 1200, 1000, 800, 600, 400, 300, 200];
+exp_path = "cumulus_ventilation_log10e-3/"
+co2u = [200, 300, 400, 600, 800, 1000, 1200, 1400];
+co2d = [1400, 1200, 1000, 800, 600, 400, 300, 200];
 
 N = length(co2u);
 zi, zb, ent = zeros(N), zeros(N), zeros(N);

@@ -19,10 +19,10 @@ par.fttype = co2dep();
 par.rtype = varRad();
 par.stype = varSST();
 par.CO2 = newCO2;
-dt, tmax = 48.0, 15;
+dt, tmax = 48.0, 50;
 
 # load initial condition from file
-path = "experiments/output/remove_cf_radcool_co2dep/";
+path = "experiments/output/cumulus_ventilation_log10e-3/";
 restarttry1 = path*"co2_upstep_"*string(Int(newCO2-100))*".jld2";
 restarttry2 = path*"co2_upstep_"*string(Int(newCO2-200))*".jld2";
 restarttry3 = path*"co2_upstep_"*string(Int(newCO2-400))*".jld2";

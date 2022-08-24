@@ -45,7 +45,7 @@ end
 """
 function we(u, p, zb, LWP, etype::enBal)
     zi, sM, qM, SST, CF = u;
-    ΔR = calc_cloudtop_RAD(u, p, LWP, p.rtype) / CF;
+    ΔR = calc_cloudtop_RAD(u, p, LWP, p.rtype);
     w = (ΔR / ρref(SST)) / sv_jump(u, p, LWP);
     return w
 end

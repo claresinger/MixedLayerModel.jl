@@ -45,8 +45,12 @@ end
 """
 function we(u, p, zb, LWP, etype::enBal)
     zi, sM, qM, SST, CF = u;
-    ΔR = calc_cloudtop_RAD(u, p, LWP, p.rtype);
-    w = (ΔR / ρref(SST)) / sv_jump(u, p, LWP);
+    ΔR = calc_cloudtop_RAD(u, p, LWP, p.rtype); # W/m2
+    w_ent = (ΔR / ρref(SST)) / sv_jump(u, p, LWP); # m/s
+    α_vent = 10e-3; # m/s
+    # w_vent = α_vent * (p.CFmax - CF) / (p.CFmax - p.CFmin); # m/s
+    w_vent = α_vent * ( 1 - 1 / ( 1 + exp( -10*(CF - (p.CFmax + p.CFmin)/2) ) ) ); # m/s
+    w = w_ent + w_vent;
     return w
 end
 

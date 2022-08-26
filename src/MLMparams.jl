@@ -1,6 +1,9 @@
 export upCO2, climatology
 
 @with_kw mutable struct upCO2
+    CFmax::Real = 1.0         # maximum cloud fraction
+    CFmin::Real = 0.2         # minimum cloud fraction
+
     # fixed SST for 400ppm
     SST0::Real = 290.0; # (K)
 
@@ -34,6 +37,9 @@ export upCO2, climatology
 end
 
 @with_kw mutable struct climatology
+    CFmax::Real = 0.8         # maximum cloud fraction
+    CFmin::Real = 0.1         # minimum cloud fraction
+
     # baseline CO2
     CO2::Real = 400; # (ppm)
     

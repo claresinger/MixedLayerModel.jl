@@ -29,13 +29,13 @@ end
 """
 function cloud_fraction(u, p, zb, LWP)
     S = calc_S(u, p, zb, LWP);
-    CF = cloud_fraction_S(S);
+    CF = cloud_fraction_S(S, p);
     return CF
 end
 
-function cloud_fraction_S(S)
+function cloud_fraction_S(S, p)
     m = 10; # tunable parameter for the slope of the CF nonlinearity
     S_crit = 0.5
-    CF = CFmax - (CFmax - CFmin) / (1 + 9*exp(-m*(S-S_crit)));
+    CF = p.CFmax - (p.CFmax - p.CFmin) / (1 + 9*exp(-m*(S-S_crit)));
     return CF
 end

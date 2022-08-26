@@ -16,10 +16,11 @@ struct varSST <: sst_type end
 """
 function dzidt(u, p, ent)
     zi, sM, qM, SST, CF = u;
-    α_vent = 10e-3;
-    # w_vent = α_vent * (CFmax - CF) / (CFmax - CFmin); # m/s
-    w_vent = α_vent * ( 1 - 1 / ( 1 + exp( -10*(CF - (CFmax + CFmin)/2) ) ) ); # m/s
-    dzidt = ent - p.D*zi + w_vent;
+    # α_vent = 10e-3;
+    # # w_vent = α_vent * (p.CFmax - CF) / (p.CFmax - p.CFmin); # m/s
+    # w_vent = α_vent * ( 1 - 1 / ( 1 + exp( -10*(CF - (p.CFmax + p.CFmin)/2) ) ) ); # m/s
+    # dzidt = ent - p.D*zi + w_vent;
+    dzidt = ent - p.D*zi;
     return dzidt
 end
 

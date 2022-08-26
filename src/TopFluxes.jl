@@ -25,7 +25,7 @@ function qjump(u, p, LWP, fttype::co2dep)
     qj = max(qj, 2e-3 - qM);
 
     # [-0.00468956  0.00172823  0.01020646]
-    # qj = -0.0047 - log(p.CO2/400)*0.0017 - (CFmax-CF)*0.01
+    # qj = -0.0047 - log(p.CO2/400)*0.0017 - (p.CFmax-CF)*0.01
     return qj
 end
 
@@ -42,7 +42,7 @@ function sjump(u, p, LWP, fttype::co2dep)
     sj = hj - L0*qj;
 
     # 10051.39210848   404.81418053  3024.85246107
-    # sj = 10050 - log(p.CO2/400)*405 - (CFmax-CF)*3025
+    # sj = 10050 - log(p.CO2/400)*405 - (p.CFmax-CF)*3025
     return sj
 end
 

@@ -118,7 +118,7 @@ function trop_sst(u, p, LWP)
     # tropical temperature increase 
     # relative to albedo decrease
     a_export = -0.1;
-    CF0 = CFmax;
+    CF0 = p.CFmax;
     αc0 = cloud_albedo(50e-3);
     Δαc = cloud_albedo(LWP) - αc0;
     ΔCF = CF - CF0;

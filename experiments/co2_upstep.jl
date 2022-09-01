@@ -10,19 +10,19 @@ include("plot_transient_solution.jl")
 println()
 # use command line argument to set co2
 newCO2 = parse(Float64,ARGS[1]);
-# newCO2 = 1800.0;
+# newCO2 = 1400.0;
 println(newCO2);
 
 par = upCO2();
 par.etype = enBal();
-par.fttype = co2dep();
+par.fttype = co2EIS();
 par.rtype = varRad();
 par.stype = varSST();
 par.CO2 = newCO2;
 dt, tmax = 48.0, 50;
 
 # load initial condition from file
-path = "experiments/output/cumulus_ventilation_log10e-3/";
+path = "experiments/output/fix_surf_rad/";
 restarttry1 = path*"co2_upstep_"*string(Int(newCO2-100))*".jld2";
 restarttry2 = path*"co2_upstep_"*string(Int(newCO2-200))*".jld2";
 restarttry3 = path*"co2_upstep_"*string(Int(newCO2-400))*".jld2";

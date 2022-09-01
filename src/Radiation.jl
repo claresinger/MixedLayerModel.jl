@@ -15,12 +15,12 @@ struct fixRad <: rad_type end
     temperature as a function of CO2 and H2O above-cloud
 """
 function ΔTa(u, p, LWP)
-    # zi, sM, qM, SST, CF = u;
-    # qft = qjump(u, p, LWP, p.fttype) + qM;
-    # ΔT = -10.1 + 3.1*log(p.CO2) + 5.3*log(qft);
+    zi, sM, qM, SST, CF = u;
+    qft = qjump(u, p, LWP, p.fttype) + qM;
+    ΔT = -10.1 + 3.1*log(p.CO2) + 5.3*log(qft);
     
     # TODO without proper twocol FT do this:
-    ΔT = -22.5 + 0.008*p.CO2;
+    # ΔT = -22.5 + 0.008*p.CO2;
     return ΔT
 end
 
@@ -33,16 +33,18 @@ function calc_surf_RAD(u, p, LWP)
     zi, sM, qM, SST, CF = u;
 
     # shortwave calculation
-    WVtrans = exp(-10*qM); # TODO: WV abs coefficient
-    αc = cloud_albedo(LWP);
-    SW_net = WVtrans * (1 - (1-CF)*α_ocean - CF*αc) * S_subtr;
+    # WVtrans = exp(-10*qM); # TODO: WV abs coefficient
+    # αc = cloud_albedo(LWP);
+    # SW_net = WVtrans * (1 - (1-CF)*α_ocean - CF*αc) * S_subtr;
+    # SW_net = (1 - (1-CF)*0.4 - CF*αc) * S_subtr;
 
     # LW_net linear with SST with coefficient dependent on log(CO2)
     # direct greenhouse effect in subtropical clear-sky
     # a0, a1, a2, b1, b2 = [12.4, -1020, 3.1, -270, 0.86];
     # LW_net = (1-CF)*(a0*log(p.CO2/400) + a1 + a2*SST) + CF*(b1 + b2*SST);
     
-    # TODO simplify the LW and keep constant
+    # TODO simplify radiative fluxes and keep constant
+    SW_net = 120 + 150*(p.CFmax - CF);
     LW_net = -30;
 
     return SW_net + LW_net
@@ -87,6 +89,8 @@ function cloud_albedo(LWP)
     αmax = 0.98;
     Lx = 36e-3;
     αc = αmax * (LWP)/(Lx + LWP);
+
+    # αc = 0.75
     return αc
 end
 
@@ -101,6 +105,8 @@ end
 function cloud_emissivity(LWP)
     a0 = 0.15 * 1e3; # m^2/kg
     ϵc = 1 - exp(-a0 * LWP); 
+
+    # ϵc = 0.9
     return ϵc
 end
 
@@ -129,8 +135,6 @@ function trop_sst(u, p, LWP)
     # ECS = °C per CO2 doubling 
     ΔT_greenhouse = p.ECS / log(2) * log(p.CO2 / 400);
     
-    # println(ΔT_export, " ", ΔT_greenhouse)
     T_trop = p.Ts400 + ΔT_export + ΔT_greenhouse;
-    # T_trop = p.Ts400;
     return T_trop
 end

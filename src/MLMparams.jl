@@ -28,6 +28,9 @@ export upCO2, climatology
     RHft::Real = 0.2;
     ECS::Real = 3.0; # (K / co2 doubling)
 
+    EIS::Real = 10.0; # (K)
+    dTdz::Real = -5e-3; # (decreases by 5 K/km)
+
     # default types
     etype::ent_type = enBal();
     ftype::flux_type = varFlux();

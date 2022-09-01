@@ -16,11 +16,15 @@ struct varSST <: sst_type end
 """
 function dzidt(u, p, ent)
     zi, sM, qM, SST, CF = u;
-    # α_vent = 10e-3;
-    # # w_vent = α_vent * (p.CFmax - CF) / (p.CFmax - p.CFmin); # m/s
-    # w_vent = α_vent * ( 1 - 1 / ( 1 + exp( -10*(CF - (p.CFmax + p.CFmin)/2) ) ) ); # m/s
-    # dzidt = ent - p.D*zi + w_vent;
-    dzidt = ent - p.D*zi;
+    α_vent = 2e-3;
+    # zb = calc_LCL(u);
+    # LWP = incloud_LWP(u, zb);
+    # decoup = calc_decoupling(u, p, zb, LWP);
+    # w_vent = α_vent * decoup;
+    # w_vent = α_vent * (p.CFmax - CF) / (p.CFmax - p.CFmin); # m/s
+    w_vent = α_vent * ( 1 - 1 / ( 1 + exp( -10*(CF - (p.CFmax + p.CFmin)/2) ) ) ); # m/s
+    dzidt = ent - p.D*zi + w_vent;
+    # dzidt = ent - p.D*zi;
     return dzidt
 end
 
@@ -35,7 +39,8 @@ function dsMdt(u, p, ent, LWP)
     ΔR = calc_cloudtop_RAD(u, p, LWP, p.rtype);
     S0 = S_0(u, p, p.ftype);
     Szi = S_zi(u, p, ent, LWP);
-    dsMdt = -(1/zi) * (Szi - S0 + ΔR/ρref(SST));
+    s_export = Cp * -1.2 / (60*60*24) # J/kg/K * K/day * day/(60*60*24)sec
+    dsMdt = -(1/zi) * (Szi - S0 + ΔR/ρref(SST)) + s_export;
     return dsMdt
 end
 
@@ -49,7 +54,8 @@ function dqMdt(u, p, ent, LWP)
     zi, sM, qM, SST, CF = u;
     Q0 = Q_0(u, p, p.ftype);
     Qzi = Q_zi(u, p, ent, LWP);
-    dqMdt = -(1/zi) * (Qzi - Q0);
+    q_export = -6e-4 * (q_sat(0, SST) / q_sat(0, p.SST0)) / (60*60*24) # kg/kg/day * day/(60*60*24)sec
+    dqMdt = -(1/zi) * (Qzi - Q0) + q_export;
     return dqMdt
 end
 
@@ -76,7 +82,8 @@ function dSSTdt(u, p, LWP, stype::varSST)
     dx = (RAD - SHF - LHF - p.OHU) / τ_SST;
     
     # TODO do this for energy export to tropics
-    dy = (p.SST0 - SST) / (5 * 3600 * 24);
+    # dy = (p.SST0 - SST) / (5 * 3600 * 24);
+    dy = 0
     return (dx + dy)
 end
 
@@ -114,9 +121,11 @@ function mlm(du, u, p, t)
     du[4] = dSSTdt(u, p, LWP, p.stype)
     du[5] = dCFdt(u, p, zb, LWP)
     
-    # println(t/3600/24)
-    # println(u)
-    # println(zb)
-    # println(du)
-    # println()
+    if u[1] < 500
+        println(t/3600/24)
+        println(u)
+        println(zb)
+        # println(du)
+        # println()
+    end
 end

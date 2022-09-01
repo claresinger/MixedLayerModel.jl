@@ -1,4 +1,4 @@
-export co2dep, fixEIS, fixedFT, twocol
+export co2dep, fixEIS, fixedFT, co2EIS, twocol
 export sjump, qjump, S_zi, Q_zi
 
 ###########
@@ -8,6 +8,7 @@ abstract type ft_type end
 struct co2dep <: ft_type end
 struct fixedFT <: ft_type end
 struct fixEIS <: ft_type end
+struct co2EIS <: ft_type end
 struct twocol <: ft_type end
 
 """
@@ -70,6 +71,19 @@ function sjump(u, p, LWP, fttype::fixEIS)
 end
 
 """
+    sjump(u, p, LWP, p.fttype::co2EIS)
+    defines s+(z) in free troposphere given EIS and dTdz
+"""
+function sjump(u, p, LWP, fttype::co2EIS)
+    zi, sM, qM, SST, CF = u;
+    EIS = 10 + 10*log(p.CO2 / 400);
+    Tft = p.SST0 + EIS + p.dTdz*zi;
+    sft = Cp*Tft + g*zi;
+    sj = sft - sM;
+    return sj
+end
+
+"""
     sjump(u, p, LWP, p.fttype::twocol)
 """
 function sjump(u, p, LWP, fttype::twocol)
@@ -87,7 +101,7 @@ end
     specific humidity above cloud given fixed RHft
     and saturation calculated at Tft
 """
-function qjump(u, p, LWP, fttype::Union{twocol, fixEIS, fixedFT})
+function qjump(u, p, LWP, fttype::Union{twocol, fixEIS, fixedFT, co2EIS})
     zi, sM, qM, SST, CF = u;
     sft = sjump(u, p, LWP, p.fttype) + sM;
     Tft = (sft - g*zi)/Cp;

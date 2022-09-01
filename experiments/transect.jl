@@ -7,7 +7,7 @@ using NCDatasets
 using Plots
 using Statistics
 
-path = "experiments/figures/remove_cf_radcool/"
+path = "experiments/figures/cumulus_ventilation_log10e-3/"
 mkpath(path)
 
 include("mlm_solve_funcs.jl")
@@ -25,22 +25,26 @@ file = "experiments/data/transect_BCs_JJA_NEP.nc";
 ds = Dataset(file, "r");
 # println(ds)
 
-skipi = 1
+skipi = 2
 lon = ds["lon"][1:skipi:end]
 N = length(lon)
 println(N, " out of ", length(ds["lon"]))
 sst_ss = zeros(N)
 real_cf = zeros(N)
-zi_ss = zeros(N)
 qtM_ss = zeros(N)
 zb_ss = zeros(N)
 lwp_ss = zeros(N)
 lhf_ss = zeros(N)
 Tsurf_ss = zeros(N)
 
+zi_ss = zeros(N)
+zi_ss_min = zeros(N)
+zi_ss_max = zeros(N)
+
 cf_ss = zeros(N)
 cf_ss_min = zeros(N)
 cf_ss_max = zeros(N)
+
 cf_ss_onlySST = zeros(N)
 cf_ss_onlyWS = zeros(N)
 cf_ss_onlyEIS = zeros(N)
@@ -80,6 +84,7 @@ for (i,loni) in enumerate(lon)
         par.EIS = ds["EIS"][j] - ds["EIS_std"][j];
         u0, sol_min = run_mlm(par, dt=3600.0*dt, tspan=(0.0,3600.0*24.0*tmax));
         cf_ss_min[i] = sol_min.u[end][5];
+        zi_ss_min[i] = sol_min.u[end][1];
 
         # maximum cf
         par.SST0 = ds["sst"][j] - ds["sst_std"][j];
@@ -89,44 +94,45 @@ for (i,loni) in enumerate(lon)
         par.EIS = ds["EIS"][j] + ds["EIS_std"][j];
         u0, sol_max = run_mlm(par, dt=3600.0*dt, tspan=(0.0,3600.0*24.0*tmax));
         cf_ss_max[i] = sol_max.u[end][5];
+        zi_ss_max[i] = sol_max.u[end][1];
 
-        # set mean values
-        ilon = 1:10
-        par.SST0 = mean(ds["sst"][ilon]);
-        par.V = mean(ds["WS"][ilon]);
-        par.D = mean(ds["D500"][ilon]);
-        par.RHft = mean(ds["RH500"][ilon]);
-        par.EIS = mean(ds["EIS"][ilon]);
+        # # set mean values
+        # ilon = 1:10
+        # par.SST0 = mean(ds["sst"][ilon]);
+        # par.V = mean(ds["WS"][ilon]);
+        # par.D = mean(ds["D500"][ilon]);
+        # par.RHft = mean(ds["RH500"][ilon]);
+        # par.EIS = mean(ds["EIS"][ilon]);
 
-        # only SST
-        par.SST0 = ds["sst"][j];
-        u0, sol_onlySST = run_mlm(par, dt=3600.0*dt, tspan=(0.0,3600.0*24.0*tmax));
-        cf_ss_onlySST[i] = sol_onlySST.u[end][5];
-        par.SST0 = mean(ds["sst"][ilon]);
+        # # only SST
+        # par.SST0 = ds["sst"][j];
+        # u0, sol_onlySST = run_mlm(par, dt=3600.0*dt, tspan=(0.0,3600.0*24.0*tmax));
+        # cf_ss_onlySST[i] = sol_onlySST.u[end][5];
+        # par.SST0 = mean(ds["sst"][ilon]);
 
-        # only WS
-        par.V = ds["WS"][j];
-        u0, sol_onlyWS = run_mlm(par, dt=3600.0*dt, tspan=(0.0,3600.0*24.0*tmax));
-        cf_ss_onlyWS[i] = sol_onlyWS.u[end][5];
-        par.V = mean(ds["WS"][ilon]);
+        # # only WS
+        # par.V = ds["WS"][j];
+        # u0, sol_onlyWS = run_mlm(par, dt=3600.0*dt, tspan=(0.0,3600.0*24.0*tmax));
+        # cf_ss_onlyWS[i] = sol_onlyWS.u[end][5];
+        # par.V = mean(ds["WS"][ilon]);
 
-        # only EIS (set and reset)
-        par.EIS = ds["EIS"][j];
-        u0, sol_onlyEIS = run_mlm(par, dt=3600.0*dt, tspan=(0.0,3600.0*24.0*tmax));
-        cf_ss_onlyEIS[i] = sol_onlyEIS.u[end][5];
-        par.EIS = mean(ds["EIS"][ilon]);
+        # # only EIS (set and reset)
+        # par.EIS = ds["EIS"][j];
+        # u0, sol_onlyEIS = run_mlm(par, dt=3600.0*dt, tspan=(0.0,3600.0*24.0*tmax));
+        # cf_ss_onlyEIS[i] = sol_onlyEIS.u[end][5];
+        # par.EIS = mean(ds["EIS"][ilon]);
 
-        # only D500
-        par.D = ds["D500"][j];
-        u0, sol_onlyD = run_mlm(par, dt=3600.0*dt, tspan=(0.0,3600.0*24.0*tmax));
-        cf_ss_onlyD[i] = sol_onlyD.u[end][5];
-        par.D = mean(ds["D500"][ilon]);
+        # # only D500
+        # par.D = ds["D500"][j];
+        # u0, sol_onlyD = run_mlm(par, dt=3600.0*dt, tspan=(0.0,3600.0*24.0*tmax));
+        # cf_ss_onlyD[i] = sol_onlyD.u[end][5];
+        # par.D = mean(ds["D500"][ilon]);
 
-        # only RH500
-        par.RHft = ds["RH500"][j];
-        u0, sol_onlyRH = run_mlm(par, dt=3600.0*dt, tspan=(0.0,3600.0*24.0*tmax));
-        cf_ss_onlyRH[i] = sol_onlyRH.u[end][5];
-        par.RHft = mean(ds["RH500"][ilon]);
+        # # only RH500
+        # par.RHft = ds["RH500"][j];
+        # u0, sol_onlyRH = run_mlm(par, dt=3600.0*dt, tspan=(0.0,3600.0*24.0*tmax));
+        # cf_ss_onlyRH[i] = sol_onlyRH.u[end][5];
+        # par.RHft = mean(ds["RH500"][ilon]);
 
         if uf[5] > 0.15 && uf[5] < 0.75
             t = sol.t / 3600.0 / 24.0;
@@ -146,7 +152,7 @@ for (i,loni) in enumerate(lon)
             for (k,si) in enumerate(S)
                 zb[k] = calc_LCL(sol.u[k]);
                 LWP[k] = incloud_LWP(sol.u[k], zb[k]);
-                S[k] = calc_S(sol.u[k], par, zb[k], LWP[k]);
+                S[k] = calc_decoupling(sol.u[k], par, zb[k], LWP[k]);
                 LHF[k] = calc_LHF(sol.u[k], par);
                 SHF[k] = calc_SHF(sol.u[k], par);
                 ΔR[k] = calc_cloudtop_RAD(sol.u[k], par, LWP[k], par.rtype);
@@ -241,7 +247,7 @@ println(cf_ss_max)
 
 # savefig(path*"JJA_NEP_transect_1var.png");
 
-### only SST and only EIS too
+### plot CF from changing all BCs or just one at a time
 p = plot(size=(600,200), layout=(1,1), dpi=300, show=true,
     left_margin = 5Plots.mm, right_margin = 2Plots.mm, palette = :tab10);
 # plot observed CF
@@ -252,18 +258,29 @@ plot!(lon, ds["allsc"][1:skipi:end]*100, subplot=1, legend=:topleft,
 plot!(lon, cf_ss*100, subplot=1, lw=2, ylim=(0,90), 
     ylabel="CF [%]", color=:magenta, marker=:circle, msw=0, label="ERA5 BCs",
     ribbon=((cf_ss-cf_ss_min)*100, (cf_ss_max-cf_ss)*100), fillalpha=0.3)
-# predicted CF from only varying on CCF
-plot!(lon, cf_ss_onlySST*100, subplot=1, lw=2, marker=:circle, msw=0, color=1, label="SST")
-plot!(lon, cf_ss_onlyWS*100, subplot=1, lw=2, marker=:circle, msw=0, color=2, label="WS")
-plot!(lon, cf_ss_onlyEIS*100, subplot=1, lw=2, marker=:circle, msw=0, color=3, label="EIS")
-plot!(lon, cf_ss_onlyD*100, subplot=1, lw=2, marker=:circle, msw=0, color=4, label="D\$_{500}\$")
-plot!(lon, cf_ss_onlyRH*100, subplot=1, lw=2, marker=:circle, msw=0, color=5, label="RH\$_{500}\$")
-
+# # predicted CF from only varying on CCF
+# plot!(lon, cf_ss_onlySST*100, subplot=1, lw=2, marker=:circle, msw=0, color=1, label="SST")
+# plot!(lon, cf_ss_onlyWS*100, subplot=1, lw=2, marker=:circle, msw=0, color=2, label="WS")
+# plot!(lon, cf_ss_onlyEIS*100, subplot=1, lw=2, marker=:circle, msw=0, color=3, label="EIS")
+# plot!(lon, cf_ss_onlyD*100, subplot=1, lw=2, marker=:circle, msw=0, color=4, label="D\$_{500}\$")
+# plot!(lon, cf_ss_onlyRH*100, subplot=1, lw=2, marker=:circle, msw=0, color=5, label="RH\$_{500}\$")
 tkloc, tkstr = xticks(p)[1];
 plot!(xticks=(tkloc, chop.(tkstr,head=1,tail=0).*" °W"));
 plot!(legend_position=:outertopright);
-
 savefig(path*"JJA_NEP_transect_1var.png");
+
+
+### plot zi from changing all BCs or just one at a time
+p = plot(size=(600,200), layout=(1,1), dpi=300, show=true,
+    left_margin = 5Plots.mm, right_margin = 2Plots.mm, palette = :tab10);
+# predicted CF with range
+plot!(lon, zi_ss / 1e3, subplot=1, lw=2, ylim=(0,5), 
+    ylabel="zi [km]", color=:magenta, marker=:circle, msw=0, label="ERA5 BCs",
+    ribbon=((zi_ss-zi_ss_min) / 1e3, (zi_ss_max-zi_ss) / 1e3), fillalpha=0.3)
+tkloc, tkstr = xticks(p)[1];
+plot!(xticks=(tkloc, chop.(tkstr,head=1,tail=0).*" °W"));
+plot!(legend_position=:outertopright);
+savefig(path*"JJA_NEP_transect_1var_zi.png");
 
 close(ds)
 

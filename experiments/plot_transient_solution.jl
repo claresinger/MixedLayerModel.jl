@@ -22,7 +22,7 @@ function plot_sol(sol, filename)
     for (i,si) in enumerate(S)
         zb[i] = calc_LCL(sol.u[i]);
         LWP[i] = incloud_LWP(sol.u[i], zb[i]);
-        S[i] = calc_S(sol.u[i], par, zb[i], LWP[i]);
+        S[i] = calc_decoupling(sol.u[i], par, zb[i], LWP[i]);
         LHF[i] = calc_LHF(sol.u[i], par);
         ΔR[i] = calc_cloudtop_RAD(sol.u[i], par, LWP[i], par.rtype);
         Δsv[i] = sv_jump(sol.u[i], par, LWP[i]);

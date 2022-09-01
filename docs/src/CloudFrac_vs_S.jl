@@ -5,7 +5,7 @@ using LaTeXStrings
 plot(size=(300,200), dpi=300, legend=false, fontsize=10);
 
 S = collect(range(0,2,length=100));
-CF = cloud_fraction_S.(S);
+CF = cloud_fraction_param.(S);
 
 plot!(S, CF);
 xlabel!("Stability, S");

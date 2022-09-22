@@ -14,17 +14,21 @@ struct varSST <: sst_type end
     evolution of inversion height, zi
     balance between entrainment and subsidence
 """
-function dzidt(u, p, ent)
+function dzidt(u, p, ent, zb, LWP)
     zi, sM, qM, SST, CF = u;
-    α_vent = 2e-3;
-    # zb = calc_LCL(u);
-    # LWP = incloud_LWP(u, zb);
-    # decoup = calc_decoupling(u, p, zb, LWP);
-    # w_vent = α_vent * decoup;
-    # w_vent = α_vent * (p.CFmax - CF) / (p.CFmax - p.CFmin); # m/s
-    w_vent = α_vent * ( 1 - 1 / ( 1 + exp( -10*(CF - (p.CFmax + p.CFmin)/2) ) ) ); # m/s
-    dzidt = ent - p.D*zi + w_vent;
-    # dzidt = ent - p.D*zi;
+    w_sub = p.D * zi;
+    # w_vent = 0;
+
+    # w_vent = p.α_vent * min(calc_decoupling(u, p, zb, LWP), 1);
+    w_vent = p.α_vent * (p.CFmax - CF) / (p.CFmax - p.CFmin); # m/s
+    # w_vent = p.α_vent * ( 1 - 1 / ( 1 + exp( -10*(CF - (p.CFmax + p.CFmin)/2) ) ) ); # m/s
+
+    # ρ0 = rho(zi, temp(zi, sM, qM));
+    # p0 = pres(zi, temp(zi, sM, qM));
+    # sub_func = (psurf - p0) * (p0 / psurf)^2 / (ρ0 * g);
+    # w_sub = p.D * sub_func;
+    
+    dzidt = ent - w_sub + w_vent;
     return dzidt
 end
 
@@ -115,13 +119,13 @@ function mlm(du, u, p, t)
     zb = calc_LCL(u);
     LWP = incloud_LWP(u, zb);
     ent = we(u, p, zb, LWP, p.etype);
-    du[1] = dzidt(u, p, ent)
+    du[1] = dzidt(u, p, ent, zb, LWP)
     du[2] = dsMdt(u, p, ent, LWP)
     du[3] = dqMdt(u, p, ent, LWP)
     du[4] = dSSTdt(u, p, LWP, p.stype)
     du[5] = dCFdt(u, p, zb, LWP)
     
-    if u[1] < 500
+    if u[1] < 200
         println(t/3600/24)
         println(u)
         println(zb)

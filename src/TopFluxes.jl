@@ -64,7 +64,7 @@ end
 """
 function sjump(u, p, LWP, fttype::fixEIS)
     zi, sM, qM, SST, CF = u;
-    Tft = p.SST0 + p.EIS + p.dTdz*zi;
+    Tft = SST + p.EIS0 + p.dTdz*zi;
     sft = Cp*Tft + g*zi;
     sj = sft - sM;
     return sj
@@ -76,8 +76,8 @@ end
 """
 function sjump(u, p, LWP, fttype::co2EIS)
     zi, sM, qM, SST, CF = u;
-    EIS = 10 + 10*log(p.CO2 / 400);
-    Tft = p.SST0 + EIS + p.dTdz*zi;
+    EIS = p.EIS0 + p.ECS*log(p.CO2 / 400) - p.Eexport*(p.CFmax - CF);
+    Tft = SST + p.dTdz*zi + EIS;
     sft = Cp*Tft + g*zi;
     sj = sft - sM;
     return sj
@@ -96,7 +96,7 @@ function sjump(u, p, LWP, fttype::twocol)
 end
 
 """
-    qjump(u, p, LWP, fttype::Union{twocol, fixEIS})
+    qjump(u, p, LWP, fttype::Union{twocol, fixEIS, fixedFT, co2EIS})
 
     specific humidity above cloud given fixed RHft
     and saturation calculated at Tft

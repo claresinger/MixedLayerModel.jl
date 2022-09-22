@@ -1,8 +1,14 @@
 export upCO2, climatology
 
 @with_kw mutable struct upCO2
-    CFmax::Real = 1.0         # maximum cloud fraction
-    CFmin::Real = 0.2         # minimum cloud fraction
+    # radiation
+    SW_a::Real = 120; # (W/m2)
+    SW_b::Real = 150; # (W/m2)
+
+    # cloud fraction params
+    CFmax::Real = 1.0;       # maximum cloud fraction
+    CFmin::Real = 0.2;       # minimum cloud fraction
+    decoup_slope::Real = 10; # decoupling slope (m)
 
     # fixed SST for 400ppm
     SST0::Real = 290.0; # (K)
@@ -12,6 +18,7 @@ export upCO2, climatology
     
     # subsidence strength
     D::Real = 6.0e-6; # (1/s)
+    α_vent::Real = 2.0e-3; # (m/s)
     
     # params for interactive surface fluxes
     V::Real = 10.0; # (m/s)
@@ -26,9 +33,10 @@ export upCO2, climatology
     RHtrop0::Real = 0.8;
     Ts400::Real = 300.0; # (K)
     RHft::Real = 0.2;
-    ECS::Real = 3.0; # (K / co2 doubling)
+    ECS::Real = 4.0; # (K / co2 doubling)
+    Eexport::Real = 15.0; # (K)
 
-    EIS::Real = 10.0; # (K)
+    EIS0::Real = 10.0; # (K)
     dTdz::Real = -5e-3; # (decreases by 5 K/km)
 
     # default types
@@ -40,14 +48,17 @@ export upCO2, climatology
 end
 
 @with_kw mutable struct climatology
-    CFmax::Real = 0.8         # maximum cloud fraction
-    CFmin::Real = 0.1         # minimum cloud fraction
+    # cloud fraction params
+    CFmax::Real = 0.8;       # maximum cloud fraction
+    CFmin::Real = 0.1;       # minimum cloud fraction
+    decoup_slope::Real = 10; # decoupling slope (m)
 
     # baseline CO2
     CO2::Real = 400; # (ppm)
     
     # subsidence strength
     D::Real = 6.0e-6; # (1/s)
+    α_vent::Real = 2.0e-3; # (m/s)
     
     # params for fixedFT inverson specification
     sft0::Real = 300*Cp; # (K * J/K/kg), Tft0 = 300 (K)
@@ -55,7 +66,7 @@ end
     RHft::Real = 0.25;
     
     # for fixEIS inversion
-    EIS::Real = 10.0; # (K)
+    EIS0::Real = 10.0; # (K)
     dTdz::Real = -5e-3; # (decreases by 5 K/km)
     
     # params for interactive surface fluxes

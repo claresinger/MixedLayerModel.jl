@@ -12,17 +12,18 @@ println()
 newCO2 = parse(Float64,ARGS[1]);
 # newCO2 = 200.0;
 println(newCO2);
+exp_path = ARGS[2];
+path = "experiments/output/"*exp_path;
 
-par = upCO2();
+# par = upCO2();
 par.CO2 = newCO2;
-par.etype = enBal();
-par.fttype = co2EIS();
-par.rtype = varRad();
-par.stype = varSST();
-dt, tmax = 48.0, 50.0;
+# par.etype = enBal();
+# par.fttype = co2EIS();
+# par.rtype = varRad();
+# par.stype = varSST();
+# dt, tmax = 48.0, 50.0;
 
 # load initial condition from file
-path = "experiments/output/fix_surf_rad/";
 restarttry1 = path*"co2_downstep_"*string(Int(newCO2+100))*".jld2";
 restarttry2 = path*"co2_downstep_"*string(Int(newCO2+200))*".jld2";
 restarttry3 = path*"co2_upstep_"*string(Int(newCO2))*".jld2";

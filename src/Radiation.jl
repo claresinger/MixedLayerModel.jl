@@ -44,7 +44,7 @@ function calc_surf_RAD(u, p, LWP)
     # LW_net = (1-CF)*(a0*log(p.CO2/400) + a1 + a2*SST) + CF*(b1 + b2*SST);
     
     # TODO simplify radiative fluxes and keep constant
-    SW_net = 120 + 150*(p.CFmax - CF);
+    SW_net = p.SW_a + p.SW_b*(p.CFmax - CF);
     LW_net = -30;
 
     return SW_net + LW_net
@@ -90,7 +90,7 @@ function cloud_albedo(LWP)
     Lx = 36e-3;
     αc = αmax * (LWP)/(Lx + LWP);
 
-    # αc = 0.75
+    αc = 0.75
     return αc
 end
 
@@ -106,35 +106,44 @@ function cloud_emissivity(LWP)
     a0 = 0.15 * 1e3; # m^2/kg
     ϵc = 1 - exp(-a0 * LWP); 
 
-    # ϵc = 0.9
+    ϵc = 0.9
     return ϵc
 end
 
-"""
-    trop_sst(u, p, LWP)
-    tropical SST specified as a deviation from a base state p.Ts400
-    with warming from export from the subtropics (proportional to all-sky albedo)
-    and warming directly from GHG that depends on the ECS parameter
-"""
-# TODO this whole thing!
 function trop_sst(u, p, LWP)
     zi, sM, qM, SST, CF = u;
-
-    # proportionality factor for 
-    # tropical temperature increase 
-    # relative to albedo decrease
-    a_export = -0.1;
-    CF0 = p.CFmax;
-    αc0 = cloud_albedo(50e-3);
-    Δαc = cloud_albedo(LWP) - αc0;
-    ΔCF = CF - CF0;
-    ΔT_export = a_export * (1-α_ocean) * S_subtr/4 * (αc0 * ΔCF + CF0 * Δαc);
-    
-    # increase in tropical temperature from
-    # direct greenhouse warming in tropics
-    # ECS = °C per CO2 doubling 
-    ΔT_greenhouse = p.ECS / log(2) * log(p.CO2 / 400);
-    
-    T_trop = p.Ts400 + ΔT_export + ΔT_greenhouse;
-    return T_trop
+    sj = sjump(u, p, LWP, p.fttype);
+    sft = sj + sM;
+    Tft = (sft - g*zi) / Cp;
+    EIS = Tft - SST - p.dTdz*zi;
+    return SST + EIS
 end
+
+# """
+#     trop_sst(u, p, LWP)
+#     tropical SST specified as a deviation from a base state p.Ts400
+#     with warming from export from the subtropics (proportional to all-sky albedo)
+#     and warming directly from GHG that depends on the ECS parameter
+# """
+# # TODO this whole thing!
+# function trop_sst(u, p, LWP)
+#     zi, sM, qM, SST, CF = u;
+
+#     # proportionality factor for 
+#     # tropical temperature increase 
+#     # relative to albedo decrease
+#     a_export = -0.1;
+#     CF0 = p.CFmax;
+#     αc0 = cloud_albedo(50e-3);
+#     Δαc = cloud_albedo(LWP) - αc0;
+#     ΔCF = CF - CF0;
+#     ΔT_export = a_export * (1-α_ocean) * S_subtr/4 * (αc0 * ΔCF + CF0 * Δαc);
+    
+#     # increase in tropical temperature from
+#     # direct greenhouse warming in tropics
+#     # ECS = °C per CO2 doubling 
+#     ΔT_greenhouse = p.ECS / log(2) * log(p.CO2 / 400);
+    
+#     T_trop = p.Ts400 + ΔT_export + ΔT_greenhouse;
+#     return T_trop
+# end

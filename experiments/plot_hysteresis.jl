@@ -21,22 +21,31 @@ S = (lhf./dR).*((zi.-zb)./zi);
 ms = 10
 c = "crimson"
 p_dR = scatter(co2, dR, color=c, marker=:x, markersize=ms, label="", 
-                ylabel="ΔR [W/m\$^2\$]",
+                ylabel="ΔR [W/m²]",
                 xticks=([400, 800, 1200, 1600]), xlim=[100,2000], ylim=[0,100])
 p_decoup = scatter(co2, S, color=c, marker=:x, markersize=ms, label="", 
-                xlabel="CO\$_2\$ [ppmv]", ylabel="Decoupling, \$\\mathcal{D}\$",
+                xlabel="CO₂ [ppmv]", ylabel="Decoupling, \$\\mathcal{D}\$",
                 yscale=:log10, yticks=([0.1,1,10], ["0.1","1","10"]), ylim=[0.1,40],
                 xticks=([400, 800, 1200, 1600]), xlim=[100,2000])
-p_cf = scatter(co2, cf*100, color=c, marker=:x, markersize=ms, label="", 
-                xlabel="CO\$_2\$ [ppmv]", ylabel="CF [%]",
-                xticks=([400, 800, 1200, 1600]), xlim=[100,2000], ylim=[0,110])
 p_sst = scatter(co2, sst, color=c, marker=:x, markersize=ms, label="", 
                 ylabel="SST [K]",
                 xticks=([400, 800, 1200, 1600]), xlim=[100,2000], ylim=[286, 312])
+p_lhf = scatter(co2, lhf, color=c, marker=:x, markersize=ms, label="",
+                xlabel="CO₂ [ppmv]", ylabel="LHF [W/m²]",
+                xticks=([400, 800, 1200, 1600]), xlim=[100,2000], ylim=[50, 250])
+p_zi = scatter(co2, zi, color=c, marker=:x, markersize=ms, label="",
+                ylabel="zᵢ [m]",
+                xticks=([400, 800, 1200, 1600]), xlim=[100,2000], ylim=[500, 1500])
+p_cf = scatter(co2, cf*100, color=c, marker=:x, markersize=ms, label="", 
+                xlabel="CO₂ [ppmv]", ylabel="CF [%]",
+                xticks=([400, 800, 1200, 1600]), xlim=[100,2000], ylim=[0,110])
+
 plot!(p_dR, co2, dR, linewidth=2, linestyle=:dot, color=c, label="")
 plot!(p_decoup, co2, S, linewidth=2, linestyle=:dot, color=c, label="")
-plot!(p_cf, co2, cf*100, linewidth=2, linestyle=:dot, color=c, label="")
 plot!(p_sst, co2, sst, linewidth=2, linestyle=:dot, color=c, label="")
+plot!(p_lhf, co2, lhf, linewidth=2, linestyle=:dot, color=c, label="")
+plot!(p_zi, co2, zi, linewidth=2, linestyle=:dot, color=c, label="")
+plot!(p_cf, co2, cf*100, linewidth=2, linestyle=:dot, color=c, label="")
 
 # plot LES downsteps
 co2 = [200,300,400,800,1000,1200,1300,1400];
@@ -51,12 +60,16 @@ S = (lhf./dR).*((zi.-zb)./zi);
 c = "royalblue"
 scatter!(p_dR, co2, dR, color=c, marker=:x, markersize=ms, label="")
 scatter!(p_decoup, co2, S, color=c, marker=:x, markersize=ms, label="")
-scatter!(p_cf, co2, cf*100, color=c, marker=:x, markersize=ms, label="")
 scatter!(p_sst, co2, sst, color=c, marker=:x, markersize=ms, label="")
+scatter!(p_lhf, co2, lhf, color=c, marker=:x, markersize=ms, label="")
+scatter!(p_zi, co2, zi, color=c, marker=:x, markersize=ms, label="")
+scatter!(p_cf, co2, cf*100, color=c, marker=:x, markersize=ms, label="")
 plot!(p_dR, co2, dR, linewidth=2, linestyle=:dot, color=c, label="")
 plot!(p_decoup, co2, S, linewidth=2, linestyle=:dot, color=c, label="")
-plot!(p_cf, co2, cf*100, linewidth=2, linestyle=:dot, color=c, label="")
 plot!(p_sst, co2, sst, linewidth=2, linestyle=:dot, color=c, label="")
+plot!(p_lhf, co2, lhf, linewidth=2, linestyle=:dot, color=c, label="")
+plot!(p_zi, co2, zi, linewidth=2, linestyle=:dot, color=c, label="")
+plot!(p_cf, co2, cf*100, linewidth=2, linestyle=:dot, color=c, label="")
 
 ###################
 
@@ -95,12 +108,16 @@ ms = 8
 c = "crimson"
 scatter!(p_dR, co2u, dR, color=c, marker=:circle, markersize=ms, markerstrokewidth=0, label="")
 scatter!(p_decoup, co2u, S, color=c, marker=:circle, markersize=ms, markerstrokewidth=0, label="")
-scatter!(p_cf, co2u, cf*100, color=c, marker=:circle, markersize=ms, markerstrokewidth=0, label="")
 scatter!(p_sst, co2u, sst, color=c, marker=:circle, markersize=ms, markerstrokewidth=0, label="")
+scatter!(p_lhf, co2u, lhf, color=c, marker=:circle, markersize=ms, markerstrokewidth=0, label="")
+scatter!(p_zi, co2u, zi, color=c, marker=:circle, markersize=ms, markerstrokewidth=0, label="")
+scatter!(p_cf, co2u, cf*100, color=c, marker=:circle, markersize=ms, markerstrokewidth=0, label="")
 plot!(p_dR, co2u, dR, color=c, linewidth=2, label="")
 plot!(p_decoup, co2u, S, color=c, linewidth=2, label="")
-plot!(p_cf, co2u, cf*100, color=c, linewidth=2, label="")
 plot!(p_sst, co2u, sst, color=c, linewidth=2, label="")
+plot!(p_lhf, co2u, lhf, color=c, linewidth=2, label="")
+plot!(p_zi, co2u, zi, color=c, linewidth=2, label="")
+plot!(p_cf, co2u, cf*100, color=c, linewidth=2, label="")
 
 N = length(co2d);
 zi, zb, ent = zeros(N), zeros(N), zeros(N);
@@ -123,22 +140,26 @@ S = (lhf./dR).*((zi.-zb)./zi);
 c = "royalblue"
 scatter!(p_dR, co2d, dR, color=c, marker=:circle, markersize=ms, markerstrokewidth=0, label="")
 scatter!(p_decoup, co2d, S, color=c, marker=:circle, markersize=ms, markerstrokewidth=0, label="")
-scatter!(p_cf, co2d, cf*100, color=c, marker=:circle, markersize=ms, markerstrokewidth=0, label="")
 scatter!(p_sst, co2d, sst, color=c, marker=:circle, markersize=ms, markerstrokewidth=0, label="")
+scatter!(p_lhf, co2d, lhf, color=c, marker=:circle, markersize=ms, markerstrokewidth=0, label="")
+scatter!(p_zi, co2d, zi, color=c, marker=:circle, markersize=ms, markerstrokewidth=0, label="")
+scatter!(p_cf, co2d, cf*100, color=c, marker=:circle, markersize=ms, markerstrokewidth=0, label="")
 plot!(p_dR, co2d, dR, color=c, linewidth=2, label="")
 plot!(p_decoup, co2d, S, color=c, linewidth=2, label="")
-plot!(p_cf, co2d, cf*100, color=c, linewidth=2, label="")
 plot!(p_sst, co2d, sst, color=c, linewidth=2, label="")
+plot!(p_lhf, co2d, lhf, color=c, linewidth=2, label="")
+plot!(p_zi, co2d, zi, color=c, linewidth=2, label="")
+plot!(p_cf, co2d, cf*100, color=c, linewidth=2, label="")
 
 # legend
 scatter!(p_dR, [-1], [-1], color="black", marker=:x, markersize=1, markerstrokewidth=0, label="LES")
 scatter!(p_dR, [-1], [-1], color="black", marker=:circle, markersize=1, markerstrokewidth=0, label="Bulk model")
 
 # save plot
-p = plot(p_dR,p_sst,p_decoup,p_cf, layout=(2,2), 
-    link=:x, size=(1000,650), dpi=300,
+p = plot(p_dR,p_sst,p_zi,p_decoup,p_lhf,p_cf, layout=(2,3), 
+    link=:x, size=(1300,650), dpi=300,
     legend=:topright, legendfontsize=12, legendfont=font(12),
-    left_margin=10Plots.mm, bottom_margin=5Plots.mm, top_margin=5Plots.mm);
+    left_margin=10Plots.mm, bottom_margin=7Plots.mm, top_margin=5Plots.mm);
 mkpath("experiments/figures/"*exp_path)
-savefig(p, "experiments/figures/"*exp_path*"AGU-steady-state.png")
+savefig(p, "experiments/figures/"*exp_path*"hystersis_plot.png")
 Plots.scalefontsizes(1/1.8)

@@ -1,5 +1,6 @@
 export co2dep, fixEIS, fixedFT, co2EIS, twocol
 export sjump, qjump, S_zi, Q_zi
+export trop_sst
 
 ###########
 # create structure for fttype
@@ -70,15 +71,76 @@ function sjump(u, p, LWP, fttype::fixEIS)
     return sj
 end
 
+# """
+#     trop_sst(u, p, LWP)
+#     tropical SST
+# """
+# function trop_sst(u, p, LWP)
+#     zi, sM, qM, SST, CF = u;
+#     sj = sjump(u, p, LWP, p.fttype);
+#     sft = sj + sM;
+#     Tft = (sft - g*zi) / Cp;
+#     EIS = Tft - SST - p.dTdz*zi;
+#     return SST + EIS
+# end
+
+# """
+#     trop_sst(u, p, LWP)
+#     tropical SST specified as a deviation from a base state p.Ts400
+#     with warming from export from the subtropics (proportional to all-sky albedo)
+#     and warming directly from GHG that depends on the ECS parameter
+# """
+# # TODO this whole thing!
+# function trop_sst(u, p, LWP)
+#     zi, sM, qM, SST, CF = u;
+
+#     # proportionality factor for 
+#     # tropical temperature increase 
+#     # relative to albedo decrease
+#     a_export = -0.1;
+#     CF0 = p.CFmax;
+#     αc0 = cloud_albedo(50e-3);
+#     Δαc = cloud_albedo(LWP) - αc0;
+#     ΔCF = CF - CF0;
+#     ΔT_export = a_export * (1-α_ocean) * S_subtr/4 * (αc0 * ΔCF + CF0 * Δαc);
+    
+#     # increase in tropical temperature from
+#     # direct greenhouse warming in tropics
+#     # ECS = °C per CO2 doubling 
+#     ΔT_greenhouse = p.ECS / log(2) * log(p.CO2 / 400);
+    
+#     T_trop = p.Ts400 + ΔT_export + ΔT_greenhouse;
+#     return T_trop
+# end
+
+function ΔSST_trop_subtrop(u, p)
+    zi, sM, qM, SST, CF = u;
+    return p.EIS0 + p.ECS*log(p.CO2 / 400) - p.Eexport*(p.CFmax - CF)
+end
+
+"""
+    trop_sst(u, p, LWP)
+    tropical SST
+"""
+function trop_sst(u, p, LWP)
+    zi, sM, qM, SST, CF = u;
+    return SST + ΔSST_trop_subtrop(u, p)
+end
+
+
 """
     sjump(u, p, LWP, p.fttype::co2EIS)
     defines s+(z) in free troposphere given EIS and dTdz
 """
 function sjump(u, p, LWP, fttype::co2EIS)
     zi, sM, qM, SST, CF = u;
-    EIS = p.EIS0 + p.ECS*log(p.CO2 / 400) - p.Eexport*(p.CFmax - CF);
-    Tft = SST + p.dTdz*zi + EIS;
-    sft = Cp*Tft + g*zi;
+    # EIS = p.EIS0 + p.ECS*log(p.CO2 / 400) - p.Eexport*(p.CFmax - CF);
+    # Tft = SST + p.dTdz*zi + EIS;
+    # sft = Cp*Tft + g*zi;
+    # SSTtrop = trop_sst(u, p, LWP);
+    # Tft = temp_ft(SSTtrop, zi, p);
+    # Tft = temp(zi, sM, qM) + ΔSST_trop_subtrop(u, p);
+    sft = Cp*trop_sst(u, p, LWP) + g*zi;
     sj = sft - sM;
     return sj
 end

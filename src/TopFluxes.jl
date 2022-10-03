@@ -113,20 +113,24 @@ end
 #     return T_trop
 # end
 
-function ΔSST_trop_subtrop(u, p)
+# function ΔSST_trop_subtrop(u, p)
+#     zi, sM, qM, SST, CF = u;
+#     return p.EIS0 + p.ECS*log(p.CO2 / 400) - p.Eexport*(p.CFmax - CF)
+# end
+
+# """
+#     trop_sst(u, p, LWP)
+#     tropical SST
+# """
+# function trop_sst(u, p, LWP)
+#     zi, sM, qM, SST, CF = u;
+#     return SST + ΔSST_trop_subtrop(u, p)
+# end
+
+function ΔT(u, p)
     zi, sM, qM, SST, CF = u;
     return p.EIS0 + p.ECS*log(p.CO2 / 400) - p.Eexport*(p.CFmax - CF)
 end
-
-"""
-    trop_sst(u, p, LWP)
-    tropical SST
-"""
-function trop_sst(u, p, LWP)
-    zi, sM, qM, SST, CF = u;
-    return SST + ΔSST_trop_subtrop(u, p)
-end
-
 
 """
     sjump(u, p, LWP, p.fttype::co2EIS)
@@ -134,13 +138,8 @@ end
 """
 function sjump(u, p, LWP, fttype::co2EIS)
     zi, sM, qM, SST, CF = u;
-    # EIS = p.EIS0 + p.ECS*log(p.CO2 / 400) - p.Eexport*(p.CFmax - CF);
-    # Tft = SST + p.dTdz*zi + EIS;
-    # sft = Cp*Tft + g*zi;
-    # SSTtrop = trop_sst(u, p, LWP);
-    # Tft = temp_ft(SSTtrop, zi, p);
-    # Tft = temp(zi, sM, qM) + ΔSST_trop_subtrop(u, p);
-    sft = Cp*trop_sst(u, p, LWP) + g*zi;
+    Tft = SST + ΔT(u, p);
+    sft = Cp*Tft + g*zi;
     sj = sft - sM;
     return sj
 end

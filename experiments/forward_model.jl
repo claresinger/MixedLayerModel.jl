@@ -1,20 +1,26 @@
-# module GModel
+@everywhere module GModel
 
-# export run_ensembles, run_forward
+using Distributed
 
-push!(LOAD_PATH, joinpath(@__DIR__, ".."))
 using MixedLayerModel
 include("mlm_solve_funcs.jl")
+
+export run_ensembles
+export run_forward
 
 CO2updn_list = [200,300,400,800,1000,1200,1300,1400,1600,1400,1300,1200,1000,800,400,300,200];
 nd = length(CO2updn_list)
 
 function run_ensembles(params, N_ens)
+    # g_ens = zeros(nd, N_ens)
+    # for i in 1:N_ens
+    #     # run the model with the current parameters, i.e., map θ to G(θ)
+    #     g_ens[:, i] = run_forward(params[:,i])
+    # end
+
     g_ens = zeros(nd, N_ens)
-    for i in 1:N_ens
-        # run the model with the current parameters, i.e., map θ to G(θ)
-        g_ens[:, i] = run_forward(params[:,i])
-    end
+    params = [params[:,i] for i in 1:size(params,2)]
+    g_ens[:, :] = hcat(pmap(x -> run_forward(x), params)...)
     return g_ens
 end
 
@@ -58,4 +64,4 @@ function run_forward(params)
     return Gstacked
 end
 
-# end # module
+end

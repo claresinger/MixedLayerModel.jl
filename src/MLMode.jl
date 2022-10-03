@@ -116,20 +116,25 @@ end
       dCF/dt = (CF' - CF) / τ_CF
 """
 function mlm(du, u, p, t)
-    zb = calc_LCL(u);
-    LWP = incloud_LWP(u, zb);
-    ent = we(u, p, zb, LWP, p.etype);
-    du[1] = dzidt(u, p, ent, zb, LWP)
-    du[2] = dsMdt(u, p, ent, LWP)
-    du[3] = dqMdt(u, p, ent, LWP)
-    du[4] = dSSTdt(u, p, LWP, p.stype)
-    du[5] = dCFdt(u, p, zb, LWP)
-    
-    if u[1] < 200
-        println(t/3600/24)
-        println(u)
-        println(zb)
-        # println(du)
-        # println()
+    if any(u .<= 0)
+        u = ones(5) .* [1000, 300e6, 6e-6, -1, 1];
+        du = zeros(5)
+    else
+        zb = calc_LCL(u);
+        LWP = incloud_LWP(u, zb);
+        ent = we(u, p, zb, LWP, p.etype);
+        du[1] = dzidt(u, p, ent, zb, LWP)
+        du[2] = dsMdt(u, p, ent, LWP)
+        du[3] = dqMdt(u, p, ent, LWP)
+        du[4] = dSSTdt(u, p, LWP, p.stype)
+        du[5] = dCFdt(u, p, zb, LWP)
     end
+    
+    # if u[1] < 200
+    #     println(t/3600/24)
+    #     println(u)
+    #     println(zb)
+    #     # println(du)
+    #     # println()
+    # end
 end

@@ -59,41 +59,41 @@ gt = dropdims(GModel.run_forward(params_true), dims = 2)
 n_samples = 100
 yt = zeros(length(gt), n_samples)
 noise_level = 1e-2
-Γy = noise_level * convert(Array, Diagonal(gt))
-μ = zeros(length(gt))
+Γy = noise_level * convert(Array, Diagonal(abs.(gt)))
+μy = zeros(length(gt))
 # Add noise
 for i in 1:n_samples
-    yt[:, i] = gt .+ rand(MvNormal(μ, Γy))
+    yt[:, i] = gt .+ rand(MvNormal(μy, Γy))
 end
 
 # Construct observation object
-data_names = ["SST"]
+data_names = ["SST","LHF"]
 truth = Observations.Observation(yt, Γy, data_names)
 truth_sample = truth.mean
 
 ###
 ###  Define the parameter priors
 ###
-# prior_decoup = constrained_gaussian("prior_decoup", 10, 2, 0.0, Inf)
-# prior_α = constrained_gaussian("prior_α", 1.08e-3, 0.02e-3, 0.0, Inf)
-# prior_EIS = constrained_gaussian("prior_EIS", 10, 2, 0.0, Inf)
-# prior_ECS = constrained_gaussian("prior_ECS", 3, 1, 0.0, Inf)
-# prior_Eexport = constrained_gaussian("prior_Eexport", 12, 4, 0.0, Inf)
-# prior_SW = constrained_gaussian("prior_SW", 120, 50, 0.0, Inf)
-prior_decoup = constrained_gaussian("prior_decoup", 10, 5, 0.0, Inf)
-prior_α = constrained_gaussian("prior_α", 1.08e-3, 1e-3, 0.0, Inf)
-prior_EIS = constrained_gaussian("prior_EIS", 10, 10, 0.0, Inf)
-prior_ECS = constrained_gaussian("prior_ECS", 3, 3, 0.0, Inf)
-prior_Eexport = constrained_gaussian("prior_Eexport", 12, 10, 0.0, Inf)
-prior_SW = constrained_gaussian("prior_SW", 120, 100, 0.0, Inf)
+prior_decoup = constrained_gaussian("prior_decoup", 10, 2, 0.0, Inf)
+prior_α = constrained_gaussian("prior_α", 1.08e-3, 0.02e-3, 0.0, Inf)
+prior_EIS = constrained_gaussian("prior_EIS", 10, 2, 0.0, Inf)
+prior_ECS = constrained_gaussian("prior_ECS", 3, 1, 0.0, Inf)
+prior_Eexport = constrained_gaussian("prior_Eexport", 12, 4, 0.0, Inf)
+prior_SW = constrained_gaussian("prior_SW", 120, 50, 0.0, Inf)
+# prior_decoup = constrained_gaussian("prior_decoup", 10, 5, 0.0, Inf)
+# prior_α = constrained_gaussian("prior_α", 1.08e-3, 1e-3, 0.0, Inf)
+# prior_EIS = constrained_gaussian("prior_EIS", 10, 10, 0.0, Inf)
+# prior_ECS = constrained_gaussian("prior_ECS", 3, 3, 0.0, Inf)
+# prior_Eexport = constrained_gaussian("prior_Eexport", 12, 10, 0.0, Inf)
+# prior_SW = constrained_gaussian("prior_SW", 120, 100, 0.0, Inf)
 priors = combine_distributions([prior_decoup, prior_α, prior_EIS, prior_ECS, prior_Eexport, prior_SW])
 
 ###
 ###  Calibrate: Ensemble Kalman Inversion
 ###
 
-N_ens = 30 # number of ensemble members
-N_iter = 10 # number of EKI iterations
+N_ens = 3 # number of ensemble members
+N_iter = 2 # number of EKI iterations
 # initial parameters: N_params x N_ens
 initial_params = construct_initial_ensemble(priors, N_ens; rng_seed = rng_seed)
 ϕ_init_mean = transform_unconstrained_to_constrained(priors, mean(initial_params, dims=2));
@@ -118,14 +118,14 @@ end
 println("ϕ_final: ", ϕ_final)
 
 
-########
-# Output and save data/figures
-########
+# ########
+# # Output and save data/figures
+# ########
 
 # Output figure save directory
 homedir = pwd()
 NNstring = "Nens" *string(N_ens) * "_Niter" * string(N_iter)
-save_directory = homedir * "/experiments/ekp/20221003_perfectmodel_pfail_parallel_" * NNstring * "/"
+save_directory = homedir * "/experiments/ekp/20221011_SST+LHF_" * NNstring * "/"
 if ~isdir(save_directory)
     mkpath(save_directory)
 end
@@ -141,12 +141,13 @@ g_stored = get_g(ekiobj, return_array = false)
 
 # plot SST
 CO2updn_list = [200,300,400,800,1000,1200,1300,1400,1600,1400,1300,1200,1000,800,400,300,200];
+nd = length(CO2updn_list)
 
 plot(size=(600,400), layout=(1,1), dpi=200, palette = palette(:heat, N_iter+1))
 for i in 1:N_iter
     g_i = get_g(ekiobj, i)
     for j in 1:N_ens
-        g_ij = g_i[:,j]
+        g_ij = GModel.unnormalize_data(g_i[1:nd,j], "SST");
         scatter!(
             CO2updn_list, 
             g_ij, 
@@ -160,10 +161,31 @@ for i in 1:N_iter
         plot!(CO2updn_list, g_ij, linestyle=:dot, color=i+1, label=false)
     end
 end
-plot!(CO2updn_list, truth_sample, linestyle=:solid, lw=3, color=:black, label="Truth", legend=:topleft)
+plot!(CO2updn_list, GModel.unnormalize_data(truth_sample[1:nd], "SST"), linestyle=:solid, lw=3, color=:black, label="Truth", legend=:topleft)
 savefig(save_directory * "SST_hysteresis_loop.png")
 plot!(ylims=[280,320])
 savefig(save_directory * "SST_hysteresis_loop_ylim.png")
+
+plot(size=(600,400), layout=(1,1), dpi=200, palette = palette(:heat, N_iter+1))
+for i in 1:N_iter
+    g_i = get_g(ekiobj, i)
+    for j in 1:N_ens
+        g_ij = GModel.unnormalize_data(g_i[nd+1:end,j], "LHF")
+        scatter!(
+            CO2updn_list, 
+            g_ij, 
+            marker=:o, 
+            ms=5, 
+            xaxis="CO2 [ppmv]",
+            yaxis="LHF [W/m2]",
+            color=i+1, 
+            label= j==1 ? "Iter. "*string(i) : false,
+        )            
+        plot!(CO2updn_list, g_ij, linestyle=:dot, color=i+1, label=false)
+    end
+end
+plot!(CO2updn_list, GModel.unnormalize_data(truth_sample[nd+1:end], "LHF"), linestyle=:solid, lw=3, color=:black, label="LES", legend=:topleft)
+savefig(save_directory * "LHF_hysteresis_loop.png")
 
 # plot u parameter convergence
 u_init = get_u_prior(ekiobj)

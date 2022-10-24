@@ -83,12 +83,7 @@ function dSSTdt(u, p, LWP, stype::varSST)
     SHF = calc_SHF(u, p);
     LHF = calc_LHF(u, p);   
     τ_SST = ρw * Cw * p.Hw;
-    dx = (RAD - SHF - LHF - p.OHU) / τ_SST;
-    
-    # TODO do this for energy export to tropics
-    # dy = (p.SST0 - SST) / (5 * 3600 * 24);
-    dy = 0
-    return (dx + dy)
+    return (RAD - SHF - LHF - p.OHU) / τ_SST
 end
 
 """

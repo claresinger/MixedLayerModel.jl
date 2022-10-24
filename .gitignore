@@ -3,6 +3,7 @@ docs/build/
 *Manifest.toml
 
 *.cov
+*.ipynb
 *.ipynb_checkpoints/
 *.vscode/
 

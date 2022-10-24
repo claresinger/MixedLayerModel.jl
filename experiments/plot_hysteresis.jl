@@ -152,7 +152,7 @@ plot!(p_zi, co2d, zi, color=c, linewidth=2, label="")
 plot!(p_cf, co2d, cf*100, color=c, linewidth=2, label="")
 
 # legend
-scatter!(p_dR, [-1], [-1], color="black", marker=:x, markersize=1, markerstrokewidth=0, label="LES")
+scatter!(p_dR, [-1], [-1], color="black", marker=:x, markersize=1, markerstrokewidth=0.1, label="LES")
 scatter!(p_dR, [-1], [-1], color="black", marker=:circle, markersize=1, markerstrokewidth=0, label="Bulk model")
 
 # save plot
@@ -162,4 +162,14 @@ p = plot(p_dR,p_sst,p_zi,p_decoup,p_lhf,p_cf, layout=(2,3),
     left_margin=10Plots.mm, bottom_margin=7Plots.mm, top_margin=5Plots.mm);
 mkpath("experiments/figures/"*exp_path)
 savefig(p, "experiments/figures/"*exp_path*"hystersis_plot.png")
+
+# save another plot
+p = plot(p_dR,p_sst,p_lhf,p_cf, layout=(2,2), 
+    link=:x, size=(900,500), dpi=300,
+    legend=:topright, legendfontsize=12, legendfont=font(12),
+    left_margin=10Plots.mm, bottom_margin=7Plots.mm, top_margin=5Plots.mm);
+mkpath("experiments/figures/"*exp_path)
+savefig(p, "experiments/figures/"*exp_path*"hystersis_plot_min.png")
+
+# reset fontsizes
 Plots.scalefontsizes(1/1.8)

@@ -60,10 +60,6 @@ LWP = incloud_LWP(uf, zb);
 RH = min(qM / q_sat(0.0, temp(0.0, sM, qM)), 1.0);
 println(uf);
 println(du);
-println("cloud base: ",zb)
-println("LWP: ", LWP);
-println("tropical sst: ", trop_sst(uf, par, LWP));
-println("ft qt: ", qjump(uf, par, LWP, par.fttype) + qM);
 
 output = Dict("p" => par, "u0" => u0, "uf" => uf, "du/u" => du./uf, 
 "we" => we(uf,par,zb,LWP,par.etype), "zb" => zb, "zc" => zi-zb,

@@ -8,7 +8,7 @@ export upCO2, climatology
     # cloud fraction params
     CFmax::Real = 1.0;       # maximum cloud fraction
     CFmin::Real = 0.2;       # minimum cloud fraction
-    decoup_slope::Real = 10; # decoupling slope (m)
+    decoup_slope::Real = 8; # decoupling slope, m
 
     # fixed SST for 400ppm
     SST0::Real = 290.0; # (K)
@@ -22,8 +22,7 @@ export upCO2, climatology
     
     # params for interactive surface fluxes
     V::Real = 10.0; # (m/s)
-    CTh::Real = 8e-4;
-    CTq::Real = 8e-4;
+    Cd::Real = 1e-3;
     
     # slab ocean params
     Hw::Real = 1.0; # (m)
@@ -51,7 +50,7 @@ end
     # cloud fraction params
     CFmax::Real = 0.8;       # maximum cloud fraction
     CFmin::Real = 0.1;       # minimum cloud fraction
-    decoup_slope::Real = 10; # decoupling slope (m)
+    decoup_slope::Real = 8; # decoupling slope (m)
 
     # baseline CO2
     CO2::Real = 400; # (ppm)
@@ -72,8 +71,7 @@ end
     # params for interactive surface fluxes
     SST0::Real = 290.; # (K)
     V::Real = 10.0; # (m/s)
-    CTh::Real = 8e-4;
-    CTq::Real = 8e-4;
+    Cd::Real = 1e-3;
     Hw::Real = 1.0; # (m)
     OHU::Real = 10.0; # (W/m2)
 

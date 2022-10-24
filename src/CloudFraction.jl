@@ -35,7 +35,7 @@ end
 
 function cloud_fraction_param(decoup, p)
     m = p.decoup_slope; # tunable parameter for the slope of the CF nonlinearity
-    dcrit = 0.5;
-    CF = p.CFmax - (p.CFmax - p.CFmin) / (1 + 9*exp(-m*(decoup-dcrit)));
+    dcrit = 1;
+    CF = p.CFmax - (p.CFmax - p.CFmin) / (1 + (1/9)*exp(-m*(decoup-dcrit)));
     return CF
 end

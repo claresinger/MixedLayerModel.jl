@@ -166,7 +166,7 @@ savefig(p, "experiments/figures/"*exp_path*"hystersis_plot.png")
 # save another plot
 p = plot(p_dR,p_sst,p_lhf,p_cf, layout=(2,2), 
     link=:x, size=(900,500), dpi=300,
-    legend=:topright, legendfontsize=12, legendfont=font(12),
+    legend=:topright, legendfontsize=10, legendfont=font(10),
     left_margin=10Plots.mm, bottom_margin=7Plots.mm, top_margin=5Plots.mm);
 mkpath("experiments/figures/"*exp_path)
 savefig(p, "experiments/figures/"*exp_path*"hystersis_plot_min.png")

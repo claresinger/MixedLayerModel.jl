@@ -16,10 +16,7 @@ struct fixRad <: rad_type end
 function ΔTa(u, p, LWP)
     zi, sM, qM, SST, CF = u;
     qft = qjump(u, p, LWP, p.fttype) + qM;
-    ΔT = -10.1 + 3.1*log(p.CO2) + 5.3*log(qft);
-    
-    # TODO without proper twocol FT do this:
-    # ΔT = -22.5 + 0.008*p.CO2;
+    ΔT = -10.1 + 3.1*log(p.CO2) + 5.3*log(max(qft, 1e-12));
     return ΔT
 end
 
@@ -42,7 +39,7 @@ function calc_surf_RAD(u, p, LWP)
     # a0, a1, a2, b1, b2 = [12.4, -1020, 3.1, -270, 0.86];
     # LW_net = (1-CF)*(a0*log(p.CO2/400) + a1 + a2*SST) + CF*(b1 + b2*SST);
     
-    # TODO simplify radiative fluxes and keep constant
+    # simplest radiative fluxes
     SW_net = p.SW_a + p.SW_b*(p.CFmax - CF);
     LW_net = -30;
 
@@ -85,10 +82,12 @@ end
     fit from LES experiments
 """
 function cloud_albedo(LWP)
-    αmax = 0.98;
-    Lx = 36e-3;
-    αc = αmax * (LWP)/(Lx + LWP);
+    # # albedo = f(LWP)
+    # αmax = 0.98;
+    # Lx = 36e-3;
+    # αc = αmax * (LWP)/(Lx + LWP);
 
+    # simplest cloud albedo, fixed
     αc = 0.75
     return αc
 end
@@ -102,9 +101,11 @@ end
     based on Stephens 1978 part II: eq 15 and 16
 """
 function cloud_emissivity(LWP)
-    a0 = 0.15 * 1e3; # m^2/kg
-    ϵc = 1 - exp(-a0 * LWP); 
+    # # emissivity = f(LWP)
+    # a0 = 0.15 * 1e3; # m^2/kg
+    # ϵc = 1 - exp(-a0 * LWP); 
 
+    # simplest cloud emissivity, fixed
     ϵc = 0.9
     return ϵc
 end

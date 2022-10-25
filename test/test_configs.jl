@@ -3,7 +3,7 @@ include("../experiments/plot_transient_solution.jl")
 
 using FileIO
 
-makeplot = false
+makeplot = true
 
 if makeplot
     dt = 6.0;
@@ -44,15 +44,15 @@ for entrainment in (enBal(), bflux())
             @test zb <= uf[1]
             @test all(du/uf .< 1e-3)
 
-            if makeplot
-                pathname = "main_figures/climatology_";
-                filename = pathname*string(entrainment)*string(fluxes)*string(radiation)*"_sol400.jld2";
-                mainsol = load(filename)["mainsol"]
-                println(sol.u[end])
-                println(mainsol.u[end])
-                @test isapprox(sol.u[end][1], mainsol.u[end][1], rtol = rtol)
-                println()
-            end
+            # if makeplot
+            #     pathname = "main_figures/climatology_";
+            #     filename = pathname*string(entrainment)*string(fluxes)*string(radiation)*"_sol400.jld2";
+            #     mainsol = load(filename)["mainsol"]
+            #     println(sol.u[end])
+            #     println(mainsol.u[end])
+            #     @test isapprox(sol.u[end][1], mainsol.u[end][1], rtol = rtol)
+            #     println()
+            # end
         end
     end
 end
@@ -61,7 +61,7 @@ end
 par = upCO2();
 for entrainment in (enBal(), bflux())
     for sst in (fixSST(), varSST())
-        for freetrop in (co2dep(), twocol())
+        for freetrop in (fixEIS(), co2EIS())
             par.etype = entrainment;
             par.ftype = varFlux();
             par.rtype = varRad();
@@ -84,15 +84,15 @@ for entrainment in (enBal(), bflux())
             @test zb <= uf[1]
             @test all(du/uf .< 1e-3)
 
-            if makeplot
-                pathname = "main_figures/upCO2_";
-                filename = pathname*string(entrainment)*string(sst)*string(freetrop)*"_sol400.jld2";
-                mainsol = load(filename)["mainsol"]
-                println(sol.u[end])
-                println(mainsol.u[end])
-                @test isapprox(sol.u[end][1], mainsol.u[end][1], rtol = rtol)
-                println()
-            end
+            # if makeplot
+            #     pathname = "main_figures/upCO2_";
+            #     filename = pathname*string(entrainment)*string(sst)*string(freetrop)*"_sol400.jld2";
+            #     mainsol = load(filename)["mainsol"]
+            #     println(sol.u[end])
+            #     println(mainsol.u[end])
+            #     @test isapprox(sol.u[end][1], mainsol.u[end][1], rtol = rtol)
+            #     println()
+            # end
         end
     end
 end

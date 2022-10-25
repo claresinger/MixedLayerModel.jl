@@ -10,11 +10,11 @@ include("../../experiments/mlm_solve_funcs.jl")
 # run simulation
 par = upCO2();
 par.etype = enBal();
-par.fttype = co2dep();
+par.fttype = co2EIS();
 par.rtype = varRad();
 par.stype = fixSST();
-dt = 2.0;
-tmax = 40.0;
+dt = 12.0;
+tmax = 50.0;
 ENV["GKSwstype"]="nul"
 u0, sol = run_mlm(par, dt=3600.0*dt, tspan=(0.0,3600.0*24.0*tmax));
 

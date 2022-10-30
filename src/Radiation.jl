@@ -1,4 +1,5 @@
 export rad_type, varRad, fixRad
+export wvtype, wvON, wvRADOFF
 export calc_surf_RAD, calc_cloudtop_RAD
 
 ## create type for radiation
@@ -8,15 +9,30 @@ abstract type rad_type end
 struct varRad <: rad_type end
 struct fixRad <: rad_type end
 
+abstract type wvtype end
+struct wvON <: wvtype end
+struct wvRADOFF <: wvtype end
+
 """
-    ΔTa(u, p, LWP)
+    ΔTa(u, p, LWP, p.wvtype::wvON)
     writes the difference between cloud-top temperature and downwelling emission
     temperature as a function of CO2 and H2O above-cloud
 """
-function ΔTa(u, p, LWP)
+function ΔTa(u, p, LWP, wvtype::wvON)
     zi, sM, qM, SST, CF = u;
     qft = qjump(u, p, LWP, p.fttype) + qM;
     ΔT = -10.1 + 3.1*log(p.CO2) + 5.3*log(max(qft, 1e-12));
+    return ΔT
+end
+
+"""
+    ΔTa(u, p, LWP, p.wvtype::wvRADOFF)
+    writes the difference between cloud-top temperature and downwelling emission
+    temperature as a function of CO2 
+    H2O above-cloud is FIXED by p.qft_rad
+"""
+function ΔTa(u, p, LWP, wvtype::wvRADOFF)
+    ΔT = -10.1 + 3.1*log(p.CO2) + 5.3*log(p.qft_rad);
     return ΔT
 end
 
@@ -69,7 +85,7 @@ function calc_cloudtop_RAD(u, p, LWP, rtype::varRad)
     zi, sM, qM, SST, CF = u;
     Tct = temp(zi,sM,qM);
     ϵc_up = cloud_emissivity(LWP);
-    Teff = Tct + ΔTa(u, p, LWP);
+    Teff = Tct + ΔTa(u, p, LWP, p.wvtype);
     ΔR = CF * σ_SB * ϵc_up * (Tct^4 - Teff^4);
     ΔR = max(ΔR, 1)
     return ΔR

@@ -13,8 +13,12 @@ export upCO2, climatology
     # fixed SST for 400ppm
     SST0::Real = 290.0; # (K)
 
+    # fix WV in radiation
+    qft_rad::Real = 2e-3;
+
     # baseline CO2
     CO2::Real = 400; # (ppm)
+    τCF::Real = 5; # (days)
     
     # subsidence strength
     D::Real = 6.0e-6; # (1/s)
@@ -44,6 +48,7 @@ export upCO2, climatology
     rtype::rad_type = varRad();
     stype::sst_type = fixSST();
     fttype::ft_type = co2EIS();
+    wvtype::wvtype = wvON();
 end
 
 @with_kw mutable struct climatology
@@ -88,4 +93,5 @@ end
     rtype::rad_type = varRad();
     stype::sst_type = fixSST();
     fttype::ft_type = fixedFT();
+    wvtype::wvtype = wvON();
 end

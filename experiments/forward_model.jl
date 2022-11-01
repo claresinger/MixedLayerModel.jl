@@ -1,4 +1,5 @@
 @everywhere module GModel
+# module GModel
 
 using Distributed
 using Statistics
@@ -14,15 +15,15 @@ CO2updn_list = [200,300,400,800,1000,1200,1300,1400,1600,1400,1300,1200,1000,800
 nd = length(CO2updn_list)
 
 function run_ensembles(params, N_ens)
-    # g_ens = zeros(nd, N_ens)
+    # g_ens = zeros(nd*2, N_ens)
     # for i in 1:N_ens
-    #     # run the model with the current parameters, i.e., map θ to G(θ)
-    #     g_ens[:, i] = run_forward(params[:,i])
+    #     g_ens[:, i] = run_forward(params[:,i]) # map θ to G(θ)
     # end
 
     g_ens = zeros(nd*2, N_ens)
     params = [params[:,i] for i in 1:size(params,2)]
-    g_ens[:, :] = hcat(pmap(x -> run_forward(x), params)...)
+    g_ens[:, :] = hcat(pmap(x -> run_forward(x), params)...) # map θ to G(θ)
+
     return g_ens
 end
 
@@ -33,15 +34,16 @@ function run_forward(params)
     par.fttype = co2EIS();
     par.rtype = varRad();
     par.stype = fixSST();
-    dt, tmax = 48.0, 50.0;
+    dt, tmax = 20*24.0, 200.0;
 
     # adjust tunable parameters
-    par.decoup_slope = params[1]; #10;
-    par.α_vent = params[2]; #1.08e-3;
-    par.EIS0 = params[3]; #10.0;
-    par.ECS = params[4]; #3.0;
-    par.Eexport = params[5]; #15.0;
-    par.SW_b = params[6]; #150;
+    # par.decoup_slope = params[1];
+    par.Cd = params[1];
+    par.α_vent = params[2];
+    par.EIS0 = params[3];
+    par.ECS = params[4];
+    par.Eexport = params[5];
+    par.SW_b = params[6];
 
     # 400 ppm
     u0, sol = run_mlm(par, dt=3600.0*dt, tspan=(0.0,3600.0*24.0*tmax), quiet=true);
@@ -53,17 +55,28 @@ function run_forward(params)
     # upsteps
     par.stype = varSST();
     Gstacked = zeros(nd*2, 1);
-
-    for (i,newCO2) in enumerate(CO2updn_list)
-        par.CO2 = newCO2;
-        par.OHU = OHU_400;
-        u0, sol = run_mlm_from_init(uf, par, dt=3600.0*dt, tspan=(0.0,3600.0*24.0*tmax), quiet=true);
-        uf = sol.u[end];
-        zi, sM, qM, SST, CF = uf;
-        Gstacked[i,:] .= normalize_data(SST, "SST");
-        Gstacked[nd+i,:] .= normalize_data(calc_LHF(uf, par), "LHF");
+    try
+        for (i,newCO2) in enumerate(CO2updn_list)
+            par.CO2 = newCO2;
+            par.OHU = OHU_400;
+            
+            u0, sol = run_mlm_from_init(uf, par, dt=3600.0*dt, tspan=(0.0,3600.0*24.0*tmax), quiet=true);
+            uf = sol.u[end];
+            
+            zi, sM, qM, SST, CF = uf;
+            Gstacked[i,:] .= normalize_data(SST, "SST");
+            Gstacked[nd+i,:] .= normalize_data(calc_LHF(uf, par), "LHF");
+        end
+    catch
+        println("catching error in MLM")
+        println(Gstacked)
+        fill!(Gstacked, NaN)
     end
-
+    if (maximum(Gstacked) > 1e5) | (minimum(Gstacked) < -1e5)
+        println(Gstacked)
+        println("NaN fill, fit too terrible: ", maximum(Gstacked), "\t", minimum(Gstacked))
+        fill!(Gstacked, NaN)
+    end
     return Gstacked
 end
 

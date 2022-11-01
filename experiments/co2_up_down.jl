@@ -1,4 +1,4 @@
-exp_path = "20221028_test/";
+exp_path = "20221029_D6.2/";
 
 # create parameters
 using MixedLayerModel
@@ -7,17 +7,19 @@ par.etype = enBal();
 par.fttype = co2EIS();
 par.rtype = varRad();
 par.stype = fixSST();
-dt, tmax = 48.0, 100.0;
+dt, tmax = 10*24.0, 100.0;
 
-par.Cd = 1e-3;
+# params
+par.decoup_slope = 8;
+par.D = 6.2e-6;
 
 # adjust tunable parameters
-par.SW_b = 150;
-par.decoup_slope = 8;
-par.α_vent = 0.95e-3;
+par.Cd = 0.8e-3;
+par.α_vent = 1.08e-3;
 par.EIS0 = 10.0;
 par.ECS = 3.0;
 par.Eexport = 15.0;
+par.SW_b = 150;
 
 # baseline
 ARGS = [exp_path]; include("co2_400.jl")

@@ -36,7 +36,8 @@ function run_forward(params)
     dt, tmax = 48.0, 50.0;
 
     # adjust tunable parameters
-    par.decoup_slope = params[1];
+    # par.decoup_slope = params[1];
+    par.Cd = params[1];
     par.α_vent = params[2];
     par.EIS0 = params[3];
     par.ECS = params[4];

@@ -1,4 +1,4 @@
-PERFECT=true
+PERFECT=false
 
 # Import modules
 using Distributed
@@ -17,15 +17,15 @@ nd = length(CO2updn_list);
 
 # load ekiobj data
 homedir = pwd()
-N_ens = 10 # number of ensemble members
-N_iter = 3 # number of EKI iterations
+N_ens = 20 # number of ensemble members
+N_iter = 5 # number of EKI iterations
 NNstring = "Nens" *string(N_ens) * "_Niter" * string(N_iter)
-save_directory = homedir * "/experiments/ekp/20221101_perf_fails_" * NNstring * "/"
+save_directory = homedir * "/experiments/ekp/20221101_LES_noise5pct_newprior2_" * NNstring * "/"
 @load save_directory * "ekiobj.jld2" ekiobj
 @load save_directory * "data_storage.jld2" g_stored
 @load save_directory * "prior_posterior.jld2" SSTi LHFi SSTf LHFf
 if PERFECT
-    @load save_directory * "truth_sample.jld2" truth_sample
+    @load save_directory * "truth.jld2" truth
     @load save_directory * "params_true.jld2" params_true
 end
 ####################
@@ -48,6 +48,16 @@ savefig(save_directory * "error_iterations.png")
 # plot prior and posterior on calibrated variables
 plot(size=(800,400), layout=(1,2), dpi=300, left_margin=5Plots.mm, bottom_margin = 5Plots.mm)
 
+yt = hcat(truth.samples...);
+samples = vcat(GModel.unnormalize_data(yt[1:nd,:], "SST"), GModel.unnormalize_data(yt[nd+1:end,:], "LHF"));
+
+plot!(CO2updn_list, mean(samples,dims=2)[1:nd], 
+    yerr = std(samples,dims=2)[1:nd], markerstrokecolor=:black,
+    linestyle=:solid, lw=3, color=:black, label="Truth", subplot=1)
+plot!(CO2updn_list, mean(samples,dims=2)[nd+1:end], 
+    yerr = std(samples,dims=2)[nd+1:end], markerstrokecolor=:black,
+    linestyle=:solid, lw=3, color=:black, label=false, subplot=2)
+
 gi = get_g(ekiobj, 1)
 σi = zeros(nd,2)
 for i in 1:nd
@@ -56,7 +66,6 @@ for i in 1:nd
     σi[i,1] = std(collect(skipmissing(replace(SST, NaN=>missing))))
     σi[i,2] = std(collect(skipmissing(replace(LHF, NaN=>missing))))
 end
-# println(σi)
 
 gf = get_g_final(ekiobj)
 σf = zeros(nd,2)
@@ -66,23 +75,18 @@ for i in 1:nd
     σf[i,1] = std(collect(skipmissing(replace(SST, NaN=>missing))))
     σf[i,2] = std(collect(skipmissing(replace(LHF, NaN=>missing))))
 end
-# println(σf)
 
-# scatter!(CO2updn_list, SSTi, yerr= subplot=1, color=:black, 
-#     label="Prior", xaxis="CO₂ [ppmv]", yaxis="SST [K]", legend=:topleft)
-plot!(CO2updn_list, SSTi, subplot=1, linestyle=:solid, color=:black,
+plot!(CO2updn_list, SSTi, yerr=σi[:,1], subplot=1, linestyle=:solid, 
+    color=:pink, markerstrokecolor=:pink,
     label="Prior", xaxis="CO₂ [ppmv]", yaxis="SST [K]", legend=:topleft)
-# scatter!(CO2updn_list, LHFi, subplot=2, color=:black, 
-#     label=false, xaxis="CO₂ [ppmv]", yaxis="LHF [W/m²]")
-plot!(CO2updn_list, LHFi, subplot=2, linestyle=:solid, color=:black,
+plot!(CO2updn_list, LHFi, yerr=σi[:,2], subplot=2, linestyle=:solid, 
+    color=:pink, markerstrokecolor=:pink,
     label=false, xaxis="CO₂ [ppmv]", yaxis="LHF [W/m²]")
 
-# scatter!(CO2updn_list, SSTf, subplot=1, color=:red, label="Posterior")
 plot!(CO2updn_list, SSTf, yerr=σf[:,1], subplot=1, label="Posterior",
-    linestyle=:solid, color=:red, markerstrokecolor=:red)
-# scatter!(CO2updn_list, LHFf, subplot=2, color=:red, label=false)
+    linestyle=:solid, color=:green, markerstrokecolor=:green)
 plot!(CO2updn_list, LHFf, yerr=σf[:,2], subplot=2, label=false,
-    linestyle=:solid, color=:red, markerstrokecolor=:red)
+    linestyle=:solid, color=:green, markerstrokecolor=:green)
 savefig(save_directory * "prior_posterior.png")
 ####################
 
@@ -106,7 +110,7 @@ for i in 1:N_iter
     end
 end
 if PERFECT
-    plot!(CO2updn_list, GModel.unnormalize_data(truth_sample[1:nd], "SST"), 
+    plot!(CO2updn_list, GModel.unnormalize_data(truth.mean[1:nd], "SST"), 
         linestyle=:solid, lw=3, color=:black, label="Truth", legend=:topleft)
 else
     plot!(CO2updn_list, SSTupdn_list, 
@@ -137,7 +141,7 @@ for i in 1:N_iter
     end
 end
 if PERFECT
-    plot!(CO2updn_list, GModel.unnormalize_data(truth_sample[nd+1:end], "LHF"), 
+    plot!(CO2updn_list, GModel.unnormalize_data(truth.mean[nd+1:end], "LHF"), 
         linestyle=:solid, lw=3, color=:black, label="LES", legend=:topleft)
 else
     plot!(CO2updn_list, LHFupdn_list,
@@ -182,9 +186,9 @@ for i in 1:N_iter
 end
 if PERFECT
     for i in 1:N_iter
-        plot!(CO2updn_list, GModel.unnormalize_data(truth_sample[nd+1:end], "SST"), subplot=2*i-1,
+        plot!(CO2updn_list, GModel.unnormalize_data(truth.mean[1:nd], "SST"), subplot=2*i-1,
             linestyle=:solid, lw=3, color=:black, label="truth", legend=:topleft)
-        plot!(CO2updn_list, GModel.unnormalize_data(truth_sample[nd+1:end], "LHF"), subplot=2*i,
+        plot!(CO2updn_list, GModel.unnormalize_data(truth.mean[nd+1:end], "LHF"), subplot=2*i,
             linestyle=:solid, lw=3, color=:black, label=false)
     end
 else

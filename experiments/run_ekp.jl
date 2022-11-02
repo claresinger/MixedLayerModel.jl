@@ -32,29 +32,29 @@ LHFupdn_list = [97.8,103.9,107.1,112.8,115.3,120.5,208.7,213.5,220.9,214.4,209.4
 ziupdn_list = [1442,1349,1266,1078,1011,972,834,781,703,766,826,866,949,1013,1230,1340,1416];
 nd = length(CO2updn_list);
 
-# gt = vcat(GModel.normalize_data(SSTupdn_list, "SST"), GModel.normalize_data(LHFupdn_list, "LHF"));
+# construct truth (normalized)
+gt = vcat(GModel.normalize_data(SSTupdn_list, "SST"), GModel.normalize_data(LHFupdn_list, "LHF"));
 
-# n_samples = 100
-# yt = zeros(length(gt), n_samples)
-# noise_level = 1e-2 .* ones(length(gt))
-# # jumps = [6,7,16,17];
-# # noise_level[jumps] .-= 0.8e-2;
-# Γy = noise_level .* convert(Array, Diagonal(abs.(gt)))
-# μy = zeros(length(gt))
-# # Add noise
-# for i in 1:n_samples
-#     yt[:, i] = gt .+ rand(MvNormal(μy, Γy))
-# end
-
-# Construct normalized observations yt and error Γy
-gt = vcat(SSTupdn_list, LHFupdn_list);
-n_samples = 100;
-samples = zeros(length(gt), n_samples);
-noise = 1e-2 .* ones(length(gt));
+# construct observations
+n_samples = 100
+yt = zeros(length(gt), n_samples)
+noise_level = 0.05
+Γy = noise_level .* convert(Array, Diagonal(abs.(gt)))
+μy = zeros(length(gt))
+# Add noise
 for i in 1:n_samples
-    samples[:, i] = gt .+ rand(MvNormal(zeros(length(gt)), noise .* gt));
+    yt[:, i] = gt .+ rand(MvNormal(μy, Γy))
 end
-yt = vcat(GModel.normalize_data(samples[1:nd,:], "SST"), GModel.normalize_data(samples[nd+1:end,:], "LHF"));
+
+# # Construct normalized observations yt and error Γy
+# gt = vcat(SSTupdn_list, LHFupdn_list);
+# n_samples = 100;
+# samples = zeros(length(gt), n_samples);
+# noise = 1e-2 .* ones(length(gt));
+# for i in 1:n_samples
+#     samples[:, i] = gt .+ rand(MvNormal(zeros(length(gt)), noise .* gt));
+# end
+# yt = vcat(GModel.normalize_data(samples[1:nd,:], "SST"), GModel.normalize_data(samples[nd+1:end,:], "LHF"));
 
 # Construct observation object
 data_names = ["SST","LHF"]
@@ -63,13 +63,12 @@ truth = Observations.Observation(yt, data_names)
 ###
 ###  Define the parameter priors
 ###
-# prior_decoup = constrained_gaussian("prior_decoup", 8, 2, 0.0, Inf)
-prior_Cd = constrained_gaussian("prior_Cd", 0.8e-3, 0.1e-3, 0.0, Inf)
-prior_α = constrained_gaussian("prior_α", 1.08e-3, 0.1e-3, 0.0, Inf)
-prior_EIS = constrained_gaussian("prior_EIS", 10, 0.1, 0.0, Inf)
-prior_ECS = constrained_gaussian("prior_ECS", 3, 0.1, 0.0, Inf)
-prior_Eexport = constrained_gaussian("prior_Eexport", 15, 0.1, 0.0, Inf)
-prior_SW = constrained_gaussian("prior_SW", 150, 10, 0.0, Inf)
+prior_Cd = constrained_gaussian("prior_Cd", 8.5e-4, 0.5e-4, 0.0, Inf)
+prior_α = constrained_gaussian("prior_α", 1e-3, 0.2e-3, 0.0, Inf)
+prior_EIS = constrained_gaussian("prior_EIS", 9, 1, 0.0, Inf)
+prior_ECS = constrained_gaussian("prior_ECS", 3, 1, 0.0, Inf)
+prior_Eexport = constrained_gaussian("prior_Eexport", 17, 1, 0.0, Inf)
+prior_SW = constrained_gaussian("prior_SW", 120, 10, 0.0, Inf)
 priors = combine_distributions([prior_Cd, prior_α, prior_EIS, prior_ECS, prior_Eexport, prior_SW])
 
 ###
@@ -77,7 +76,7 @@ priors = combine_distributions([prior_Cd, prior_α, prior_EIS, prior_ECS, prior_
 ###
 
 N_ens = 20 # number of ensemble members
-N_iter = 5 # number of EKI iterations
+N_iter = 10 # number of EKI iterations
 # initial parameters: N_params x N_ens
 initial_params = construct_initial_ensemble(priors, N_ens; rng_seed = rng_seed)
 ϕ_init_mean = transform_unconstrained_to_constrained(priors, mean(initial_params, dims=2));
@@ -101,6 +100,7 @@ ekiobj = EKP.EnsembleKalmanProcess(
         EKP.update_ensemble!(ekiobj, g_ens)
         err[i] = get_error(ekiobj)[end]
         println("Iteration: " * string(i) * ", Error: " * string(err[i]))
+        println(get_ϕ_mean_final(priors, ekiobj))
     end
 end
 
@@ -115,7 +115,7 @@ println("ϕ_final: ", ϕ_final)
 # Output figure save directory
 homedir = pwd()
 NNstring = "Nens" *string(N_ens) * "_Niter" * string(N_iter)
-save_directory = homedir * "/experiments/ekp/20221101_LES_narrowprior_uniformerror_" * NNstring * "/"
+save_directory = homedir * "/experiments/ekp/20221101_LES_noise5pct_newprior_" * NNstring * "/"
 if ~isdir(save_directory)
     mkpath(save_directory)
 end
@@ -136,3 +136,4 @@ LHFf = GModel.unnormalize_data(gf[1:nd,1], "LHF")
 @save save_directory * "data_storage.jld2" g_stored
 @save save_directory * "ekiobj.jld2" ekiobj
 @save save_directory * "prior_posterior.jld2" SSTi LHFi SSTf LHFf
+@save save_directory * "truth.jld2" truth

@@ -1,4 +1,5 @@
 @everywhere module GModel
+# module GModel
 
 using Distributed
 using Statistics
@@ -33,27 +34,29 @@ function run_forward(params)
     par.fttype = co2EIS();
     par.rtype = varRad();
     par.stype = fixSST();
-    dt, tmax = 48.0, 50.0;
+    dt, tmax = 20*24.0, 200.0;
 
     # adjust tunable parameters
-    par.decoup_slope = params[1];
+    # par.decoup_slope = params[1];
+    par.Cd = params[1];
     par.α_vent = params[2];
     par.EIS0 = params[3];
     par.ECS = params[4];
     par.Eexport = params[5];
     par.SW_b = params[6];
 
-    # 400 ppm
-    u0, sol = run_mlm(par, dt=3600.0*dt, tspan=(0.0,3600.0*24.0*tmax), quiet=true);
-    uf = sol.u[end];
-    zb = calc_LCL(uf);
-    LWP = incloud_LWP(uf, zb);
-    OHU_400 = calc_OHU(uf,par,LWP,par.stype);
-
-    # upsteps
-    par.stype = varSST();
     Gstacked = zeros(nd*2, 1);
+
     try
+        # 400 ppm
+        u0, sol = run_mlm(par, dt=3600.0*dt, tspan=(0.0,3600.0*24.0*tmax), quiet=true);
+        uf = sol.u[end];
+        zb = calc_LCL(uf);
+        LWP = incloud_LWP(uf, zb);
+        OHU_400 = calc_OHU(uf,par,LWP,par.stype);
+
+        # upsteps
+        par.stype = varSST();
         for (i,newCO2) in enumerate(CO2updn_list)
             par.CO2 = newCO2;
             par.OHU = OHU_400;
@@ -70,11 +73,11 @@ function run_forward(params)
         println(Gstacked)
         fill!(Gstacked, NaN)
     end
-    # if (maximum(Gstacked) > 1e5) | (minimum(Gstacked) < -1e5)
-    #     println(Gstacked)
-    #     println("NaN fill, fit too terrible: ", maximum(Gstacked), "\t", minimum(Gstacked))
-    #     fill!(Gstacked, NaN)
-    # end
+    if (maximum(Gstacked) > 1e5) | (minimum(Gstacked) < -1e5)
+        println(Gstacked)
+        println("NaN fill, fit too terrible: ", maximum(Gstacked), "\t", minimum(Gstacked))
+        fill!(Gstacked, NaN)
+    end
     return Gstacked
 end
 

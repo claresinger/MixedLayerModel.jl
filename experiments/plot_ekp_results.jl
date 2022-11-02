@@ -1,4 +1,4 @@
-PERFECT=false
+PERFECT=true
 
 # Import modules
 using Distributed
@@ -17,10 +17,10 @@ nd = length(CO2updn_list);
 
 # load ekiobj data
 homedir = pwd()
-N_ens = 60 # number of ensemble members
-N_iter = 10 # number of EKI iterations
+N_ens = 10 # number of ensemble members
+N_iter = 3 # number of EKI iterations
 NNstring = "Nens" *string(N_ens) * "_Niter" * string(N_iter)
-save_directory = homedir * "/experiments/ekp/20221029_LES_calCd_" * NNstring * "/"
+save_directory = homedir * "/experiments/ekp/20221101_perf_fails_" * NNstring * "/"
 @load save_directory * "ekiobj.jld2" ekiobj
 @load save_directory * "data_storage.jld2" g_stored
 @load save_directory * "prior_posterior.jld2" SSTi LHFi SSTf LHFf
@@ -146,6 +146,58 @@ end
 savefig(save_directory * "LHF_hysteresis_loop.png")
 plot!(ylims=[50,250])
 savefig(save_directory * "LHF_hysteresis_loop_ylim.png")
+####################
+
+# plot SST and LHF for each iteration
+plot(size=(800,200*N_iter), layout=(N_iter,2), dpi=200, left_margin=10Plots.mm)
+for i in 1:N_iter
+    g_i = get_g(ekiobj, i)
+    for j in 1:N_ens
+        g_ij = GModel.unnormalize_data(g_i[1:nd,j], "SST")
+        scatter!(
+            CO2updn_list, 
+            g_ij, 
+            marker=:o, 
+            ms=5, 
+            xaxis="CO2 [ppmv]",
+            yaxis="SST [K]",
+            subplot=2*i-1,
+            label=false
+        )  
+        plot!(CO2updn_list, g_ij, linestyle=:dot, subplot=2*i-1, label=false)
+        
+        g_ij = GModel.unnormalize_data(g_i[nd+1:end,j], "LHF")
+        scatter!(
+            CO2updn_list, 
+            g_ij, 
+            marker=:o, 
+            ms=5, 
+            xaxis="CO2 [ppmv]",
+            yaxis="LHF [W/m2]",
+            subplot=2*i,
+            label=false
+        )            
+        plot!(CO2updn_list, g_ij, linestyle=:dot, subplot=2*i, label=false)
+    end
+end
+if PERFECT
+    for i in 1:N_iter
+        plot!(CO2updn_list, GModel.unnormalize_data(truth_sample[nd+1:end], "SST"), subplot=2*i-1,
+            linestyle=:solid, lw=3, color=:black, label="truth", legend=:topleft)
+        plot!(CO2updn_list, GModel.unnormalize_data(truth_sample[nd+1:end], "LHF"), subplot=2*i,
+            linestyle=:solid, lw=3, color=:black, label=false)
+    end
+else
+    for i in 1:N_iter
+        plot!(CO2updn_list, SSTupdn_list, subplot=2*i-1,
+            linestyle=:solid, lw=3, color=:black, label="LES", legend=:topleft)
+        plot!(CO2updn_list, LHFupdn_list, subplot=2*i,
+            linestyle=:solid, lw=3, color=:black, label=false)
+    end
+end
+savefig(save_directory * "hysteresis_loop_iterations.png")
+# plot!(ylims=[50,250], subplot=)
+# savefig(save_directory * "hysteresis_loop_iterations_ylim.png")
 ####################
 
 # plot u parameter convergence

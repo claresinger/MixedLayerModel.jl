@@ -1,4 +1,4 @@
-exp_path = "20221029_D6.2/";
+exp_path = "20221101_Cd0.8e-3_α1.08e-3_EIS10_Ex15_ECS3_SW180/";
 
 # create parameters
 using MixedLayerModel
@@ -11,7 +11,7 @@ dt, tmax = 10*24.0, 100.0;
 
 # params
 par.decoup_slope = 8;
-par.D = 6.2e-6;
+par.D = 6e-6;
 
 # adjust tunable parameters
 par.Cd = 0.8e-3;
@@ -19,7 +19,7 @@ par.α_vent = 1.08e-3;
 par.EIS0 = 10.0;
 par.ECS = 3.0;
 par.Eexport = 15.0;
-par.SW_b = 150;
+par.SW_b = 180;
 
 # baseline
 ARGS = [exp_path]; include("co2_400.jl")

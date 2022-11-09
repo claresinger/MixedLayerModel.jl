@@ -64,7 +64,7 @@ truth = Observations.Observation(yt, data_names)
 ###  Define the parameter priors
 ###
 prior_Cd = constrained_gaussian("prior_Cd", 8.5e-4, 0.5e-4, 0.0, Inf)
-prior_α = constrained_gaussian("prior_α", 1e-3, 0.2e-3, 0.0, Inf)
+prior_α = constrained_gaussian("prior_α", 1e-3, 0.1e-3, 0.0, Inf)
 prior_EIS = constrained_gaussian("prior_EIS", 9, 1, 0.0, Inf)
 prior_ECS = constrained_gaussian("prior_ECS", 3, 1, 0.0, Inf)
 prior_Eexport = constrained_gaussian("prior_Eexport", 17, 1, 0.0, Inf)
@@ -126,11 +126,11 @@ g_stored = get_g(ekiobj, return_array = false)
 ϕi = get_ϕ_mean(priors, ekiobj, 1)
 gi = GModel.run_ensembles(ϕi, 1)
 SSTi = GModel.unnormalize_data(gi[1:nd,1], "SST")
-LHFi = GModel.unnormalize_data(gi[1:nd,1], "LHF")
+LHFi = GModel.unnormalize_data(gi[nd+1:end,1], "LHF")
 ϕf = get_ϕ_mean_final(priors, ekiobj)
 gf = GModel.run_ensembles(ϕf, 1)
 SSTf = GModel.unnormalize_data(gf[1:nd,1], "SST")
-LHFf = GModel.unnormalize_data(gf[1:nd,1], "LHF")
+LHFf = GModel.unnormalize_data(gf[nd+1:end,1], "LHF")
 
 @save save_directory * "parameter_storage.jld2" u_stored
 @save save_directory * "data_storage.jld2" g_stored

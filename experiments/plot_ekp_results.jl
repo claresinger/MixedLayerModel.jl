@@ -18,9 +18,9 @@ nd = length(CO2updn_list);
 # load ekiobj data
 homedir = pwd()
 N_ens = 20 # number of ensemble members
-N_iter = 5 # number of EKI iterations
+N_iter = 10 # number of EKI iterations
 NNstring = "Nens" *string(N_ens) * "_Niter" * string(N_iter)
-save_directory = homedir * "/experiments/ekp/20221101_LES_noise5pct_newprior2_" * NNstring * "/"
+save_directory = homedir * "/experiments/ekp/20221101_LES_noise5pct_newprior_" * NNstring * "/"
 @load save_directory * "ekiobj.jld2" ekiobj
 @load save_directory * "data_storage.jld2" g_stored
 @load save_directory * "prior_posterior.jld2" SSTi LHFi SSTf LHFf

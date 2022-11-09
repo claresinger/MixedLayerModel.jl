@@ -6,10 +6,13 @@ using MixedLayerModel: Rd, Rv, L0, T0, Cp, δ, ϵ, μ
 ENV["GKSwstype"]="nul"
 Plots.scalefontsizes(1.8)
 
-exp_path = ARGS[1];
-co2u = ARGS[2];
+##############
+#plot modified results
+
+# exp_path = ARGS[1];
+# co2u = ARGS[2];
 co2u = parse.(Int64, split(replace(replace(co2u, "]"=>""), "["=>""),","))
-co2d = ARGS[3];
+# co2d = ARGS[3];
 co2d = parse.(Int64, split(replace(replace(co2d, "]"=>""), "["=>""),","))
 print(co2u)
 println(typeof(co2u))
@@ -97,9 +100,84 @@ plot!(p_lhf, co2d, lhf, color=c, linewidth=2, label="")
 plot!(p_zi, co2d, zi, color=c, linewidth=2, label="")
 plot!(p_cf, co2d, cf*100, color=c, linewidth=2, label="")
 
-# legend
-scatter!(p_dR, [-1], [-1], color="black", marker=:x, markersize=1, markerstrokewidth=0.1, label="LES")
-scatter!(p_dR, [-1], [-1], color="black", marker=:circle, markersize=1, markerstrokewidth=0, label="Bulk model")
+
+##############
+# plot orig results
+orig_co2u = parse.(Int64, split(replace(replace(orig_co2u, "]"=>""), "["=>""),","))
+orig_co2d = parse.(Int64, split(replace(replace(orig_co2d, "]"=>""), "["=>""),","))
+
+N = length(orig_co2u);
+zi, zb, ent = zeros(N), zeros(N), zeros(N);
+cf, lwp, sst, lhf = zeros(N), zeros(N), zeros(N), zeros(N);
+dR = zeros(N);
+
+for (i, co2i) in enumerate(orig_co2u)
+    file = "experiments/output/"*orig_path*"co2_upstep_"*string(co2i)*".jld2"
+    dat = load(file);
+    uf = dat["uf"];
+    par = dat["p"];
+    zii, sM, qM, ssti, cfi = uf;
+    zbi = dat["zb"];
+    zi[i], zb[i], sst[i], cf[i] = zii, zbi, ssti, cfi;
+    lhf[i], ent[i], dR[i] = dat["LHF"], dat["we"]*1e3, dat["ΔR"];
+    lwp[i] = incloud_LWP(uf, zb[i]) * 1e3;
+end
+S = (lhf./dR).*((zi.-zb)./zi);
+
+c = "crimson"
+ms = 3
+scatter!(p_dR, orig_co2u, dR, color=c, marker=:circle, markersize=ms, markerstrokewidth=0, label="")
+scatter!(p_decoup, orig_co2u, S, color=c, marker=:circle, markersize=ms, markerstrokewidth=0, label="")
+scatter!(p_sst, orig_co2u, sst, color=c, marker=:circle, markersize=ms, markerstrokewidth=0, label="")
+scatter!(p_lhf, orig_co2u, lhf, color=c, marker=:circle, markersize=ms, markerstrokewidth=0, label="")
+scatter!(p_zi, orig_co2u, zi, color=c, marker=:circle, markersize=ms, markerstrokewidth=0, label="")
+scatter!(p_cf, orig_co2u, cf*100, color=c, marker=:circle, markersize=ms, markerstrokewidth=0, label="")
+plot!(p_dR, orig_co2u, dR, color=c, linewidth=1, alpha=0.5, label="")
+plot!(p_decoup, orig_co2u, S, color=c, linewidth=1, alpha=0.5, label="")
+plot!(p_sst, orig_co2u, sst, color=c, linewidth=1, alpha=0.5, label="")
+plot!(p_lhf, orig_co2u, lhf, color=c, linewidth=1, alpha=0.5, label="")
+plot!(p_zi, orig_co2u, zi, color=c, linewidth=1, alpha=0.5, label="")
+plot!(p_cf, orig_co2u, cf*100, color=c, linewidth=1, alpha=0.5, label="")
+
+
+N = length(orig_co2d);
+zi, zb, ent = zeros(N), zeros(N), zeros(N);
+cf, lwp, sst, lhf = zeros(N), zeros(N), zeros(N), zeros(N);
+dR = zeros(N);
+
+for (i, co2i) in enumerate(orig_co2d)
+    file = "experiments/output/"*orig_path*"co2_downstep_"*string(co2i)*".jld2"
+    dat = load(file);
+    uf = dat["uf"];
+    par = dat["p"];
+    zii, sM, qM, ssti, cfi = uf;
+    zbi = dat["zb"];
+    zi[i], zb[i], sst[i], cf[i] = zii, zbi, ssti, cfi;
+    lhf[i], ent[i], dR[i] = dat["LHF"], dat["we"]*1e3, dat["ΔR"];
+    lwp[i] = incloud_LWP(uf, zb[i]) * 1e3;
+end
+S = (lhf./dR).*((zi.-zb)./zi);
+
+c = "royalblue"
+ms = 3
+scatter!(p_dR, orig_co2d, dR, color=c, marker=:circle, markersize=ms, markerstrokewidth=0, label="")
+scatter!(p_decoup, orig_co2d, S, color=c, marker=:circle, markersize=ms, markerstrokewidth=0, label="")
+scatter!(p_sst, orig_co2d, sst, color=c, marker=:circle, markersize=ms, markerstrokewidth=0, label="")
+scatter!(p_lhf, orig_co2d, lhf, color=c, marker=:circle, markersize=ms, markerstrokewidth=0, label="")
+scatter!(p_zi, orig_co2d, zi, color=c, marker=:circle, markersize=ms, markerstrokewidth=0, label="")
+scatter!(p_cf, orig_co2d, cf*100, color=c, marker=:circle, markersize=ms, markerstrokewidth=0, label="")
+plot!(p_dR, orig_co2d, dR, color=c, linewidth=1, alpha=0.5, label="")
+plot!(p_decoup, orig_co2d, S, color=c, linewidth=1, alpha=0.5, label="")
+plot!(p_sst, orig_co2d, sst, color=c, linewidth=1, alpha=0.5, label="")
+plot!(p_lhf, orig_co2d, lhf, color=c, linewidth=1, alpha=0.5, label="")
+plot!(p_zi, orig_co2d, zi, color=c, linewidth=1, alpha=0.5, label="")
+plot!(p_cf, orig_co2d, cf*100, color=c, linewidth=1, alpha=0.5, label="")
+
+##############
+
+# # legend
+# plot!(p_dR, [-1, -1], [-1, -1], color="black", alpha=0.5, label="Orig")
+# scatter!(p_dR, [-1], [-1], color="black", marker=:circle, markersize=1, markerstrokewidth=0, label="WV off")
 
 # save plot
 p = plot(p_dR,p_sst,p_zi,p_decoup,p_lhf,p_cf, layout=(2,3), 

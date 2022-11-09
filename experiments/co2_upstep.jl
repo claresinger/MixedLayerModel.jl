@@ -24,7 +24,7 @@ par.CO2 = newCO2;
 # load initial condition from file
 restarttry1 = path*"co2_upstep_"*string(Int(newCO2-100))*".jld2";
 restarttry2 = path*"co2_upstep_"*string(Int(newCO2-200))*".jld2";
-restarttry3 = path*"co2_upstep_"*string(Int(newCO2-400))*".jld2";
+restarttry3 = path*"co2_upstep_"*string(Int(newCO2-10000))*".jld2";
 if isfile(restarttry1)
     output = load(restarttry1);
 elseif isfile(restarttry2)

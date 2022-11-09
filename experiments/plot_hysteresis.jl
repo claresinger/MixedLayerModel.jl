@@ -20,23 +20,23 @@ ms = 10
 c = "crimson"
 p_dR = scatter(co2, dR, color=c, marker=:x, markersize=ms, label="", 
                 ylabel="ΔR [W/m²]",
-                xticks=([400, 800, 1200, 1600]), xlim=[100,2000], ylim=[0,100])
+                xticks=([400, 800, 1200, 1600]), xlim=[0,2000], ylim=[0,100])
 p_decoup = scatter(co2, S, color=c, marker=:x, markersize=ms, label="", 
                 xlabel="CO₂ [ppmv]", ylabel="Decoupling, \$\\mathcal{D}\$",
                 yscale=:log10, yticks=([0.1,1,10], ["0.1","1","10"]), ylim=[0.1,40],
-                xticks=([400, 800, 1200, 1600]), xlim=[100,2000])
+                xticks=([400, 800, 1200, 1600]), xlim=[0,2000])
 p_sst = scatter(co2, sst, color=c, marker=:x, markersize=ms, label="", 
                 ylabel="SST [K]",
-                xticks=([400, 800, 1200, 1600]), xlim=[100,2000], ylim=[286, 312])
+                xticks=([400, 800, 1200, 1600]), xlim=[0,2000], ylim=[286, 312])
 p_lhf = scatter(co2, lhf, color=c, marker=:x, markersize=ms, label="",
                 xlabel="CO₂ [ppmv]", ylabel="LHF [W/m²]",
-                xticks=([400, 800, 1200, 1600]), xlim=[100,2000], ylim=[50, 250])
+                xticks=([400, 800, 1200, 1600]), xlim=[0,2000], ylim=[50, 250])
 p_zi = scatter(co2, zi, color=c, marker=:x, markersize=ms, label="",
                 ylabel="zᵢ [m]",
-                xticks=([400, 800, 1200, 1600]), xlim=[100,2000], ylim=[500, 1500])
+                xticks=([400, 800, 1200, 1600]), xlim=[0,2000], ylim=[500, 1500])
 p_cf = scatter(co2, cf*100, color=c, marker=:x, markersize=ms, label="", 
                 xlabel="CO₂ [ppmv]", ylabel="CF [%]",
-                xticks=([400, 800, 1200, 1600]), xlim=[100,2000], ylim=[0,110])
+                xticks=([400, 800, 1200, 1600]), xlim=[0,2000], ylim=[0,110])
 
 plot!(p_dR, co2, dR, linewidth=2, linestyle=:dot, color=c, label="")
 plot!(p_decoup, co2, S, linewidth=2, linestyle=:dot, color=c, label="")

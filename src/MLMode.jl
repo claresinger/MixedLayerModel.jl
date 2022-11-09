@@ -16,17 +16,16 @@ struct varSST <: sst_type end
 """
 function dzidt(u, p, ent, zb, LWP)
     zi, sM, qM, SST, CF = u;
+
     w_sub = p.D * zi;
-    # w_vent = 0;
-
-    # w_vent = p.α_vent * min(calc_decoupling(u, p, zb, LWP), 1);
-    w_vent = p.α_vent * (p.CFmax - CF) / (p.CFmax - p.CFmin); # m/s
-    # w_vent = p.α_vent * ( 1 - 1 / ( 1 + exp( -10*(CF - (p.CFmax + p.CFmin)/2) ) ) ); # m/s
-
     # ρ0 = rho(zi, temp(zi, sM, qM));
     # p0 = pres(zi, temp(zi, sM, qM));
     # sub_func = (psurf - p0) * (p0 / psurf)^2 / (ρ0 * g);
     # w_sub = p.D * sub_func;
+    
+    # TODO: w_vent
+    # w_vent = 0;
+    w_vent = p.α_vent * (p.CFmax - CF) / (p.CFmax - p.CFmin); # m/s
     
     dzidt = ent - w_sub + w_vent;
     return dzidt

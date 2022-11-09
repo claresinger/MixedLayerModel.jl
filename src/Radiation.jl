@@ -45,7 +45,7 @@ function calc_surf_RAD(u, p, LWP)
     zi, sM, qM, SST, CF = u;
 
     # shortwave calculation
-    # WVtrans = exp(-10*qM); # TODO: WV abs coefficient
+    # WVtrans = exp(-10*qM);
     # αc = cloud_albedo(LWP);
     # SW_net = WVtrans * (1 - (1-CF)*α_ocean - CF*αc) * S_subtr;
     # SW_net = (1 - (1-CF)*0.4 - CF*αc) * S_subtr;

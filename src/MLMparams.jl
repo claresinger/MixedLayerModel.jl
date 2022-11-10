@@ -59,6 +59,7 @@ end
 
     # baseline CO2
     CO2::Real = 400; # (ppm)
+    τCF::Real = 5; # (days)
     
     # subsidence strength
     D::Real = 6.0e-6; # (1/s)

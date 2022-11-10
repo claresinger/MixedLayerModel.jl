@@ -29,7 +29,7 @@ export upCO2, climatology
     Cd::Real = 1e-3;
     
     # slab ocean params
-    Hw::Real = 1.0; # (m)
+    Hw::Real = 1.0; # (m), 1m ~ 50 days
     OHU::Real = 10.0; # (W/m2)
 
     # tropical column params

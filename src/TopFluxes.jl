@@ -32,18 +32,14 @@ function sjump(u, p, LWP, fttype::fixEIS)
     return sj
 end
 
-function ΔT(u, p)
-    zi, sM, qM, SST, CF = u;
-    return p.EIS0 + p.ECS*log(p.CO2 / 400) - p.Eexport*(p.CFmax - CF)
-end
-
 """
     sjump(u, p, LWP, p.fttype::co2EIS)
     defines s+(z) in free troposphere given EIS and dTdz
 """
 function sjump(u, p, LWP, fttype::co2EIS)
     zi, sM, qM, SST, CF = u;
-    Tft = SST + ΔT(u, p);
+    EIS = p.EIS0 + (p.ECS/log(2))*log(p.CO2 / 400) - p.Eexport*(p.CFmax - CF);
+    Tft = SST + EIS + p.dTdz*zi;
     sft = Cp*Tft + g*zi;
     sj = sft - sM;
     return sj

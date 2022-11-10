@@ -1,4 +1,4 @@
-exp_path = "20221102_prior/";
+exp_path = "20221109_Hw_α1.25/";
 
 # create parameters
 using MixedLayerModel
@@ -8,19 +8,16 @@ par.fttype = co2EIS();
 par.rtype = varRad();
 par.stype = fixSST();
 dt, tmax = 10*24.0, 100.0;
-# dt, tmax = 0.1, 3.0;
 
-# # params
-# par.decoup_slope = 8;
-# par.D = 6e-6;
-
+par.τCF = 2.0 # 2 days
+par.Hw = 0.2; # 10 days
+par.α_vent = 1.25e-3;
 # adjust tunable parameters
 par.Cd = 8e-4;
-par.α_vent = 1e-3;
 par.EIS0 = 8.0;
-par.ECS = 3.0;
-par.Eexport = 15.0;
-par.SW_b = 160;
+par.ECS = 1.5;
+par.Eexport = 10.0;
+par.SW_b = 150;
 
 # tuned "20221101_LES_noise5pct_newprior_Nens20_Niter10"
 # ϕ_final: [0.0008107894654652039, 0.001140080332952163, 5.0508769710181625, 4.692294040652614, 15.03709820113598, 118.76428605612544]

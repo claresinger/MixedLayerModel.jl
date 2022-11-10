@@ -25,12 +25,15 @@ par.CO2 = newCO2;
 restarttry1 = path*"co2_upstep_"*string(Int(newCO2-100))*".jld2";
 restarttry2 = path*"co2_upstep_"*string(Int(newCO2-200))*".jld2";
 restarttry3 = path*"co2_upstep_"*string(Int(newCO2-400))*".jld2";
+restarttry4 = path*"co2_upstep_"*string(Int(newCO2-800))*".jld2";
 if isfile(restarttry1)
     output = load(restarttry1);
 elseif isfile(restarttry2)
     output = load(restarttry2);
 elseif isfile(restarttry3)
     output = load(restarttry3);
+elseif isfile(restarttry4)
+    output = load(restarttry4);
 else
     output = load(path*"co2_400.jld2");
 end

@@ -1,4 +1,4 @@
-exp_path = "20221109_Hw_α1.25/";
+exp_path = "20221109_Hw_α1.22/";
 
 # create parameters
 using MixedLayerModel
@@ -11,7 +11,7 @@ dt, tmax = 10*24.0, 100.0;
 
 par.τCF = 2.0 # 2 days
 par.Hw = 0.2; # 10 days
-par.α_vent = 1.25e-3;
+par.α_vent = 1.22e-3;
 # adjust tunable parameters
 par.Cd = 8e-4;
 par.EIS0 = 8.0;

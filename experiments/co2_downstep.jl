@@ -24,19 +24,25 @@ par.CO2 = newCO2;
 # load initial condition from file
 restarttry1 = path*"co2_downstep_"*string(Int(newCO2+100))*".jld2";
 restarttry2 = path*"co2_downstep_"*string(Int(newCO2+200))*".jld2";
-restarttry3 = path*"co2_upstep_"*string(Int(newCO2))*".jld2";
+restarttry3 = path*"co2_downstep_"*string(Int(newCO2+400))*".jld2";
+restarttry4 = path*"co2_downstep_"*string(Int(newCO2+800))*".jld2";
+restarttry5 = path*"co2_upstep_"*string(Int(newCO2))*".jld2";
 if isfile(restarttry1)
     output = load(restarttry1);
 elseif isfile(restarttry2)
     output = load(restarttry2);
 elseif isfile(restarttry3)
     output = load(restarttry3);
+elseif isfile(restarttry4)
+    output = load(restarttry4);
+elseif isfile(restarttry5)
+    output = load(restarttry5);
 else
     println("no restart file")
 end
 u0 = output["uf"];
 OHU = output["OHU"];
-# println("restarting from CO2 = "*string(output["p"].CO2));
+println("restarting from CO2 = "*string(output["p"].CO2));
 
 # set OHU
 par.OHU = OHU;

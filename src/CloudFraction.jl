@@ -1,15 +1,15 @@
-export calc_S, cloud_fraction, cloud_fraction_S
+export calc_decoupling, cloud_fraction, cloud_fraction_param
 
 """
-    calc_S(u, p)
+    calc_decoupling(u, p)
 
     calculates the stability parameter, s
     also called the minimal decloupling parameter
     in Bretherton and Wyant (1997)
-    S = (LHF / ΔR) * (zc / zi)
+    De = (LHF / ΔR) * (zc / zi)
     where zc is the cloud thickness (zi-zb)
 """
-function calc_S(u, p, zb, LWP)
+function calc_decoupling(u, p, zb, LWP)
     zi, sM, qM, SST, CF = u;
     LHF = calc_LHF(u, p);
     ΔR = calc_cloudtop_RAD(u, p, LWP, p.rtype);
@@ -28,14 +28,14 @@ end
     stability parameter
 """
 function cloud_fraction(u, p, zb, LWP)
-    S = calc_S(u, p, zb, LWP);
-    CF = cloud_fraction_S(S);
+    decoup = calc_decoupling(u, p, zb, LWP);
+    CF = cloud_fraction_param(decoup, p);
     return CF
 end
 
-function cloud_fraction_S(S)
-    m = 10; # tunable parameter for the slope of the CF nonlinearity
-    S_crit = 0.5
-    CF = CFmax - (CFmax - CFmin) / (1 + 9*exp(-m*(S-S_crit)));
+function cloud_fraction_param(decoup, p)
+    m = p.decoup_slope; # tunable parameter for the slope of the CF nonlinearity
+    dcrit = 1;
+    CF = p.CFmax - (p.CFmax - p.CFmin) / (1 + (1/9)*exp(-m*(decoup-dcrit)));
     return CF
 end

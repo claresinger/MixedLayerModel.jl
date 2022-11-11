@@ -1,5 +1,3 @@
-push!(LOAD_PATH, joinpath(@__DIR__, ".."))
-
 using MixedLayerModel
 using MixedLayerModel: Cp, g
 using FileIO

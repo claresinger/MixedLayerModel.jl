@@ -21,10 +21,6 @@ psurf = 101780.0    # surface pressure (Pa = J/m^3)
 S_subtr = 471.0     # solar flux in subtropics (W/m^2)
 α_ocean = 0.1       # surface albedo of ocean water
 
-# TODO these params change between obs and LES (1 -> 0.2 vs 0.8 -> 0.1)
-CFmax = 0.8         # maximum cloud fraction
-CFmin = 0.1         # minimum cloud fraction
-
 # thermodynamic constants
 δ = (Rv-Rd)/Rd     
 ϵ = Cp*T0/L0        

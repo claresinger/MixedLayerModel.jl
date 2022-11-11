@@ -1,6 +1,6 @@
 export rad_type, varRad, fixRad
+export wvtype, wvON, wvRADOFF
 export calc_surf_RAD, calc_cloudtop_RAD
-export trop_sst
 
 ## create type for radiation
 ## one where ΔR is prescribed
@@ -9,18 +9,30 @@ abstract type rad_type end
 struct varRad <: rad_type end
 struct fixRad <: rad_type end
 
+abstract type wvtype end
+struct wvON <: wvtype end
+struct wvRADOFF <: wvtype end
+
 """
-    ΔTa(u, p, LWP)
+    ΔTa(u, p, LWP, p.wvtype::wvON)
     writes the difference between cloud-top temperature and downwelling emission
     temperature as a function of CO2 and H2O above-cloud
 """
-function ΔTa(u, p, LWP)
+function ΔTa(u, p, LWP, wvtype::wvON)
     zi, sM, qM, SST, CF = u;
     qft = qjump(u, p, LWP, p.fttype) + qM;
-    ΔT = -10.1 + 3.1*log(p.CO2) + 5.3*log(qft);
-    
-    # TODO without proper twocol FT do this:
-    # ΔT = -22.5 + 0.008*p.CO2;
+    ΔT = -10.1 + 3.1*log(p.CO2) + 5.3*log(max(qft, 1e-12));
+    return ΔT
+end
+
+"""
+    ΔTa(u, p, LWP, p.wvtype::wvRADOFF)
+    writes the difference between cloud-top temperature and downwelling emission
+    temperature as a function of CO2 
+    H2O above-cloud is FIXED by p.qft_rad
+"""
+function ΔTa(u, p, LWP, wvtype::wvRADOFF)
+    ΔT = -10.1 + 3.1*log(p.CO2) + 5.3*log(p.qft_rad);
     return ΔT
 end
 
@@ -33,16 +45,18 @@ function calc_surf_RAD(u, p, LWP)
     zi, sM, qM, SST, CF = u;
 
     # shortwave calculation
-    WVtrans = exp(-10*qM); # TODO: WV abs coefficient
-    αc = cloud_albedo(LWP);
-    SW_net = WVtrans * (1 - (1-CF)*α_ocean - CF*αc) * S_subtr;
+    # WVtrans = exp(-10*qM);
+    # αc = cloud_albedo(LWP);
+    # SW_net = WVtrans * (1 - (1-CF)*α_ocean - CF*αc) * S_subtr;
+    # SW_net = (1 - (1-CF)*0.4 - CF*αc) * S_subtr;
 
     # LW_net linear with SST with coefficient dependent on log(CO2)
     # direct greenhouse effect in subtropical clear-sky
     # a0, a1, a2, b1, b2 = [12.4, -1020, 3.1, -270, 0.86];
     # LW_net = (1-CF)*(a0*log(p.CO2/400) + a1 + a2*SST) + CF*(b1 + b2*SST);
     
-    # TODO simplify the LW and keep constant
+    # simplest radiative fluxes
+    SW_net = p.SW_a + p.SW_b*(p.CFmax - CF);
     LW_net = -30;
 
     return SW_net + LW_net
@@ -71,7 +85,7 @@ function calc_cloudtop_RAD(u, p, LWP, rtype::varRad)
     zi, sM, qM, SST, CF = u;
     Tct = temp(zi,sM,qM);
     ϵc_up = cloud_emissivity(LWP);
-    Teff = Tct + ΔTa(u, p, LWP);
+    Teff = Tct + ΔTa(u, p, LWP, p.wvtype);
     ΔR = CF * σ_SB * ϵc_up * (Tct^4 - Teff^4);
     ΔR = max(ΔR, 1)
     return ΔR
@@ -82,12 +96,15 @@ end
 
     albedo of the cloud given LWP in kg/m^2
     fit from LES experiments
-    goes between 0 and 0.8
 """
 function cloud_albedo(LWP)
-    m = 0.795;
-    Lx = 19.136*1e-3;
-    αc = m * (1 - Lx/(Lx+LWP));
+    # # albedo = f(LWP)
+    # αmax = 0.98;
+    # Lx = 36e-3;
+    # αc = αmax * (LWP)/(Lx + LWP);
+
+    # simplest cloud albedo, fixed
+    αc = 0.75
     return αc
 end
 
@@ -100,38 +117,11 @@ end
     based on Stephens 1978 part II: eq 15 and 16
 """
 function cloud_emissivity(LWP)
-    a0 = 0.15 * 1e3; # m^2/kg
-    ϵc = 1 - exp(-a0 * LWP); 
+    # # emissivity = f(LWP)
+    # a0 = 0.15 * 1e3; # m^2/kg
+    # ϵc = 1 - exp(-a0 * LWP); 
+
+    # simplest cloud emissivity, fixed
+    ϵc = 0.9
     return ϵc
-end
-
-"""
-    trop_sst(u, p, LWP)
-    tropical SST specified as a deviation from a base state p.Ts400
-    with warming from export from the subtropics (proportional to all-sky albedo)
-    and warming directly from GHG that depends on the ECS parameter
-"""
-# TODO this whole thing!
-function trop_sst(u, p, LWP)
-    zi, sM, qM, SST, CF = u;
-
-    # proportionality factor for 
-    # tropical temperature increase 
-    # relative to albedo decrease
-    a_export = -0.1;
-    CF0 = CFmax;
-    αc0 = cloud_albedo(50e-3);
-    Δαc = cloud_albedo(LWP) - αc0;
-    ΔCF = CF - CF0;
-    ΔT_export = a_export * (1-α_ocean) * S_subtr/4 * (αc0 * ΔCF + CF0 * Δαc);
-    
-    # increase in tropical temperature from
-    # direct greenhouse warming in tropics
-    # ECS = °C per CO2 doubling 
-    ΔT_greenhouse = p.ECS / log(2) * log(p.CO2 / 400);
-    
-    # println(ΔT_export, " ", ΔT_greenhouse)
-    T_trop = p.Ts400 + ΔT_export + ΔT_greenhouse;
-    # T_trop = p.Ts400;
-    return T_trop
 end

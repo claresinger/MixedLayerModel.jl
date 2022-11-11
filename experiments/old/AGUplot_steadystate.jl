@@ -22,17 +22,17 @@ ms = 10
 c = "crimson"
 p_dR = scatter(co2, dR, color=c, marker=:x, markersize=ms, label="", 
                 ylabel="ΔR [W/m\$^2\$]",
-                xticks=([400, 800, 1200, 1600]), xlim=[100,1700], ylim=[0,100])
+                xticks=([400, 800, 1200, 1600]), xlim=[100,2000], ylim=[0,100])
 p_decoup = scatter(co2, S, color=c, marker=:x, markersize=ms, label="", 
                 xlabel="CO\$_2\$ [ppmv]", ylabel="Decoupling, \$\\mathcal{D}\$",
                 yscale=:log10, yticks=([0.1,1,10], ["0.1","1","10"]), ylim=[0.1,40],
-                xticks=([400, 800, 1200, 1600]), xlim=[100,1700])
+                xticks=([400, 800, 1200, 1600]), xlim=[100,2000])
 p_cf = scatter(co2, cf*100, color=c, marker=:x, markersize=ms, label="", 
                 xlabel="CO\$_2\$ [ppmv]", ylabel="CF [%]",
-                xticks=([400, 800, 1200, 1600]), xlim=[100,1700], ylim=[0,110])
+                xticks=([400, 800, 1200, 1600]), xlim=[100,2000], ylim=[0,110])
 p_sst = scatter(co2, sst, color=c, marker=:x, markersize=ms, label="", 
                 ylabel="SST [K]",
-                xticks=([400, 800, 1200, 1600]), xlim=[100,1700], ylim=[285, 315])
+                xticks=([400, 800, 1200, 1600]), xlim=[100,2000], ylim=[286, 312])
 plot!(p_dR, co2, dR, linewidth=2, linestyle=:dot, color=c, label="")
 plot!(p_decoup, co2, S, linewidth=2, linestyle=:dot, color=c, label="")
 plot!(p_cf, co2, cf*100, linewidth=2, linestyle=:dot, color=c, label="")
@@ -60,9 +60,14 @@ plot!(p_sst, co2, sst, linewidth=2, linestyle=:dot, color=c, label="")
 
 ###################
 
-exp_path = "cfmip_modCF_surfRAD/"
-co2u = [200, 300, 400, 600, 800, 1000, 1200, 1400, 1500, 1600];
-co2d = [1600, 1500, 1400, 1200, 1000, 800, 600, 400, 300, 200];
+exp_path = ARGS[1];
+co2u = ARGS[2];
+co2u = parse.(Int64, split(replace(replace(co2u, "]"=>""), "["=>""),","))
+co2d = ARGS[3];
+co2d = parse.(Int64, split(replace(replace(co2d, "]"=>""), "["=>""),","))
+print(co2u)
+println(typeof(co2u))
+# co2d = [1800, 1600, 1400, 1200, 1000, 800, 600, 400, 300]#, 200];
 
 N = length(co2u);
 zi, zb, ent = zeros(N), zeros(N), zeros(N);

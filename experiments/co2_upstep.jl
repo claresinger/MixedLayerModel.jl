@@ -1,5 +1,3 @@
-push!(LOAD_PATH, joinpath(@__DIR__, ".."))
-
 using MixedLayerModel
 using FileIO
 using Plots
@@ -10,28 +8,32 @@ include("plot_transient_solution.jl")
 println()
 # use command line argument to set co2
 newCO2 = parse(Float64,ARGS[1]);
-# newCO2 = 1000.0;
+# newCO2 = 1400.0;
 println(newCO2);
+exp_path = ARGS[2];
+path = "experiments/output/"*exp_path;
 
-par = upCO2();
-par.etype = enBal();
-par.fttype = co2dep();
-par.rtype = varRad();
-par.stype = varSST();
+# par = upCO2();
+# par.etype = enBal();
+# par.fttype = co2EIS();
+# par.rtype = varRad();
+# par.stype = varSST();
 par.CO2 = newCO2;
-dt, tmax = 48.0, 50.0;
+# dt, tmax = 48.0, 50;
 
 # load initial condition from file
-path = "experiments/output/cfmip_modCF_surfRAD/";
 restarttry1 = path*"co2_upstep_"*string(Int(newCO2-100))*".jld2";
 restarttry2 = path*"co2_upstep_"*string(Int(newCO2-200))*".jld2";
 restarttry3 = path*"co2_upstep_"*string(Int(newCO2-400))*".jld2";
+restarttry4 = path*"co2_upstep_"*string(Int(newCO2-800))*".jld2";
 if isfile(restarttry1)
     output = load(restarttry1);
 elseif isfile(restarttry2)
     output = load(restarttry2);
 elseif isfile(restarttry3)
     output = load(restarttry3);
+elseif isfile(restarttry4)
+    output = load(restarttry4);
 else
     output = load(path*"co2_400.jld2");
 end
@@ -59,10 +61,6 @@ LWP = incloud_LWP(uf, zb);
 RH = min(qM / q_sat(0.0, temp(0.0, sM, qM)), 1.0);
 println(uf);
 println(du);
-println("cloud base: ",zb)
-println("LWP: ", LWP);
-println("tropical sst: ", trop_sst(uf, par, LWP));
-println("ft qt: ", qjump(uf, par, LWP, par.fttype) + qM);
 
 output = Dict("p" => par, "u0" => u0, "uf" => uf, "du/u" => du./uf, 
 "we" => we(uf,par,zb,LWP,par.etype), "zb" => zb, "zc" => zi-zb,

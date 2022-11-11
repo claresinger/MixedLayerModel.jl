@@ -17,7 +17,7 @@ struct fixFlux <: flux_type end
 function S_0(u, p, ftype::varFlux)
     zi, sM, qM, SST, CF = u;
     s0 = Cp * SST;
-    return p.CTh * p.V * (s0 - sM)
+    return p.Cd * p.V * (s0 - sM)
 end
 
 """
@@ -40,7 +40,7 @@ end
 function Q_0(u, p, ftype::varFlux)
     zi, sM, qM, SST, CF = u;
     qs = q_sat(0.0,SST);
-    Q0 = p.CTq * p.V * (qs - qM);
+    Q0 = p.Cd * p.V * (qs - qM);
     return Q0
 end
 

@@ -1,5 +1,3 @@
-push!(LOAD_PATH, joinpath(@__DIR__, ".."))
-
 using MixedLayerModel
 using FileIO
 
@@ -7,15 +5,15 @@ include("mlm_solve_funcs.jl")
 include("plot_transient_solution.jl")
 
 # define path to save file (which experiment are you running?)
-path = "experiments/output/cfmip_modCF_surfRAD/";
+exp_path = ARGS[1];
+path = "experiments/output/"*exp_path;
 
-# define OHU from 400 ppm simulation
-par = upCO2();
-par.etype = enBal();
-par.fttype = co2dep();
-par.rtype = varRad();
-par.stype = fixSST();
-dt, tmax = 48.0, 50.0;
+# par = upCO2();
+# par.etype = enBal();
+# par.fttype = co2EIS();
+# par.rtype = varRad();
+# par.stype = fixSST();
+# dt, tmax = 48.0, 50.0;
 
 ## solve and plot
 ENV["GKSwstype"]="nul"
@@ -34,12 +32,6 @@ LWP = incloud_LWP(uf, zb);
 RH = min(qM / q_sat(0.0, temp(0.0, sM, qM)), 1.0);
 println(uf);
 println(du);
-println("cloud base: ",zb)
-println("LWP: ", LWP);
-println("tropical sst: ", trop_sst(uf, par, LWP));
-println("ft T: ", temp_ft(trop_sst(uf, par, LWP), zi, par));
-println("cloud top T: ", temp(zi, sM, qM));
-println("ft qt: ", qjump(uf, par, LWP, par.fttype) + qM);
 
 output = Dict("p" => par, "u0" => u0, "uf" => uf, "du/u" => du./uf, 
 "we" => we(uf,par,zb,LWP,par.etype), "zb" => zb, "zc" => zi-zb,

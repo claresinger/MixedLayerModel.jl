@@ -2,10 +2,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 import xarray as xr
 
-path = "../figures/20221110_dailytransect/"
-ds = xr.open_dataset(path+"transect_output_Cd4.nc")
+path = "../figures/20221115_dailytransect_subonly_100days/"
+ds = xr.open_dataset(path+"transect_output.nc")
 
 plt.figure(figsize=(10,5))
+plt.rcParams.update({"font.size":20})
 
 mean_cf = ds.mean("time").cf * 100
 std_cf =  ds.std("time").cf * 100

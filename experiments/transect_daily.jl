@@ -7,7 +7,7 @@ using Statistics
 using StatsBase
 using Random
 
-path = "experiments/figures/20221110_dailytransect/"
+path = "experiments/figures/20221115_dailytransect_subonly_100days/"
 mkpath(path)
 
 include("mlm_solve_funcs.jl")
@@ -22,10 +22,10 @@ par.etype = enBal();
 
 par.decoup_slope = 8;
 par.α_vent = 1.22e-3;
-par.Cd = 3e-4;
+par.Cd = 5e-4;
 
 # load boundary conditions from file
-file = "experiments/data/transect_BCs_all_JJA_NEP.nc";
+file = "experiments/data/transect_BCs_all_JJA_NEP_subonly.nc";
 ds = Dataset(file, "r");
 time = ds["time"]
 
@@ -43,11 +43,16 @@ cf_monthly_mean = zeros(Nlon)
 
 for (i,loni) in enumerate(lon)
     local j = i*skipi
-    par.SST0 = ds["sst_mean"][j];
-    par.V = ds["WS_mean"][j];
-    par.D = max(ds["D500_mean"][j], 1e-6);
-    par.RHft = ds["RH500_mean"][j];
-    par.EIS0 = ds["EIS_mean"][j];
+    # par.SST0 = ds["sst_mean"][j];
+    # par.V = ds["WS_mean"][j];
+    # par.D = max(ds["D500_mean"][j], 1e-6);
+    # par.RHft = ds["RH500_mean"][j];
+    # par.EIS0 = ds["EIS_mean"][j];
+    par.SST0 = mean(ds["sst"][j,:]);
+    par.V = mean(ds["WS"][j,:]);
+    par.D = mean(ds["D500"][j,:]);
+    par.RHft = mean(ds["RH500"][j,:]);
+    par.EIS0 = mean(ds["EIS"][j,:]);
     dt, tmax = 24*5, 100; # hours, days
     u0, sol = run_mlm(par, init=1, dt=3600.0*dt, tspan=(0.0,3600.0*24.0*tmax), quiet=true);
     local uf = sol.u[end];
@@ -61,15 +66,17 @@ for (id, day) in enumerate(days_indices)
         local j = i*skipi
         par.SST0 = ds["sst"][j, day];
         par.V = ds["WS"][j, day];
-        par.D = max(ds["D500"][j, day], 1e-6);
+        D500 = ds["D500"][j, day];
         par.RHft = ds["RH500"][j, day];
         par.EIS0 = ds["EIS"][j, day];
         dt, tmax = 24*5, 100; # hours, days
         u0, sol = run_mlm(par, init=1, dt=3600.0*dt, tspan=(0.0,3600.0*24.0*tmax), quiet=true);
         local uf = sol.u[end];
+        # println(par.SST0, ", ", par.EIS0, ", ", par.V, ", ", par.D, ", ", par.RHft)
         # println(uf);
         uf_save[id, i, :] = uf;
     end
+    println(uf_save[id, :, 5])
 end
 
 # create output netcdf file

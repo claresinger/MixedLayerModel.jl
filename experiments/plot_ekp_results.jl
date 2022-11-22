@@ -17,15 +17,15 @@ nd = length(CO2updn_list);
 
 # load ekiobj data
 homedir = pwd()
-N_ens = 20 # number of ensemble members
-N_iter = 10 # number of EKI iterations
+N_ens = 5 # number of ensemble members
+N_iter = 2 # number of EKI iterations
 NNstring = "Nens" *string(N_ens) * "_Niter" * string(N_iter)
-save_directory = homedir * "/experiments/ekp/20221101_LES_noise5pct_newprior_" * NNstring * "/"
+save_directory = homedir * "/experiments/ekp/20221121_LES_noise5pct_" * NNstring * "/"
 @load save_directory * "ekiobj.jld2" ekiobj
-@load save_directory * "data_storage.jld2" g_stored
+@load save_directory * "priors.jld2" priors
 @load save_directory * "prior_posterior.jld2" SSTi LHFi SSTf LHFf
+@load save_directory * "truth.jld2" truth
 if PERFECT
-    @load save_directory * "truth.jld2" truth
     @load save_directory * "params_true.jld2" params_true
 end
 ####################
@@ -205,35 +205,41 @@ savefig(save_directory * "hysteresis_loop_iterations.png")
 ####################
 
 # plot u parameter convergence
-u_init = get_u_prior(ekiobj)
-for i in 1:N_iter
+# u_init = get_u_prior(ekiobj)
+ϕ_all = get_ϕ(priors, ekiobj)
+ϕ_all = reshape(vcat(ϕ_all...),(6,N_ens,N_iter+1));
+param_name = ["\$C_d \\times 10^4\$ [-]", "\$\\alpha_{\\mathrm{vent}} \\times 10^3\$ [m s⁻¹]", 
+    "\$a_T\$ [K]", "\$b_T\$ [K]", "\$c_T\$ [K]", "\$b_{\\mathrm{SW}}\$ [W m⁻²]"]
+scale = [10^4, 10^3, 1, 1, 1, 1]
+for i in 0:N_iter
     plot(size=(1200, 400), layout=(1,3), dpi=200, left_margin=10Plots.mm, bottom_margin = 10Plots.mm)
-    u_i = get_u(ekiobj, i)
     for pl in 1:3
         plot!(
-            u_i[pl*2-1, :], 
-            u_i[pl*2, :], 
+            ϕ_all[pl*2, :, i+1] * scale[pl*2],
+            ϕ_all[pl*2-1, :, i+1] * scale[pl*2-1],
             seriestype = :scatter, 
-            xlims = extrema(u_init[pl*2-1, :]), 
-            ylims = extrema(u_init[pl*2, :]),
+            xlims = extrema(ϕ_all[pl*2, :, :]) .* scale[pl*2],
+            ylims = extrema(ϕ_all[pl*2-1, :, :]) .* scale[pl*2-1], 
             label = false,
             subplot=pl,
+            xlabel = param_name[pl*2],
+            ylabel = param_name[pl*2-1],
+            title = pl==2 ? "EKI iteration = " * string(i) : "",
         )
         if PERFECT
             plot!(
                 [params_true[pl*2-1]],
-                xaxis = "u"*string(pl*2-1),
-                yaxis = "u"*string(pl*2),
-                seriestype = "vline",
+                xaxis = "u"*string(pl*2),
+                yaxis = "u"*string(pl*2-1),
+                seriestype = "hline",
                 linestyle = :dash,
                 linecolor = :red,
                 label = false,
-                title = pl==2 ? "EKI iteration = " * string(i) : "",
                 subplot=pl,
             )
             plot!(
                 [params_true[pl*2]], 
-                seriestype = "hline", 
+                seriestype = "vline", 
                 linestyle = :dash, 
                 linecolor = :red, 
                 label = false,
@@ -241,7 +247,29 @@ for i in 1:N_iter
             )
         end
     end
-    figpath = joinpath(save_directory, "posterior_EKP_it_$(i).png")
+    figpath = joinpath(save_directory, "parameters_EKP_it_$(i).png")
+    savefig(figpath)
+end
+####################
+
+# plot u parameter convergence
+plot(size=(1200, 400), layout=(1,3), dpi=200, left_margin=10Plots.mm, bottom_margin = 10Plots.mm)
+for (i,it) in enumerate([0, N_iter])
+    for pl in 1:3
+        plot!(
+            ϕ_all[pl*2, :, it+1] * scale[pl*2],
+            ϕ_all[pl*2-1, :, it+1] * scale[pl*2-1],
+            seriestype = :scatter, 
+            xlims = extrema(ϕ_all[pl*2, :, :]) .* [0.95,1.05] .* scale[pl*2],
+            ylims = extrema(ϕ_all[pl*2-1, :, :]) .* [0.95,1.05] .* scale[pl*2-1], 
+            label = pl == 1 ? ["Initial","Final"][i] : false,
+            color = [:black, :red][i],
+            subplot=pl,
+            xlabel = param_name[pl*2],
+            ylabel = param_name[pl*2-1],
+        )
+    end
+    figpath = joinpath(save_directory, "parameters_EKP_firstlast.png")
     savefig(figpath)
 end
 ####################

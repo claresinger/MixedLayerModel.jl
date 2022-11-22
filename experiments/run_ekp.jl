@@ -1,5 +1,5 @@
 using Distributed
-addprocs(1; exeflags = "--project=experiments/")
+addprocs(4; exeflags = "--project=experiments/")
 
 include("forward_model.jl") # calls whole set of CO2 experiments in MLM
 
@@ -46,16 +46,6 @@ for i in 1:n_samples
     yt[:, i] = gt .+ rand(MvNormal(μy, Γy))
 end
 
-# # Construct normalized observations yt and error Γy
-# gt = vcat(SSTupdn_list, LHFupdn_list);
-# n_samples = 100;
-# samples = zeros(length(gt), n_samples);
-# noise = 1e-2 .* ones(length(gt));
-# for i in 1:n_samples
-#     samples[:, i] = gt .+ rand(MvNormal(zeros(length(gt)), noise .* gt));
-# end
-# yt = vcat(GModel.normalize_data(samples[1:nd,:], "SST"), GModel.normalize_data(samples[nd+1:end,:], "LHF"));
-
 # Construct observation object
 data_names = ["SST","LHF"]
 truth = Observations.Observation(yt, data_names)
@@ -63,20 +53,21 @@ truth = Observations.Observation(yt, data_names)
 ###
 ###  Define the parameter priors
 ###
-prior_Cd = constrained_gaussian("prior_Cd", 8.5e-4, 0.5e-4, 0.0, Inf)
-prior_α = constrained_gaussian("prior_α", 1e-3, 0.1e-3, 0.0, Inf)
-prior_EIS = constrained_gaussian("prior_EIS", 9, 1, 0.0, Inf)
-prior_ECS = constrained_gaussian("prior_ECS", 3, 1, 0.0, Inf)
-prior_Eexport = constrained_gaussian("prior_Eexport", 17, 1, 0.0, Inf)
-prior_SW = constrained_gaussian("prior_SW", 120, 10, 0.0, Inf)
+prior_Cd = constrained_gaussian("prior_Cd", 8e-4, 0.5e-4, 0.0, Inf)
+prior_α = constrained_gaussian("prior_α", 1.22e-3, 0.1e-3, 0.0, Inf)
+prior_EIS = constrained_gaussian("prior_EIS", 10, 1, 0.0, Inf)
+prior_ECS = constrained_gaussian("prior_ECS", 1.5, 0.5, 0.0, Inf)
+prior_Eexport = constrained_gaussian("prior_Eexport", 10, 1, 0.0, Inf)
+prior_SW = constrained_gaussian("prior_SW", 150, 10, 0.0, Inf)
 priors = combine_distributions([prior_Cd, prior_α, prior_EIS, prior_ECS, prior_Eexport, prior_SW])
 
 ###
 ###  Calibrate: Ensemble Kalman Inversion
 ###
 
-N_ens = 20 # number of ensemble members
-N_iter = 10 # number of EKI iterations
+N_ens = 5 # number of ensemble members
+N_iter = 2 # number of EKI iterations
+println(N_ens, " ", N_iter)
 # initial parameters: N_params x N_ens
 initial_params = construct_initial_ensemble(priors, N_ens; rng_seed = rng_seed)
 ϕ_init_mean = transform_unconstrained_to_constrained(priors, mean(initial_params, dims=2));
@@ -115,12 +106,13 @@ println("ϕ_final: ", ϕ_final)
 # Output figure save directory
 homedir = pwd()
 NNstring = "Nens" *string(N_ens) * "_Niter" * string(N_iter)
-save_directory = homedir * "/experiments/ekp/20221101_LES_noise5pct_newprior_" * NNstring * "/"
+save_directory = homedir * "/experiments/ekp/20221121_LES_noise5pct_" * NNstring * "/"
 if ~isdir(save_directory)
     mkpath(save_directory)
 end
 
 u_stored = get_u(ekiobj, return_array = false)
+ϕ_stored = get_ϕ(priors, ekiobj)
 g_stored = get_g(ekiobj, return_array = false)
 
 ϕi = get_ϕ_mean(priors, ekiobj, 1)
@@ -132,8 +124,10 @@ gf = GModel.run_ensembles(ϕf, 1)
 SSTf = GModel.unnormalize_data(gf[1:nd,1], "SST")
 LHFf = GModel.unnormalize_data(gf[nd+1:end,1], "LHF")
 
-@save save_directory * "parameter_storage.jld2" u_stored
+@save save_directory * "raw_parameter_storage.jld2" u_stored
+@save save_directory * "real_parameter_storage.jld2" ϕ_stored
 @save save_directory * "data_storage.jld2" g_stored
 @save save_directory * "ekiobj.jld2" ekiobj
 @save save_directory * "prior_posterior.jld2" SSTi LHFi SSTf LHFf
 @save save_directory * "truth.jld2" truth
+@save save_directory * "priors.jld2" priors

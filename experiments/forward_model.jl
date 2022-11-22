@@ -33,7 +33,7 @@ function run_forward(params)
     par.fttype = co2EIS();
     par.rtype = varRad();
     par.stype = fixSST();
-    dt, tmax = 48.0, 50.0;
+    dt, tmax = 10.0, 100.0; # days
 
     # adjust tunable parameters
     # par.decoup_slope = params[1];
@@ -45,7 +45,7 @@ function run_forward(params)
     par.SW_b = params[6];
 
     # 400 ppm
-    u0, sol = run_mlm(par, dt=3600.0*dt, tspan=(0.0,3600.0*24.0*tmax), quiet=true);
+    u0, sol = run_mlm(par, dt=3600.0*24.0*dt, tspan=(0.0,3600.0*24.0*tmax), quiet=true);
     uf = sol.u[end];
     zb = calc_LCL(uf);
     LWP = incloud_LWP(uf, zb);

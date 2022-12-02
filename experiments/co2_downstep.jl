@@ -1,6 +1,5 @@
 using MixedLayerModel
 using FileIO
-using Plots
 
 include("mlm_solve_funcs.jl")
 include("plot_transient_solution.jl")
@@ -8,7 +7,6 @@ include("plot_transient_solution.jl")
 println()
 # use command line argument to set co2
 newCO2 = parse(Float64,ARGS[1]);
-# newCO2 = 200.0;
 println(newCO2);
 exp_path = ARGS[2];
 path = "experiments/output/"*exp_path;

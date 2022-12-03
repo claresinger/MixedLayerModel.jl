@@ -1,26 +1,22 @@
 PERFECT=false
 
 # Import modules
-using Distributed
 using EnsembleKalmanProcesses
 using Statistics
 using Plots
 using StatsPlots
 using JLD2
 
-include("forward_model.jl") # calls whole set of CO2 experiments in MLM
+include("normalize.jl")
 
-CO2updn_list = [200,300,400,800,1000,1200,1300,1400,1600,1400,1300,1200,1000,800,400,300,200];
-SSTupdn_list = [287.7,289.1,290.0,292.2,293.2,294.3,304.5,305.8,308.0,306.2,304.7,303.7,302.0,300.9,297.9,296.8,287.6];
-LHFupdn_list = [97.8,103.9,107.1,112.8,115.3,120.5,208.7,213.5,220.9,214.4,209.4,206.0,199.7,195.2,183.7,179.1,96.1];
-nd = length(CO2updn_list);
+# point to path
+N_ens = 50 # number of ensemble members
+N_iter = 5 # number of EKI iterations
+N_params = 2; # number of calibrated parameters
+NNstring = "Nens" *string(N_ens) * "_Niter" * string(N_iter)
+save_directory = "experiments/ekp/20221202_LES_10pct_jumps_constraints_2params_" * NNstring * "/"
 
 # load ekiobj data
-homedir = pwd()
-N_ens = 5 # number of ensemble members
-N_iter = 2 # number of EKI iterations
-NNstring = "Nens" *string(N_ens) * "_Niter" * string(N_iter)
-save_directory = homedir * "/experiments/ekp/20221121_LES_noise5pct_" * NNstring * "/"
 @load save_directory * "ekiobj.jld2" ekiobj
 @load save_directory * "priors.jld2" priors
 @load save_directory * "prior_posterior.jld2" SSTi LHFi SSTf LHFf
@@ -49,7 +45,7 @@ savefig(save_directory * "error_iterations.png")
 plot(size=(800,400), layout=(1,2), dpi=300, left_margin=5Plots.mm, bottom_margin = 5Plots.mm)
 
 yt = hcat(truth.samples...);
-samples = vcat(GModel.unnormalize_data(yt[1:nd,:], "SST"), GModel.unnormalize_data(yt[nd+1:end,:], "LHF"));
+samples = vcat(unnormalize_data(yt[1:nd,:], "SST"), unnormalize_data(yt[nd+1:end,:], "LHF"));
 
 plot!(CO2updn_list, mean(samples,dims=2)[1:nd], 
     yerr = std(samples,dims=2)[1:nd], markerstrokecolor=:black,
@@ -61,8 +57,8 @@ plot!(CO2updn_list, mean(samples,dims=2)[nd+1:end],
 gi = get_g(ekiobj, 1)
 σi = zeros(nd,2)
 for i in 1:nd
-    SST = GModel.unnormalize_data(gi[i,:], "SST")
-    LHF = GModel.unnormalize_data(gi[i,:], "LHF")
+    SST = unnormalize_data(gi[i,:], "SST")
+    LHF = unnormalize_data(gi[i+nd,:], "LHF")
     σi[i,1] = std(collect(skipmissing(replace(SST, NaN=>missing))))
     σi[i,2] = std(collect(skipmissing(replace(LHF, NaN=>missing))))
 end
@@ -70,8 +66,8 @@ end
 gf = get_g_final(ekiobj)
 σf = zeros(nd,2)
 for i in 1:nd
-    SST = GModel.unnormalize_data(gf[i,:], "SST")
-    LHF = GModel.unnormalize_data(gf[i,:], "LHF")
+    SST = unnormalize_data(gf[i,:], "SST")
+    LHF = unnormalize_data(gf[i+nd,:], "LHF")
     σf[i,1] = std(collect(skipmissing(replace(SST, NaN=>missing))))
     σf[i,2] = std(collect(skipmissing(replace(LHF, NaN=>missing))))
 end
@@ -95,7 +91,7 @@ plot(size=(600,400), layout=(1,1), dpi=200, palette = palette(:heat, N_iter+1))
 for i in 1:N_iter
     g_i = get_g(ekiobj, i)
     for j in 1:N_ens
-        g_ij = GModel.unnormalize_data(g_i[1:nd,j], "SST");
+        g_ij = unnormalize_data(g_i[1:nd,j], "SST");
         scatter!(
             CO2updn_list, 
             g_ij, 
@@ -110,7 +106,7 @@ for i in 1:N_iter
     end
 end
 if PERFECT
-    plot!(CO2updn_list, GModel.unnormalize_data(truth.mean[1:nd], "SST"), 
+    plot!(CO2updn_list, unnormalize_data(truth.mean[1:nd], "SST"), 
         linestyle=:solid, lw=3, color=:black, label="Truth", legend=:topleft)
 else
     plot!(CO2updn_list, SSTupdn_list, 
@@ -126,7 +122,7 @@ plot(size=(600,400), layout=(1,1), dpi=200, palette = palette(:heat, N_iter+1))
 for i in 1:N_iter
     g_i = get_g(ekiobj, i)
     for j in 1:N_ens
-        g_ij = GModel.unnormalize_data(g_i[nd+1:end,j], "LHF")
+        g_ij = unnormalize_data(g_i[nd+1:end,j], "LHF")
         scatter!(
             CO2updn_list, 
             g_ij, 
@@ -141,7 +137,7 @@ for i in 1:N_iter
     end
 end
 if PERFECT
-    plot!(CO2updn_list, GModel.unnormalize_data(truth.mean[nd+1:end], "LHF"), 
+    plot!(CO2updn_list, unnormalize_data(truth.mean[nd+1:end], "LHF"), 
         linestyle=:solid, lw=3, color=:black, label="LES", legend=:topleft)
 else
     plot!(CO2updn_list, LHFupdn_list,
@@ -157,7 +153,7 @@ plot(size=(800,200*N_iter), layout=(N_iter,2), dpi=200, left_margin=10Plots.mm)
 for i in 1:N_iter
     g_i = get_g(ekiobj, i)
     for j in 1:N_ens
-        g_ij = GModel.unnormalize_data(g_i[1:nd,j], "SST")
+        g_ij = unnormalize_data(g_i[1:nd,j], "SST")
         scatter!(
             CO2updn_list, 
             g_ij, 
@@ -170,7 +166,7 @@ for i in 1:N_iter
         )  
         plot!(CO2updn_list, g_ij, linestyle=:dot, subplot=2*i-1, label=false)
         
-        g_ij = GModel.unnormalize_data(g_i[nd+1:end,j], "LHF")
+        g_ij = unnormalize_data(g_i[nd+1:end,j], "LHF")
         scatter!(
             CO2updn_list, 
             g_ij, 
@@ -186,9 +182,9 @@ for i in 1:N_iter
 end
 if PERFECT
     for i in 1:N_iter
-        plot!(CO2updn_list, GModel.unnormalize_data(truth.mean[1:nd], "SST"), subplot=2*i-1,
+        plot!(CO2updn_list, unnormalize_data(truth.mean[1:nd], "SST"), subplot=2*i-1,
             linestyle=:solid, lw=3, color=:black, label="truth", legend=:topleft)
-        plot!(CO2updn_list, GModel.unnormalize_data(truth.mean[nd+1:end], "LHF"), subplot=2*i,
+        plot!(CO2updn_list, unnormalize_data(truth.mean[nd+1:end], "LHF"), subplot=2*i,
             linestyle=:solid, lw=3, color=:black, label=false)
     end
 else
@@ -200,20 +196,21 @@ else
     end
 end
 savefig(save_directory * "hysteresis_loop_iterations.png")
+
 # plot!(ylims=[50,250], subplot=)
 # savefig(save_directory * "hysteresis_loop_iterations_ylim.png")
 ####################
 
-# plot u parameter convergence
-# u_init = get_u_prior(ekiobj)
+# # plot u parameter convergence
+# # u_init = get_u_prior(ekiobj)
 ϕ_all = get_ϕ(priors, ekiobj)
-ϕ_all = reshape(vcat(ϕ_all...),(6,N_ens,N_iter+1));
+ϕ_all = reshape(vcat(ϕ_all...),(N_params,N_ens,N_iter+1));
 param_name = ["\$C_d \\times 10^4\$ [-]", "\$\\alpha_{\\mathrm{vent}} \\times 10^3\$ [m s⁻¹]", 
     "\$a_T\$ [K]", "\$b_T\$ [K]", "\$c_T\$ [K]", "\$b_{\\mathrm{SW}}\$ [W m⁻²]"]
 scale = [10^4, 10^3, 1, 1, 1, 1]
 for i in 0:N_iter
     plot(size=(1200, 400), layout=(1,3), dpi=200, left_margin=10Plots.mm, bottom_margin = 10Plots.mm)
-    for pl in 1:3
+    for pl in 1:1
         plot!(
             ϕ_all[pl*2, :, i+1] * scale[pl*2],
             ϕ_all[pl*2-1, :, i+1] * scale[pl*2-1],
@@ -250,12 +247,13 @@ for i in 0:N_iter
     figpath = joinpath(save_directory, "parameters_EKP_it_$(i).png")
     savefig(figpath)
 end
+
 ####################
 
 # plot u parameter convergence
 plot(size=(1200, 400), layout=(1,3), dpi=200, left_margin=10Plots.mm, bottom_margin = 10Plots.mm)
 for (i,it) in enumerate([0, N_iter])
-    for pl in 1:3
+    for pl in 1:1
         plot!(
             ϕ_all[pl*2, :, it+1] * scale[pl*2],
             ϕ_all[pl*2-1, :, it+1] * scale[pl*2-1],
@@ -269,7 +267,7 @@ for (i,it) in enumerate([0, N_iter])
             ylabel = param_name[pl*2-1],
         )
     end
-    figpath = joinpath(save_directory, "parameters_EKP_firstlast.png")
-    savefig(figpath)
+    savefig(save_directory * "parameters_EKP_firstlast.png")
 end
+
 ####################

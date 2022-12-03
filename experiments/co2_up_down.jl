@@ -7,7 +7,7 @@ par.etype = enBal();
 par.fttype = co2EIS();
 par.rtype = varRad();
 par.stype = fixSST();
-dt, tmax = 10*24.0, 50.0;
+dt, tmax = 10.0, 100.0; # days
 
 par.τCF = 2.0 # 2 days
 par.Hw = 0.2; # 10 days

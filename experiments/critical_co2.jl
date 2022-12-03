@@ -10,7 +10,7 @@ function co2_loop(par; co2try=400:100:2500)
      # 400 ppm
      par.stype = fixSST();
      par.CO2 = 400;
-     u0, sol = run_mlm(par, dt=3600.0*dt, tspan=(0.0,3600.0*24.0*tmax), quiet=true);
+     u0, sol = run_mlm(par, dt=3600.0*24.0*dt, tspan=(0.0,3600.0*24.0*tmax), quiet=true);
      uf = sol.u[end];
      zb = calc_LCL(uf);
      LWP = incloud_LWP(uf, zb);
@@ -22,7 +22,7 @@ function co2_loop(par; co2try=400:100:2500)
         par.CO2 = co2i;
         par.OHU = OHU_400;
         
-        u0, sol = run_mlm_from_init(uf, par, dt=3600.0*dt, tspan=(0.0,3600.0*24.0*tmax), quiet=true);
+        u0, sol = run_mlm_from_init(uf, par, dt=3600.0*24.0*dt, tspan=(0.0,3600.0*24.0*tmax), quiet=true);
         uf = sol.u[end];
         # println(co2i, "\t", uf[5])
         if uf[5] < 0.3
@@ -37,7 +37,7 @@ par.etype = enBal();
 par.fttype = co2EIS();
 par.rtype = varRad();
 par.stype = fixSST();
-dt, tmax = 10*24.0, 100.0;
+dt, tmax = 10.0, 100.0; # days
 
 # adjust tunable parameters
 par.Cd = 8e-4;

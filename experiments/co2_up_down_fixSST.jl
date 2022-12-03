@@ -7,7 +7,7 @@ par.etype = enBal();
 par.fttype = fixEIS(); # no tropical warming from fixEIS()
 par.rtype = varRad();
 par.stype = fixSST(); # no subtropical warming from fixSST()
-dt, tmax = 24.0*10.0, 100.0;
+dt, tmax = 24.0, 100.0; # days
 
 par.τCF = 2.0 # 2 days
 par.Hw = 0.2; # 10 days

@@ -47,7 +47,7 @@ par.OHU = OHU;
 
 # solve and plot
 ENV["GKSwstype"]="nul"
-u0, sol = run_mlm_from_init(u0, par, dt=3600.0*dt, tspan=(0.0,3600.0*24.0*tmax));
+u0, sol = run_mlm_from_init(u0, par, dt=3600.0*24.0*dt, tspan=(0.0,3600.0*24.0*tmax));
 mkpath(replace(path, "output"=>"figures"));
 filename = replace(path, "output"=>"figures")*"down"*string(Int(newCO2))*"_t.png";
 plot_sol(sol, filename);

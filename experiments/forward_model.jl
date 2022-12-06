@@ -34,6 +34,7 @@ function run_forward(params)
     # par.decoup_slope = params[1];
     par.Cd = params[1];
     par.α_vent = params[2];
+    par.SW_b = params[3];
     # par.EIS0 = params[3];
     # par.ECS = params[4];
     # par.Eexport = params[5];

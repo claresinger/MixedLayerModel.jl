@@ -1,5 +1,5 @@
 using Distributed
-addprocs(4; exeflags = "--project=experiments/")
+addprocs(6; exeflags = "--project=experiments/")
 
 include("forward_model.jl") # calls whole set of CO2 experiments in MLM
 include("normalize.jl")
@@ -53,23 +53,23 @@ truth = Observations.Observation(yt, data_names)
 ###
 ###  Define the parameter priors
 ###
-prior_Cd = ParameterDistribution(Parameterized(Normal(8e-4, 1e-4)), no_constraint(), "prior_Cd")
-prior_α = ParameterDistribution(Parameterized(Normal(1.2e-3, 0.2e-3)), no_constraint(), "prior_α")
 # prior_Cd = constrained_gaussian("prior_Cd", 8e-4, 1e-4, 0, 5e-3)
 # prior_α = constrained_gaussian("prior_α", 1.22e-3, 0.05e-3, 0, 5e-3)
-prior_EIS = constrained_gaussian("prior_EIS", 10, 1, 0.0, Inf)
-prior_ECS = constrained_gaussian("prior_ECS", 1.5, 0.5, 0.0, Inf)
-prior_Eexport = constrained_gaussian("prior_Eexport", 10, 1, 0.0, Inf)
-prior_SW = constrained_gaussian("prior_SW", 150, 10, 0.0, Inf)
+# prior_EIS = constrained_gaussian("prior_EIS", 10, 1, 0.0, Inf)
+# prior_ECS = constrained_gaussian("prior_ECS", 1.5, 0.5, 0.0, Inf)
+# prior_Eexport = constrained_gaussian("prior_Eexport", 10, 1, 0.0, Inf)
+# prior_SW = constrained_gaussian("prior_SW", 150, 10, 0.0, Inf)
 # priors = combine_distributions([prior_Cd, prior_α, prior_EIS, prior_ECS, prior_Eexport, prior_SW])
-priors = combine_distributions([prior_Cd, prior_α])
+prior_Cd = ParameterDistribution(Parameterized(Normal(8e-4, 2e-4)), no_constraint(), "prior_Cd")
+prior_α = ParameterDistribution(Parameterized(Normal(1.2e-3, 0.3e-3)), no_constraint(), "prior_α")
+prior_SW = ParameterDistribution(Parameterized(Normal(140, 20)), no_constraint(), "prior_SW")
+priors = combine_distributions([prior_Cd, prior_α, prior_SW])
 
 ###
 ###  Calibrate: Ensemble Kalman Inversion
 ###
-
-N_ens = 50 # number of ensemble members
-N_iter = 5 # number of EKI iterations
+N_ens = 60 # number of ensemble members
+N_iter = 10 # number of EKI iterations
 println(N_ens, " ", N_iter)
 # initial parameters: N_params x N_ens
 initial_params = construct_initial_ensemble(priors, N_ens; rng_seed = rng_seed)
@@ -107,7 +107,7 @@ println("ϕ_final: ", ϕ_final)
 # Output figure save directory
 homedir = pwd()
 NNstring = "Nens" *string(N_ens) * "_Niter" * string(N_iter)
-save_directory = homedir * "/experiments/ekp/20221202_LES_10pct_jumps_constraints_2params_" * NNstring * "/"
+save_directory = homedir * "/experiments/ekp/20221205_LES_10pct_jumps_constraints_3params_" * NNstring * "/"
 if ~isdir(save_directory)
     mkpath(save_directory)
 end

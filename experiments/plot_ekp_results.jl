@@ -11,10 +11,10 @@ include("normalize.jl")
 
 # point to path
 N_ens = 50 # number of ensemble members
-N_iter = 5 # number of EKI iterations
-N_params = 2; # number of calibrated parameters
+N_iter = 10 # number of EKI iterations
+N_params = 3; # number of calibrated parameters
 NNstring = "Nens" *string(N_ens) * "_Niter" * string(N_iter)
-save_directory = "experiments/ekp/20221202_LES_10pct_jumps_constraints_2params_" * NNstring * "/"
+save_directory = "experiments/ekp/20221205_LES_10pct_jumps_constraints_3params_" * NNstring * "/"
 
 # load ekiobj data
 @load save_directory * "ekiobj.jld2" ekiobj
@@ -28,12 +28,16 @@ end
 
 # plot error vs. iterations
 plot(size=(600,300), layout=(1,1), dpi=400)
+err = get_error(ekiobj);
+lims = (floor(minimum(err)/100)*100, ceil(maximum(err)/100)*100);
 plot!(
     1:N_iter,
-    get_error(ekiobj),
+    err,
     xaxis="Iterations",
     yaxis="Error",
     yscale=:log10,
+    yticks=(lims[1]:200:lims[2], Int.(lims[1]:200:lims[2])),
+    ylims=lims,
     marker=:o,
     ms=5,
     label=""
@@ -155,10 +159,10 @@ for i in 1:N_iter
     for j in 1:N_ens
         g_ij = unnormalize_data(g_i[1:nd,j], "SST")
         scatter!(
-            CO2updn_list, 
-            g_ij, 
-            marker=:o, 
-            ms=5, 
+            CO2updn_list,
+            g_ij,
+            marker=:o,
+            ms=5,
             xaxis="CO2 [ppmv]",
             yaxis="SST [K]",
             subplot=2*i-1,
@@ -168,10 +172,10 @@ for i in 1:N_iter
         
         g_ij = unnormalize_data(g_i[nd+1:end,j], "LHF")
         scatter!(
-            CO2updn_list, 
-            g_ij, 
-            marker=:o, 
-            ms=5, 
+            CO2updn_list,
+            g_ij,
+            marker=:o,
+            ms=5,
             xaxis="CO2 [ppmv]",
             yaxis="LHF [W/m2]",
             subplot=2*i,
@@ -201,10 +205,61 @@ savefig(save_directory * "hysteresis_loop_iterations.png")
 # savefig(save_directory * "hysteresis_loop_iterations_ylim.png")
 ####################
 
-# # plot u parameter convergence
-# # u_init = get_u_prior(ekiobj)
-ϕ_all = get_ϕ(priors, ekiobj)
-ϕ_all = reshape(vcat(ϕ_all...),(N_params,N_ens,N_iter+1));
+# plot SST and LHF for each iteration
+plot(size=(800,200), layout=(1,2), dpi=200, palette = palette(:heat, N_iter+1),
+    left_margin=7Plots.mm, bottom_margin=5Plots.mm)
+for i in [1,N_iter]
+    g_i = get_g(ekiobj, i)
+    for j in 1:N_ens
+        g_ij = unnormalize_data(g_i[1:nd,j], "SST")
+        scatter!(
+            CO2updn_list,
+            g_ij,
+            marker=:o,
+            ms=5,
+            color=i+1,
+            xaxis="CO2 [ppmv]",
+            yaxis="SST [K]",
+            subplot=1,
+            label=j == 1 ? "$i" : false
+        )  
+        plot!(CO2updn_list, g_ij, linestyle=:dot, color=i+1, subplot=1, label=false)
+        
+        g_ij = unnormalize_data(g_i[nd+1:end,j], "LHF")
+        scatter!(
+            CO2updn_list,
+            g_ij,
+            marker=:o,
+            ms=5,
+            color=i+1,
+            xaxis="CO2 [ppmv]",
+            yaxis="LHF [W/m2]",
+            subplot=2,
+            label=false
+        )            
+        plot!(CO2updn_list, g_ij, linestyle=:dot, color=i+1, subplot=2, label=false)
+    end
+end
+if PERFECT
+    plot!(CO2updn_list, unnormalize_data(truth.mean[1:nd], "SST"), subplot=1,
+        linestyle=:solid, lw=3, color=:black, label="truth", legend=:topleft)
+    plot!(CO2updn_list, unnormalize_data(truth.mean[nd+1:end], "LHF"), subplot=2,
+        linestyle=:solid, lw=3, color=:black, label=false)
+else
+    plot!(CO2updn_list, SSTupdn_list, subplot=1,
+        linestyle=:solid, lw=3, color=:black, label="LES", legend=:topleft)
+    plot!(CO2updn_list, LHFupdn_list, subplot=2,
+        linestyle=:solid, lw=3, color=:black, label=false)
+end
+savefig(save_directory * "hysteresis_loop_firstlast.png")
+####################
+
+# plot ϕ parameter convergence
+ϕ_list = get_ϕ(priors, ekiobj)
+ϕ_all = zeros(N_params,N_ens,N_iter+1);
+for (i,ϕi) in enumerate(ϕ_list)
+    ϕ_all[:,:,i] = ϕi;
+end
 param_name = ["\$C_d \\times 10^4\$ [-]", "\$\\alpha_{\\mathrm{vent}} \\times 10^3\$ [m s⁻¹]", 
     "\$a_T\$ [K]", "\$b_T\$ [K]", "\$c_T\$ [K]", "\$b_{\\mathrm{SW}}\$ [W m⁻²]"]
 scale = [10^4, 10^3, 1, 1, 1, 1]
@@ -250,8 +305,8 @@ end
 
 ####################
 
-# plot u parameter convergence
-plot(size=(1200, 400), layout=(1,3), dpi=200, left_margin=10Plots.mm, bottom_margin = 10Plots.mm)
+# plot ϕ parameter convergence
+plot(size=(400, 400), layout=(1,1), dpi=200, left_margin=5Plots.mm, bottom_margin = 5Plots.mm)
 for (i,it) in enumerate([0, N_iter])
     for pl in 1:1
         plot!(
@@ -268,6 +323,51 @@ for (i,it) in enumerate([0, N_iter])
         )
     end
     savefig(save_directory * "parameters_EKP_firstlast.png")
+end
+
+####################
+
+# plot ϕ parameter convergence
+param_name = ["\$C_d \\times 10^4\$ [-]", "\$\\alpha_{\\mathrm{vent}} \\times 10^3\$ [m s⁻¹]", 
+    "\$b_{\\mathrm{SW}}\$ [W m⁻²]"]
+scale = [10^4, 10^3, 1]
+plot(size=(1200, 1200), layout=(N_params,N_params), dpi=200,
+    left_margin=5Plots.mm, bottom_margin = 5Plots.mm)
+for (i,it) in enumerate([0, N_iter])
+    for par1 in 1:N_params
+        for par2 in 1:N_params
+            if par1 == par2
+                h1 = histogram!(
+                    ϕ_all[par1, :, it+1] * scale[par1], 
+                    bins = 10,
+                    label = par1*par2 == 1 ? ["Initial","Final"][i] : false,
+                    color = [:grey, :red3][i],
+                    subplot = par1 + (par2-1)*N_params,
+                    xlabel = par2 == 3 ? param_name[par1] : "",
+                    xlims = extrema(ϕ_all[par1, :, :]) .* [0.95,1.05] .* scale[par1],
+                    yaxis = false,
+                    legend = :topleft,
+                )
+            elseif par1 < par2
+                plot!(
+                    ϕ_all[par1, :, it+1] * scale[par1],
+                    ϕ_all[par2, :, it+1] * scale[par2],
+                    seriestype = :scatter,
+                    xlims = extrema(ϕ_all[par1, :, :]) .* [0.95,1.05] .* scale[par1],
+                    ylims = extrema(ϕ_all[par2, :, :]) .* [0.95,1.05] .* scale[par2], 
+                    label = par1*par2 == 1 ? ["Initial","Final"][i] : false,
+                    color = [:grey, :red3][i],
+                    markerstrokewidth = 0,
+                    subplot = par1 + (par2-1)*N_params,
+                    xlabel = par2 == 3 ? param_name[par1] : "",
+                    ylabel = par1 == 1 ? param_name[par2] : "",
+                )
+            elseif par1 > par2
+                plot!(legend=false,grid=false,yaxis=false,xaxis=false,foreground_color_subplot=:white,subplot=par1+(par2-1)*N_params)
+            end
+        end
+    end
+    savefig(save_directory * "parameters_EKP_corner.png")
 end
 
 ####################

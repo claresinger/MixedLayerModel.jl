@@ -10,8 +10,8 @@ using JLD2
 include("normalize.jl")
 
 # point to path
-N_ens = 50 # number of ensemble members
-N_iter = 10 # number of EKI iterations
+N_ens = 90 # number of ensemble members
+N_iter = 15 # number of EKI iterations
 N_params = 3; # number of calibrated parameters
 NNstring = "Nens" *string(N_ens) * "_Niter" * string(N_iter)
 save_directory = "experiments/ekp/20221205_LES_10pct_jumps_constraints_3params_" * NNstring * "/"
@@ -39,6 +39,7 @@ plot!(
     yticks=(lims[1]:200:lims[2], Int.(lims[1]:200:lims[2])),
     ylims=lims,
     marker=:o,
+    color=:black,
     ms=5,
     label=""
 )
@@ -46,17 +47,19 @@ savefig(save_directory * "error_iterations.png")
 ####################
 
 # plot prior and posterior on calibrated variables
-plot(size=(800,400), layout=(1,2), dpi=300, left_margin=5Plots.mm, bottom_margin = 5Plots.mm)
+plot(size=(800,300), layout=(1,2), dpi=300, left_margin=5Plots.mm, bottom_margin = 5Plots.mm)
 
 yt = hcat(truth.samples...);
 samples = vcat(unnormalize_data(yt[1:nd,:], "SST"), unnormalize_data(yt[nd+1:end,:], "LHF"));
 
 plot!(CO2updn_list, mean(samples,dims=2)[1:nd], 
     yerr = std(samples,dims=2)[1:nd], markerstrokecolor=:black,
-    linestyle=:solid, lw=3, color=:black, label="Truth", subplot=1)
+    linestyle=:solid, lw=2, color=:black, label= PERFECT ? "Truth" : "LES", 
+    subplot=1, title="a)", titleloc = :left, titlefont = font(10))
 plot!(CO2updn_list, mean(samples,dims=2)[nd+1:end], 
     yerr = std(samples,dims=2)[nd+1:end], markerstrokecolor=:black,
-    linestyle=:solid, lw=3, color=:black, label=false, subplot=2)
+    linestyle=:solid, lw=2, color=:black, label=false, 
+    subplot=2, title="b)", titleloc = :left, titlefont = font(10))
 
 gi = get_g(ekiobj, 1)
 σi = zeros(nd,2)
@@ -77,138 +80,137 @@ for i in 1:nd
 end
 
 plot!(CO2updn_list, SSTi, yerr=σi[:,1], subplot=1, linestyle=:solid, 
-    color=:pink, markerstrokecolor=:pink,
+    color=:grey, markerstrokecolor=:grey,
     label="Prior", xaxis="CO₂ [ppmv]", yaxis="SST [K]", legend=:topleft)
 plot!(CO2updn_list, LHFi, yerr=σi[:,2], subplot=2, linestyle=:solid, 
-    color=:pink, markerstrokecolor=:pink,
+    color=:grey, markerstrokecolor=:grey,
     label=false, xaxis="CO₂ [ppmv]", yaxis="LHF [W/m²]")
 
-plot!(CO2updn_list, SSTf, yerr=σf[:,1], subplot=1, label="Posterior",
-    linestyle=:solid, color=:green, markerstrokecolor=:green)
+plot!(CO2updn_list, SSTf, yerr=σf[:,1], subplot=1, label="Optimal",
+    linestyle=:solid, color=:red3, markerstrokecolor=:red3, lw=2)
 plot!(CO2updn_list, LHFf, yerr=σf[:,2], subplot=2, label=false,
-    linestyle=:solid, color=:green, markerstrokecolor=:green)
+    linestyle=:solid, color=:red3, markerstrokecolor=:red3, lw=2)
 savefig(save_directory * "prior_posterior.png")
 ####################
 
-# plot SST
-plot(size=(600,400), layout=(1,1), dpi=200, palette = palette(:heat, N_iter+1))
-for i in 1:N_iter
-    g_i = get_g(ekiobj, i)
-    for j in 1:N_ens
-        g_ij = unnormalize_data(g_i[1:nd,j], "SST");
-        scatter!(
-            CO2updn_list, 
-            g_ij, 
-            marker=:o, 
-            ms=5, 
-            xaxis="CO2 [ppmv]",
-            yaxis="SST [K]",
-            color=i+1, 
-            label= j==1 ? "Iter. "*string(i) : false,
-        )            
-        plot!(CO2updn_list, g_ij, linestyle=:dot, color=i+1, label=false)
-    end
-end
-if PERFECT
-    plot!(CO2updn_list, unnormalize_data(truth.mean[1:nd], "SST"), 
-        linestyle=:solid, lw=3, color=:black, label="Truth", legend=:topleft)
-else
-    plot!(CO2updn_list, SSTupdn_list, 
-        linestyle=:solid, lw=3, color=:black, label="LES", legend=:topleft)
-end
-savefig(save_directory * "SST_hysteresis_loop.png")
-plot!(ylims=[280,320])
-savefig(save_directory * "SST_hysteresis_loop_ylim.png")
-####################
+# # plot SST
+# plot(size=(600,400), layout=(1,1), dpi=200, palette = palette(:heat, N_iter+1))
+# for i in 1:N_iter
+#     g_i = get_g(ekiobj, i)
+#     for j in 1:N_ens
+#         g_ij = unnormalize_data(g_i[1:nd,j], "SST");
+#         scatter!(
+#             CO2updn_list, 
+#             g_ij, 
+#             marker=:o, 
+#             ms=5, 
+#             xaxis="CO2 [ppmv]",
+#             yaxis="SST [K]",
+#             color=i+1, 
+#             label= j==1 ? "Iter. "*string(i) : false,
+#         )            
+#         plot!(CO2updn_list, g_ij, linestyle=:dot, color=i+1, label=false)
+#     end
+# end
+# if PERFECT
+#     plot!(CO2updn_list, unnormalize_data(truth.mean[1:nd], "SST"), 
+#         linestyle=:solid, lw=3, color=:black, label="Truth", legend=:topleft)
+# else
+#     plot!(CO2updn_list, SSTupdn_list, 
+#         linestyle=:solid, lw=3, color=:black, label="LES", legend=:topleft)
+# end
+# savefig(save_directory * "SST_hysteresis_loop.png")
+# plot!(ylims=[280,320])
+# savefig(save_directory * "SST_hysteresis_loop_ylim.png")
+# ####################
 
-# plot LHF
-plot(size=(600,400), layout=(1,1), dpi=200, palette = palette(:heat, N_iter+1))
-for i in 1:N_iter
-    g_i = get_g(ekiobj, i)
-    for j in 1:N_ens
-        g_ij = unnormalize_data(g_i[nd+1:end,j], "LHF")
-        scatter!(
-            CO2updn_list, 
-            g_ij, 
-            marker=:o, 
-            ms=5, 
-            xaxis="CO2 [ppmv]",
-            yaxis="LHF [W/m2]",
-            color=i+1, 
-            label= j==1 ? "Iter. "*string(i) : false,
-        )            
-        plot!(CO2updn_list, g_ij, linestyle=:dot, color=i+1, label=false)
-    end
-end
-if PERFECT
-    plot!(CO2updn_list, unnormalize_data(truth.mean[nd+1:end], "LHF"), 
-        linestyle=:solid, lw=3, color=:black, label="LES", legend=:topleft)
-else
-    plot!(CO2updn_list, LHFupdn_list,
-        linestyle=:solid, lw=3, color=:black, label="LES", legend=:topleft)
-end
-savefig(save_directory * "LHF_hysteresis_loop.png")
-plot!(ylims=[50,250])
-savefig(save_directory * "LHF_hysteresis_loop_ylim.png")
-####################
+# # plot LHF
+# plot(size=(600,400), layout=(1,1), dpi=200, palette = palette(:heat, N_iter+1))
+# for i in 1:N_iter
+#     g_i = get_g(ekiobj, i)
+#     for j in 1:N_ens
+#         g_ij = unnormalize_data(g_i[nd+1:end,j], "LHF")
+#         scatter!(
+#             CO2updn_list, 
+#             g_ij, 
+#             marker=:o, 
+#             ms=5, 
+#             xaxis="CO2 [ppmv]",
+#             yaxis="LHF [W/m2]",
+#             color=i+1, 
+#             label= j==1 ? "Iter. "*string(i) : false,
+#         )            
+#         plot!(CO2updn_list, g_ij, linestyle=:dot, color=i+1, label=false)
+#     end
+# end
+# if PERFECT
+#     plot!(CO2updn_list, unnormalize_data(truth.mean[nd+1:end], "LHF"), 
+#         linestyle=:solid, lw=3, color=:black, label="LES", legend=:topleft)
+# else
+#     plot!(CO2updn_list, LHFupdn_list,
+#         linestyle=:solid, lw=3, color=:black, label="LES", legend=:topleft)
+# end
+# savefig(save_directory * "LHF_hysteresis_loop.png")
+# plot!(ylims=[50,250])
+# savefig(save_directory * "LHF_hysteresis_loop_ylim.png")
+# ####################
 
-# plot SST and LHF for each iteration
-plot(size=(800,200*N_iter), layout=(N_iter,2), dpi=200, left_margin=10Plots.mm)
-for i in 1:N_iter
-    g_i = get_g(ekiobj, i)
-    for j in 1:N_ens
-        g_ij = unnormalize_data(g_i[1:nd,j], "SST")
-        scatter!(
-            CO2updn_list,
-            g_ij,
-            marker=:o,
-            ms=5,
-            xaxis="CO2 [ppmv]",
-            yaxis="SST [K]",
-            subplot=2*i-1,
-            label=false
-        )  
-        plot!(CO2updn_list, g_ij, linestyle=:dot, subplot=2*i-1, label=false)
+# # plot SST and LHF for each iteration
+# plot(size=(800,200*N_iter), layout=(N_iter,2), dpi=200, left_margin=10Plots.mm)
+# for i in 1:N_iter
+#     g_i = get_g(ekiobj, i)
+#     for j in 1:N_ens
+#         g_ij = unnormalize_data(g_i[1:nd,j], "SST")
+#         scatter!(
+#             CO2updn_list,
+#             g_ij,
+#             marker=:o,
+#             ms=5,
+#             xaxis="CO2 [ppmv]",
+#             yaxis="SST [K]",
+#             subplot=2*i-1,
+#             label=false
+#         )  
+#         plot!(CO2updn_list, g_ij, linestyle=:dot, subplot=2*i-1, label=false)
         
-        g_ij = unnormalize_data(g_i[nd+1:end,j], "LHF")
-        scatter!(
-            CO2updn_list,
-            g_ij,
-            marker=:o,
-            ms=5,
-            xaxis="CO2 [ppmv]",
-            yaxis="LHF [W/m2]",
-            subplot=2*i,
-            label=false
-        )            
-        plot!(CO2updn_list, g_ij, linestyle=:dot, subplot=2*i, label=false)
-    end
-end
-if PERFECT
-    for i in 1:N_iter
-        plot!(CO2updn_list, unnormalize_data(truth.mean[1:nd], "SST"), subplot=2*i-1,
-            linestyle=:solid, lw=3, color=:black, label="truth", legend=:topleft)
-        plot!(CO2updn_list, unnormalize_data(truth.mean[nd+1:end], "LHF"), subplot=2*i,
-            linestyle=:solid, lw=3, color=:black, label=false)
-    end
-else
-    for i in 1:N_iter
-        plot!(CO2updn_list, SSTupdn_list, subplot=2*i-1,
-            linestyle=:solid, lw=3, color=:black, label="LES", legend=:topleft)
-        plot!(CO2updn_list, LHFupdn_list, subplot=2*i,
-            linestyle=:solid, lw=3, color=:black, label=false)
-    end
-end
-savefig(save_directory * "hysteresis_loop_iterations.png")
+#         g_ij = unnormalize_data(g_i[nd+1:end,j], "LHF")
+#         scatter!(
+#             CO2updn_list,
+#             g_ij,
+#             marker=:o,
+#             ms=5,
+#             xaxis="CO2 [ppmv]",
+#             yaxis="LHF [W/m2]",
+#             subplot=2*i,
+#             label=false
+#         )            
+#         plot!(CO2updn_list, g_ij, linestyle=:dot, subplot=2*i, label=false)
+#     end
+# end
+# if PERFECT
+#     for i in 1:N_iter
+#         plot!(CO2updn_list, unnormalize_data(truth.mean[1:nd], "SST"), subplot=2*i-1,
+#             linestyle=:solid, lw=3, color=:black, label="truth", legend=:topleft)
+#         plot!(CO2updn_list, unnormalize_data(truth.mean[nd+1:end], "LHF"), subplot=2*i,
+#             linestyle=:solid, lw=3, color=:black, label=false)
+#     end
+# else
+#     for i in 1:N_iter
+#         plot!(CO2updn_list, SSTupdn_list, subplot=2*i-1,
+#             linestyle=:solid, lw=3, color=:black, label="LES", legend=:topleft)
+#         plot!(CO2updn_list, LHFupdn_list, subplot=2*i,
+#             linestyle=:solid, lw=3, color=:black, label=false)
+#     end
+# end
+# savefig(save_directory * "hysteresis_loop_iterations.png")
 
-# plot!(ylims=[50,250], subplot=)
-# savefig(save_directory * "hysteresis_loop_iterations_ylim.png")
-####################
+# # plot!(ylims=[50,250], subplot=)
+# # savefig(save_directory * "hysteresis_loop_iterations_ylim.png")
+# ####################
 
 # plot SST and LHF for each iteration
-plot(size=(800,200), layout=(1,2), dpi=200, palette = palette(:heat, N_iter+1),
-    left_margin=7Plots.mm, bottom_margin=5Plots.mm)
-for i in [1,N_iter]
+plot(size=(800,300), layout=(1,2), dpi=200, left_margin=7Plots.mm, bottom_margin=5Plots.mm)
+for (ind,i) in enumerate([1,N_iter])
     g_i = get_g(ekiobj, i)
     for j in 1:N_ens
         g_ij = unnormalize_data(g_i[1:nd,j], "SST")
@@ -217,13 +219,13 @@ for i in [1,N_iter]
             g_ij,
             marker=:o,
             ms=5,
-            color=i+1,
+            color=[:grey, :red3][ind],
             xaxis="CO2 [ppmv]",
             yaxis="SST [K]",
             subplot=1,
-            label=j == 1 ? "$i" : false
+            label=j == 1 ? ["Prior", "Posterior"][ind] : false
         )  
-        plot!(CO2updn_list, g_ij, linestyle=:dot, color=i+1, subplot=1, label=false)
+        plot!(CO2updn_list, g_ij, linestyle=:dot, color=[:grey, :red3][ind], subplot=1, label=false)
         
         g_ij = unnormalize_data(g_i[nd+1:end,j], "LHF")
         scatter!(
@@ -231,25 +233,25 @@ for i in [1,N_iter]
             g_ij,
             marker=:o,
             ms=5,
-            color=i+1,
+            color=[:grey, :red3][ind],
             xaxis="CO2 [ppmv]",
             yaxis="LHF [W/m2]",
             subplot=2,
             label=false
         )            
-        plot!(CO2updn_list, g_ij, linestyle=:dot, color=i+1, subplot=2, label=false)
+        plot!(CO2updn_list, g_ij, linestyle=:dot, color=[:grey, :red3][ind], subplot=2, label=false)
     end
 end
 if PERFECT
     plot!(CO2updn_list, unnormalize_data(truth.mean[1:nd], "SST"), subplot=1,
-        linestyle=:solid, lw=3, color=:black, label="truth", legend=:topleft)
+        linestyle=:solid, lw=2, color=:black, label="truth", legend=:topleft)
     plot!(CO2updn_list, unnormalize_data(truth.mean[nd+1:end], "LHF"), subplot=2,
-        linestyle=:solid, lw=3, color=:black, label=false)
+        linestyle=:solid, lw=2, color=:black, label=false)
 else
     plot!(CO2updn_list, SSTupdn_list, subplot=1,
-        linestyle=:solid, lw=3, color=:black, label="LES", legend=:topleft)
+        linestyle=:solid, lw=2, color=:black, label="LES", legend=:topleft)
     plot!(CO2updn_list, LHFupdn_list, subplot=2,
-        linestyle=:solid, lw=3, color=:black, label=false)
+        linestyle=:solid, lw=2, color=:black, label=false)
 end
 savefig(save_directory * "hysteresis_loop_firstlast.png")
 ####################
@@ -327,11 +329,13 @@ end
 
 ####################
 
+println(get_ϕ_mean_final(priors, ekiobj))
+
 # plot ϕ parameter convergence
 param_name = ["\$C_d \\times 10^4\$ [-]", "\$\\alpha_{\\mathrm{vent}} \\times 10^3\$ [m s⁻¹]", 
     "\$b_{\\mathrm{SW}}\$ [W m⁻²]"]
 scale = [10^4, 10^3, 1]
-plot(size=(1200, 1200), layout=(N_params,N_params), dpi=200,
+plot(size=(900, 900), layout=(N_params,N_params), dpi=200,
     left_margin=5Plots.mm, bottom_margin = 5Plots.mm)
 for (i,it) in enumerate([0, N_iter])
     for par1 in 1:N_params
@@ -341,6 +345,7 @@ for (i,it) in enumerate([0, N_iter])
                     ϕ_all[par1, :, it+1] * scale[par1], 
                     bins = 10,
                     label = par1*par2 == 1 ? ["Initial","Final"][i] : false,
+                    linecolor = [:grey, :red3][i],
                     color = [:grey, :red3][i],
                     subplot = par1 + (par2-1)*N_params,
                     xlabel = par2 == 3 ? param_name[par1] : "",

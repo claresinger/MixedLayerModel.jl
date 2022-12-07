@@ -1,5 +1,5 @@
 using Distributed
-addprocs(6; exeflags = "--project=experiments/")
+addprocs(8; exeflags = "--project=experiments/")
 
 include("forward_model.jl") # calls whole set of CO2 experiments in MLM
 include("normalize.jl")
@@ -62,14 +62,14 @@ truth = Observations.Observation(yt, data_names)
 # priors = combine_distributions([prior_Cd, prior_α, prior_EIS, prior_ECS, prior_Eexport, prior_SW])
 prior_Cd = ParameterDistribution(Parameterized(Normal(8e-4, 2e-4)), no_constraint(), "prior_Cd")
 prior_α = ParameterDistribution(Parameterized(Normal(1.2e-3, 0.3e-3)), no_constraint(), "prior_α")
-prior_SW = ParameterDistribution(Parameterized(Normal(140, 20)), no_constraint(), "prior_SW")
+prior_SW = ParameterDistribution(Parameterized(Normal(150, 40)), no_constraint(), "prior_SW")
 priors = combine_distributions([prior_Cd, prior_α, prior_SW])
 
 ###
 ###  Calibrate: Ensemble Kalman Inversion
 ###
-N_ens = 60 # number of ensemble members
-N_iter = 10 # number of EKI iterations
+N_ens = 90 # number of ensemble members
+N_iter = 15 # number of EKI iterations
 println(N_ens, " ", N_iter)
 # initial parameters: N_params x N_ens
 initial_params = construct_initial_ensemble(priors, N_ens; rng_seed = rng_seed)

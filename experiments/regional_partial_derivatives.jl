@@ -37,8 +37,8 @@ par.α_vent = 1.22e-3;
 par.Cd = 5e-4;
 
 #####
-skip1 = 20
-skip2 = 20
+skip1 = 10
+skip2 = 10
 lon = ds["lon"][1:skip1:end]
 lat = ds["lat"][1:skip2:end]
 N, M = length(lon), length(lat)
@@ -68,39 +68,41 @@ for (i1,loni) in enumerate(lon)
             u0 = sol.u[end];
             CF0[i1,i2] = u0[5];
 
-            # loop for all vars and do + and - perturbations
-            for (k,var) in enumerate(vars)
-                # decrease
-                if var == "CO2"
-                    meanminus = 400 - 50;
-                else
-                    meanminus = ds[var*"_mean"][j1,j2] - ds[var*"_std"][j1,j2] / 2;
-                end
-                par.SST0 = (var == "sst") ? meanminus : ds["sst_mean"][j1,j2] # (K)
-                par.V = (var == "WS") ? meanminus : ds["WS_mean"][j1,j2] # m/s
-                par.D = (var == "D500") ? meanminus : ds["D500_mean"][j1,j2] # (1/s)
-                par.RHft = (var == "RH500") ? meanminus : ds["RH500_mean"][j1,j2] # (-)
-                par.EIS0 = (var == "EIS") ? meanminus : ds["EIS_mean"][j1,j2] # (K)
-                par.CO2 = (var == "CO2") ? meanminus : 400 # (ppm)
-                lwpm, swcrem = allsky_lwp(u0, par);
-                
-                # increase
-                if var == "CO2"
-                    meanplus = 400 + 50;
-                else
-                    meanplus = ds[var*"_mean"][j1,j2] + ds[var*"_std"][j1,j2] / 2;
-                end
-                par.SST0 = (var == "sst") ? meanplus : ds["sst_mean"][j1,j2] # (K)
-                par.V = (var == "WS") ? meanplus : ds["WS_mean"][j1,j2] # m/s
-                par.D = (var == "D500") ? meanplus : ds["D500_mean"][j1,j2] # (1/s)
-                par.RHft = (var == "RH500") ? meanplus : ds["RH500_mean"][j1,j2] # (-)
-                par.EIS0 = (var == "EIS") ? meanplus : ds["EIS_mean"][j1,j2] # (K)
-                par.CO2 = (var == "CO2") ? meanplus : 400 # (ppm)
-                lwpp, swcrep = allsky_lwp(u0, par);
+            if CF0[i1,i2] > 0.5
+                # loop for all vars and do + and - perturbations
+                for (k,var) in enumerate(vars)
+                    # decrease
+                    if var == "CO2"
+                        meanminus = 400 - 50;
+                    else
+                        meanminus = ds[var*"_mean"][j1,j2] - ds[var*"_std"][j1,j2] / 2;
+                    end
+                    par.SST0 = (var == "sst") ? meanminus : ds["sst_mean"][j1,j2] # (K)
+                    par.V = (var == "WS") ? meanminus : ds["WS_mean"][j1,j2] # m/s
+                    par.D = (var == "D500") ? meanminus : ds["D500_mean"][j1,j2] # (1/s)
+                    par.RHft = (var == "RH500") ? meanminus : ds["RH500_mean"][j1,j2] # (-)
+                    par.EIS0 = (var == "EIS") ? meanminus : ds["EIS_mean"][j1,j2] # (K)
+                    par.CO2 = (var == "CO2") ? meanminus : 400 # (ppm)
+                    lwpm, swcrem = allsky_lwp(u0, par);
+                    
+                    # increase
+                    if var == "CO2"
+                        meanplus = 400 + 50;
+                    else
+                        meanplus = ds[var*"_mean"][j1,j2] + ds[var*"_std"][j1,j2] / 2;
+                    end
+                    par.SST0 = (var == "sst") ? meanplus : ds["sst_mean"][j1,j2] # (K)
+                    par.V = (var == "WS") ? meanplus : ds["WS_mean"][j1,j2] # m/s
+                    par.D = (var == "D500") ? meanplus : ds["D500_mean"][j1,j2] # (1/s)
+                    par.RHft = (var == "RH500") ? meanplus : ds["RH500_mean"][j1,j2] # (-)
+                    par.EIS0 = (var == "EIS") ? meanplus : ds["EIS_mean"][j1,j2] # (K)
+                    par.CO2 = (var == "CO2") ? meanplus : 400 # (ppm)
+                    lwpp, swcrep = allsky_lwp(u0, par);
 
-                # save
-                dLWPdX[i1,i2,k] = lwpp - lwpm;
-                dCREdX[i1,i2,k] = swcrep - swcrem;
+                    # save
+                    dLWPdX[i1,i2,k] = lwpp - lwpm;
+                    dCREdX[i1,i2,k] = swcrep - swcrem;
+                end
             end
         end
     end

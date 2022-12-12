@@ -86,11 +86,7 @@ cf, lwp, sst, lhf = zeros(N), zeros(N), zeros(N), zeros(N);
 dR = zeros(N);
 
 for (i, co2i) in enumerate(co2u)
-    if co2i == 400
-        file = "experiments/output/"*exp_path*"co2_400.jld2"
-    else
-        file = "experiments/output/"*exp_path*"co2_upstep_"*string(co2i)*".jld2"
-    end
+    file = "experiments/output/"*exp_path*"co2_upstep_"*string(co2i)*".jld2"
     dat = load(file);
     uf = dat["uf"];
     par = dat["p"];

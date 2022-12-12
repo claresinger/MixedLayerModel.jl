@@ -5,7 +5,7 @@ using Plots
 using Statistics
 include("mlm_solve_funcs.jl")
 
-path = "experiments/figures/20221118_perturb_from_mean/";
+path = "experiments/figures/20221211_perturb_from_mean/";
 mkpath(path);
 
 function allsky_lwp(u0, par)
@@ -33,12 +33,12 @@ par.fttype = fixEIS();
 par.etype = enBal();
 
 par.decoup_slope = 8;
-par.α_vent = 1.22e-3;
-par.Cd = 5e-4;
+par.α_vent = 1.69e-3;
+par.Cd = 6e-4; #7.9e-4;
 
 #####
-skip1 = 10
-skip2 = 10
+skip1 = 5
+skip2 = 5
 lon = ds["lon"][1:skip1:end]
 lat = ds["lat"][1:skip2:end]
 N, M = length(lon), length(lat)

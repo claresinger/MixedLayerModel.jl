@@ -27,7 +27,7 @@ def map_plot(ax, data, var):
     ax.set_ylim([15, 40])
     return h,ax,gl
 
-path = "experiments/figures/20221118_perturb_from_mean/"
+path = "experiments/figures/20221211_perturb_from_mean/"
 ds = xr.open_dataset(path+"partial_derivatives.nc")
 print(ds.dCREdX.min("lon").min("lat"))
 print(ds.dCREdX.mean("lon").min("lat"))
@@ -54,7 +54,7 @@ for i, var in enumerate(keys):
         gl.left_labels = False
     if i == 0:
         # cb = plt.colorbar(h,cax=cax,label="$\\Delta$SWCRE [W m$^{-2}$]", orientation="horizontal")
-        cb = plt.colorbar(h,cax=cax,label="$\\Delta$ allsky-LWP [g m$^{-2}$]", orientation="horizontal")
+        cb = plt.colorbar(h,cax=cax,label="$\\Delta$ All-sky LWP [g m$^{-2}$]", orientation="horizontal")
 plt.savefig(path+"box_linear_perturb_JJA_NEP.png", dpi=200, bbox_inches="tight", facecolor="w")
 
 ## cloud fraction plot

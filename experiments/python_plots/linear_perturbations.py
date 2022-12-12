@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import xarray as xr
 
-path = "../figures/20221115_linear_perturb/"
+path = "experiments/figures/20221211_linear_perturb/"
 ds = xr.open_dataset(path+"linear_perturbs.nc")
 
 Xname_arr = ["SST", "V", "D", "RH", "EIS", "CO2"]
@@ -23,7 +23,7 @@ for (i,var) in enumerate(Xname_arr):
             label=case,
         )
         ax.set_ylim([0,100])
-        ax.set_title(letter[i]+") "+Xlabel_arr[i], fontweight="bold", loc="left")
+        ax.set_title(letter[i]+") "+Xlabel_arr[i], loc="left")
         # ax.set_title(letter[i]+") ", fontweight="bold", loc="left")
         # ax.set_xlabel(Xlabel_arr[i])
 
@@ -48,9 +48,9 @@ for (i,var) in enumerate(Xname_arr):
         else:
             ax.set_yticks([])
 
-fig.supylabel("Cloud fraction [%]", fontsize=15)
+fig.supylabel("Cloud fraction [%]", fontsize=12)
 fig.text(0.88, 0.5, "In-cloud liquid water path [g m$^2$]", va="center", rotation="vertical", 
-    fontsize=15, color="b")
+    fontsize=12, color="b")
 plt.savefig(path+"linear_perturb.png",dpi=200,bbox_inches="tight")
 
 

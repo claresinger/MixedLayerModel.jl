@@ -5,36 +5,8 @@ using NCDatasets
 
 include("mlm_solve_funcs.jl")
 
-path = "experiments/figures/20221115_linear_perturb/";
+path = "experiments/figures/20221211_linear_perturb/";
 mkpath(path);
-
-# # stratocumulus
-# regime = "Sc"
-# init = 1
-# SST0 = 290;
-# D0 = 6e-6;
-# V0 = 10.0;
-# RHft0 = 0.2;
-# EIS0 = 12.0;
-# CO20 = 400.0;
-# # ylimCF = (70,80)
-# # ylimLWP = (75,175)
-# ylimCF = (0,90)
-# ylimLWP = (0,200)
-
-# # cumulus
-# regime = "Cu"
-# init = 0
-# SST0 = 295;
-# D0 = 2e-6;
-# V0 = 10.0;
-# RHft0 = 0.2;
-# EIS0 = 8.0;
-# CO20 = 400.0;
-# # ylimCF = (5,20)
-# # ylimLWP = (50,150)
-# ylimCF = (0,90)
-# ylimLWP = (0,200)
 
 N = 11
 _p2 = collect(range(98,102,N)) ./ 100;
@@ -45,9 +17,11 @@ Xname_arr = ["SST", "V", "D", "RH", "EIS", "CO2"];
 Xlabel_arr = ["SST [K]", "V [m/s]", "D [10⁻⁶ s⁻¹]", "RH₊ [%]", "EIS [K]", "CO₂ [ppm]"];
 perturb = [_p2, _p10, _p10, _p20, _p20, _p50];
 Nvar = length(Xname_arr);
+print = false;
 
 # perturb = [[1],[1],[1],[1],[1],[1]];
 # Nvar = 1;
+# print = true;
 
 X_arr = zeros(length(Xname_arr), N, 2);
 CF_arr = zeros(length(Xname_arr), N, 2);
@@ -59,17 +33,17 @@ for (k,regime) in enumerate(["Sc","Cu"])
         init = 1
         SST0 = 290;
         D0 = 5e-6;
-        V0 = 10.0;
-        RHft0 = 0.2;
+        V0 = 8.0;
+        RHft0 = 0.25;
         EIS0 = 12.0;
         CO20 = 400.0;
     end
     if regime == "Cu"
         init = 0
         SST0 = 295;
-        D0 = 4e-6;
-        V0 = 10.0;
-        RHft0 = 0.2;
+        D0 = 5e-6;
+        V0 = 8.0;
+        RHft0 = 0.25;
         EIS0 = 6.0;
         CO20 = 400.0;
     end
@@ -89,8 +63,8 @@ for (k,regime) in enumerate(["Sc","Cu"])
         
         # adjust tunable parameters
         par.decoup_slope = 8;
-        par.α_vent = 1.22e-3;
-        par.Cd = 5e-4;
+        par.α_vent = 1.69e-3;
+        par.Cd = 6e-4; #7.9e-4;
 
         for (i,Xi) in enumerate(X)            
             par.SST0 = (j == 1) ? Xi : SST0 # (K)
@@ -105,9 +79,11 @@ for (k,regime) in enumerate(["Sc","Cu"])
             tmax = 3600.0*24.0*100.0;
             u0, sol = run_mlm(par, init=init, dt=dt, tspan=(0.0,tmax), quiet=true);
             uf = sol.u[end];
-            # println(uf)
-            # println(calc_LCL(uf))
-            # println(incloud_LWP(uf, calc_LCL(uf)) * 1e3)
+            if print
+                println(uf)
+                println(calc_LCL(uf))
+                println(incloud_LWP(uf, calc_LCL(uf)) * 1e3)
+            end
 
             # save
             X_arr[j,i,k] = Xi;

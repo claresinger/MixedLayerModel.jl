@@ -9,10 +9,10 @@ Plots.scalefontsizes(1.8)
 ##############
 #plot modified results
 
-# exp_path = ARGS[1];
-# co2u = ARGS[2];
+exp_path = ARGS[1];
+co2u = ARGS[2];
 co2u = parse.(Int64, split(replace(replace(co2u, "]"=>""), "["=>""),","))
-# co2d = ARGS[3];
+co2d = ARGS[3];
 co2d = parse.(Int64, split(replace(replace(co2d, "]"=>""), "["=>""),","))
 print(co2u)
 println(typeof(co2u))
@@ -23,11 +23,7 @@ cf, lwp, sst, lhf = zeros(N), zeros(N), zeros(N), zeros(N);
 dR = zeros(N);
 
 for (i, co2i) in enumerate(co2u)
-    if co2i == 400
-        file = "experiments/output/"*exp_path*"co2_400.jld2"
-    else
-        file = "experiments/output/"*exp_path*"co2_upstep_"*string(co2i)*".jld2"
-    end
+    file = "experiments/output/"*exp_path*"co2_upstep_"*string(co2i)*".jld2"
     dat = load(file);
     uf = dat["uf"];
     par = dat["p"];
@@ -193,7 +189,7 @@ p = plot(p_dR,p_sst,p_lhf,p_cf, layout=(2,2),
     legend=:topright, legendfontsize=10, legendfont=font(10),
     left_margin=10Plots.mm, bottom_margin=7Plots.mm, top_margin=5Plots.mm);
 mkpath("experiments/figures/"*exp_path)
-savefig(p, "experiments/figures/"*exp_path*"hystersis_plot_min.png")
+savefig(p, "experiments/figures/"*exp_path*"hystersis_plot_"*title*".png")
 
 # reset fontsizes
 Plots.scalefontsizes(1/1.8)

@@ -262,7 +262,7 @@ savefig(save_directory * "hysteresis_loop_firstlast.png")
 for (i,ϕi) in enumerate(ϕ_list)
     ϕ_all[:,:,i] = ϕi;
 end
-param_name = ["\$C_d \\times 10^4\$ [-]", "\$\\alpha_{\\mathrm{vent}} \\times 10^3\$ [m s⁻¹]", 
+param_name = ["\$V\$ [mm s⁻¹]", "\$\\alpha_{\\mathrm{vent}}\$ [mm s⁻¹]", 
     "\$a_T\$ [K]", "\$b_T\$ [K]", "\$c_T\$ [K]", "\$b_{\\mathrm{SW}}\$ [W m⁻²]"]
 scale = [10^4, 10^3, 1, 1, 1, 1]
 for i in 0:N_iter
@@ -332,7 +332,7 @@ end
 println(get_ϕ_mean_final(priors, ekiobj))
 
 # plot ϕ parameter convergence
-param_name = ["\$C_d \\times 10^4\$ [-]", "\$\\alpha_{\\mathrm{vent}} \\times 10^3\$ [m s⁻¹]", 
+param_name = ["\$V\$ [mm s⁻¹]", "\$\\alpha_{\\mathrm{vent}}\$ [mm s⁻¹]", 
     "\$b_{\\mathrm{SW}}\$ [W m⁻²]"]
 scale = [10^4, 10^3, 1]
 plot(size=(900, 900), layout=(N_params,N_params), dpi=200,

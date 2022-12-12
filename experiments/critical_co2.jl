@@ -91,15 +91,17 @@ ds = Dataset(exp_path*"critical_co2.nc","r")
 println(ds)
 x_list = ds["Xval"]
 co2c_list = ds["critCO2"]
+N = length(co2c_list[1,:])
+println(N)
 
 # plot
 default = Int(ceil(N/2))
 pCd = plot(x_list[2,:]*1e4, co2c_list[2,:], marker=:circle, color=:black, label=false, 
-    xlabel="\$C_d \\times 10^4\$ [-]", ylabel="Critical CO₂ [ppmv]", ylims=[500,2000],
+    xlabel="\$V\$ [mm s⁻¹]", ylabel="Critical CO₂ [ppmv]", ylims=[500,2000],
     title="a)", titleloc=:left, titlefont = font(10))
 plot!([x_list[2,default]*1e4], [co2c_list[2,default]], marker=:circle, color=:red3, label=false)
 pα = plot(x_list[1,:]*1e3, co2c_list[1,:], marker=:circle, color=:black, label=false,
-    xlabel="\$\\alpha_{\\mathrm{vent}} \\times 10^{3}\$ [m s⁻¹]", ylims=[500,2000], ytick=([500,1000,1500,2000],[]),
+    xlabel="\$\\alpha_{\\mathrm{vent}}\$ [mm s⁻¹]", ylims=[500,2000], ytick=([500,1000,1500,2000],[]),
     title="b)", titleloc=:left, titlefont = font(10))
 plot!([x_list[1,default]*1e3], [co2c_list[1,default]], marker=:circle, color=:red3, label=false)
 pSWb = plot(x_list[3,:], co2c_list[3,:], marker=:circle, color=:black, label=false,
@@ -110,3 +112,5 @@ plot!([x_list[3,default]], [co2c_list[3,default]], marker=:circle, color=:red3, 
 plot(pCd, pα, pSWb, layout=(1,3), size=(900,300), dpi=300, 
     left_margin=5Plots.mm, bottom_margin=5Plots.mm)
 savefig(exp_path*"co2_crit_params.png")
+
+close(ds)

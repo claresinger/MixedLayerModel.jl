@@ -96,18 +96,27 @@ println(N)
 
 # plot
 default = Int(ceil(N/2))
-pCd = plot(x_list[2,:]*1e4, co2c_list[2,:], marker=:circle, color=:black, label=false, 
+ms = 6
+pCd = plot(x_list[2,:]*1e4, co2c_list[2,:], 
+    marker=:circle, markersize=ms, color=:black, markerstrokewidth=0, label=false, 
     xlabel="\$V\$ [mm s⁻¹]", ylabel="Critical CO₂ [ppmv]", ylims=[500,2000],
     title="a)", titleloc=:left, titlefont = font(10))
-plot!([x_list[2,default]*1e4], [co2c_list[2,default]], marker=:circle, color=:red3, label=false)
-pα = plot(x_list[1,:]*1e3, co2c_list[1,:], marker=:circle, color=:black, label=false,
+plot!([x_list[2,default]*1e4], [co2c_list[2,default]], 
+    marker=:circle, markersize=ms, color=:red3, markerstrokewidth=0, label=false)
+
+pα = plot(x_list[1,:]*1e3, co2c_list[1,:], 
+    marker=:circle, markersize=ms, color=:black, markerstrokewidth=0, label=false,
     xlabel="\$\\alpha_{\\mathrm{vent}}\$ [mm s⁻¹]", ylims=[500,2000], ytick=([500,1000,1500,2000],[]),
     title="b)", titleloc=:left, titlefont = font(10))
-plot!([x_list[1,default]*1e3], [co2c_list[1,default]], marker=:circle, color=:red3, label=false)
-pSWb = plot(x_list[3,:], co2c_list[3,:], marker=:circle, color=:black, label=false,
+plot!([x_list[1,default]*1e3], [co2c_list[1,default]], 
+    marker=:circle, markersize=ms, color=:red3, markerstrokewidth=0, label=false)
+
+pSWb = plot(x_list[3,:], co2c_list[3,:], 
+    marker=:circle, markersize=ms, color=:black, markerstrokewidth=0, label=false,
     xlabel="\$b_{\\mathrm{SW}}\$ [W m⁻²]", ylims=[500,2000], ytick=([500,1000,1500,2000],[]),
     title="c)", titleloc=:left, titlefont = font(10))
-plot!([x_list[3,default]], [co2c_list[3,default]], marker=:circle, color=:red3, label=false)
+plot!([x_list[3,default]], [co2c_list[3,default]], 
+    marker=:circle, markersize=ms, color=:red3, markerstrokewidth=0, label=false)
 
 plot(pCd, pα, pSWb, layout=(1,3), size=(900,300), dpi=300, 
     left_margin=5Plots.mm, bottom_margin=5Plots.mm)

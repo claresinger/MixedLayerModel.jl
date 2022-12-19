@@ -5,10 +5,12 @@ import xarray as xr
 path = "experiments/figures/20221211_linear_perturb/"
 ds = xr.open_dataset(path+"linear_perturbs.nc")
 
-Xname_arr = ["SST", "V", "D", "RH", "EIS", "CO2"]
-Xlabel_arr = ["SST [K]", "WS [m s$^{-1}$]", "D $\\times 10^{-6}$ [s$^{-1}$]", "RH$_+$ [%]", "EIS [K]", "CO$_2$ [ppm]"]
+Xname_arr = ["SST", "V", "EIS", "D", "RH", "CO2"]
+Xlabel_arr = ["SST [K]", "$U$ [m s$^{-1}$]", "EIS [K]", "$D \\times 10^6$ [s$^{-1}$]", 
+    "RH$_{\!+}$ [%]", "CO$_2$ [ppmv]"]
 
 Nvar, Ncase = np.size(ds.var), np.size(ds.base)
+plt.rcParams.update({"font.size":8})
 fig, axes = plt.subplots(len(Xname_arr) // 2, 2, figsize=(6,6), constrained_layout=True)
 letter = ["a","b","c","d","e","f"]
 
@@ -24,11 +26,8 @@ for (i,var) in enumerate(Xname_arr):
         )
         ax.set_ylim([0,100])
         ax.set_title(letter[i]+") "+Xlabel_arr[i], loc="left")
-        # ax.set_title(letter[i]+") ", fontweight="bold", loc="left")
-        # ax.set_xlabel(Xlabel_arr[i])
-
-        if i == 1:
-            ax.legend(bbox_to_anchor=(1.2,1.05))
+        if i == 0:
+            ax.legend(loc=3, labelspacing=0.2, borderaxespad=0.3, handlelength=1.5)
 
         ax2 = ax.twinx()
         ax2.plot(
@@ -48,9 +47,9 @@ for (i,var) in enumerate(Xname_arr):
         else:
             ax.set_yticks([])
 
-fig.supylabel("Cloud fraction [%]", fontsize=12)
-fig.text(0.88, 0.5, "In-cloud liquid water path [g m$^2$]", va="center", rotation="vertical", 
-    fontsize=12, color="b")
+fig.supylabel("Cloud fraction [%]", fontsize=10)
+fig.text(1.02, 0.5, "In-cloud liquid water path [g m$^2$]", 
+    va="center", rotation="vertical", color="b", fontsize=10)
 plt.savefig(path+"linear_perturb.png",dpi=200,bbox_inches="tight")
 
 

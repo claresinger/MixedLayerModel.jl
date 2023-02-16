@@ -5,20 +5,23 @@ using Plots
 using Statistics
 using StatsBase
 using Random
-# include("mlm_solve_funcs.jl")
+include("mlm_solve_funcs.jl")
 
-using Distributed
-addprocs(8; exeflags = "--project=experiments/")
-
-include("one_day_cf_regional.jl")
-
-
-path = "experiments/figures/20221219_CFdaily_parallel/";
+path = "experiments/figures/20230126_CFdaily_parallel_10days/";
 mkpath(path);
 
 # load boundary conditions from file
+# import xarray as xr
+# ds = xr.open_dataset("data/box_BCs_daily_JJA_NEP_subonly.nc")
+# x = ds.where((ds.D500 > 0) & (ds.D500 < 10e-6) 
+#                 & (ds.EIS > 0) & (ds.EIS < 20) 
+#                 & (ds.RH500 < 1) 
+#                 & (ds.WS > 0) & (ds.WS < 15)
+#                 & (ds.sst == ds.sst))
+# x.to_netcdf("data/regional_daily_good_BCs_JJA_NEP_subonly.nc")
 file = "experiments/data/regional_daily_good_BCs_JJA_NEP_subonly.nc";
 ds = Dataset(file, "r");
+ds = NCDatasets.@select(ds, 10 <= lat <= 40 && -160 <= lon <= -110)
 time = ds["time"]
 
 # set up MLM params
@@ -34,20 +37,11 @@ par.α_vent = 1.69e-3;
 par.Cd = 6e-4; #7.9e-4;
 
 #####
-skip1 = 200 #20, 5
-skip2 = 200 #10, 5
+skip1 = 50 #20, 5, 200
+skip2 = 50 #10, 5, 200
 lon = ds["lon"][1:skip1:end]
 lat = ds["lat"][1:skip2:end]
 N, M = length(lon), length(lat)
-
-# import xarray as xr
-# ds = xr.open_dataset("data/box_BCs_daily_JJA_NEP_subonly.nc")
-# x = ds.where((ds.D500 > 0) & (ds.D500 < 10e-6) 
-#                 & (ds.EIS > 0) & (ds.EIS < 20) 
-#                 & (ds.RH500 < 1) 
-#                 & (ds.WS > 0) & (ds.WS < 15)
-#                 & (ds.sst == ds.sst))
-# x.to_netcdf("data/regional_daily_good_BCs_JJA_NEP_subonly.nc")
 
 Ndays = 10 # about 55% success rate
 Random.seed!(1234)
@@ -55,15 +49,37 @@ days_indices = sample(1:length(time), Ndays, replace=false, ordered=true)
 CFsave = fill(NaN, (N, M, Ndays))
 println(size(CFsave))
 
-# for (i, dayi) in enumerate(days_indices)
-#     println(i, ": ", dayi)
-#     CFsave[:,:,i] = one_day(dayi, ds, skip1, skip2, par)
-# end
+@time begin
+Threads.@threads for i in 1:Ndays
+    dayi = days_indices[i]
+    println(i, ": ", dayi)
 
-out = pmap(x -> RegionalCF.one_day(x, ds, skip1, skip2, par), days_indices)
-print(out)
-
-# CFsave[:,:,:] = hcat(out...)
+    for i1 in 1:N
+        for i2 in 1:M
+            # println(i1,", ", i2)
+            local j1 = 1 + (i1-1)*skip1
+            local j2 = 1 + (i2-1)*skip2
+            
+            if typeof(ds["sst"][j1,j2,dayi]) == Missing
+                println("skip")
+            else
+                par.SST0 = ds["sst"][j1,j2,dayi] # (K)
+                par.V = ds["WS"][j1,j2,dayi] # m/s
+                par.D = ds["D500"][j1,j2,dayi] # (1/s)
+                par.RHft = ds["RH500"][j1,j2,dayi] # (-)
+                par.EIS0 = ds["EIS"][j1,j2,dayi] # (K)
+                par.CO2 = 400 # (ppm)
+                try
+                    _, sol = run_mlm(par, dt=3600.0*24.0*5, tspan=(0.0,3600.0*24.0*100), quiet=true);
+                    CFsave[i1,i2,i] = sol.u[end][5];
+                catch
+                    println("fail")
+                end
+            end
+        end
+    end
+end
+end
 
 # create output netcdf file
 filename = path*"CF_daily.nc"

@@ -7,7 +7,7 @@ using Statistics
 using StatsBase
 using Random
 
-path = "experiments/figures/20221211_dailytransect_subonly_100days_1var/"
+path = "experiments/figures/20230215_dailytransect_subonly_100days_skip1_1var/"
 mkpath(path)
 
 include("mlm_solve_funcs.jl")
@@ -38,65 +38,67 @@ lon = ds["lon"][1:skipi:end]
 Nlon = length(lon)
 println(Nlon, " out of ", length(ds["lon"]), " longitudes")
 
-uf_save = zeros(Ndays, Nlon, 5)
-cf_mean = zeros(Nlon)
-
-for (i,loni) in enumerate(lon)
-    local j = (i-1)*skipi+1
-    par.SST0 = mean(ds["sst"][j,:]);
-    par.V = mean(ds["WS"][j,:]);
-    par.D = mean(ds["D500"][j,:]);
-    par.RHft = mean(ds["RH500"][j,:]);
-    par.EIS0 = mean(ds["EIS"][j,:]);
-    dt, tmax = 5, 100; # days
-    u0, sol = run_mlm(par, init=1, dt=3600.0*24.0*dt, tspan=(0.0,3600.0*24.0*tmax), quiet=true);
-    local uf = sol.u[end];
-    cf_mean[i] = uf[5];
-end
-println(cf_mean)
-
+uf_save = fill(NaN, (Ndays, Nlon, 5));
 bc_vars = ["sst", "WS", "D500", "RH500", "EIS"]
 Nvar = length(bc_vars)
-cf_mean_1var = zeros(Nlon, Nvar)
-for (v,var) in enumerate(bc_vars)
-    for (i,loni) in enumerate(lon)
-        local j = (i-1)*skipi+1
-        par.SST0 = var=="sst" ? mean(ds["sst"], dims=2)[j] : mean(ds["sst"][1,:]);
-        par.V = var=="WS" ? mean(ds["WS"], dims=2)[j] : mean(ds["WS"][1,:]);
-        par.D = var=="D500" ? mean(ds["D500"], dims=2)[j] : mean(ds["D500"][1,:]);
-        par.RHft = var=="RH500" ? mean(ds["RH500"], dims=2)[j] : mean(ds["RH500"][1,:]);
-        par.EIS0 = var=="EIS" ? mean(ds["EIS"], dims=2)[j] : mean(ds["EIS"][1,:]);
-        dt, tmax = 5, 100; # days
-        u0, sol = run_mlm(par, init=1, dt=3600.0*24.0*dt, tspan=(0.0,3600.0*24.0*tmax), quiet=true);
-        local uf = sol.u[end];
-        cf_mean_1var[i,v] = uf[5];
+cf_1var = fill(NaN, (Ndays, Nlon, Nvar));
+
+# Threads.@threads for id in 1:Ndays
+    # GC.safepoint(); # garbage collecting for threads
+for id in 1:Ndays
+    day = days_indices[id]
+    println(id, " / ", Ndays, ": ", day)
+    @time begin
+        for (i,loni) in enumerate(lon)
+            local j = (i-1)*skipi+1
+            par.SST0 = ds["sst"][j, day];
+            par.V = ds["WS"][j, day];
+            par.D = ds["D500"][j, day];
+            par.RHft = ds["RH500"][j, day];
+            par.EIS0 = ds["EIS"][j, day];
+            dt, tmax = 5*24*3600, 100*24*3600; # seconds
+            try
+                local _, sol = run_mlm(par, init=1, dt=dt, tspan=(0.0,tmax), quiet=true);
+                uf_save[id, i, :] = sol.u[end];
+            catch
+                println("fail! ", day, ", ", loni, ", all")
+            end
+
+            for (v,var) in enumerate(bc_vars)
+                par.SST0 = var=="sst" ? ds["sst"][j,day] : mean(ds["sst"][1,:]);
+                par.V = var=="WS" ? ds["WS"][j,day] : mean(ds["WS"][1,:]);
+                par.D = var=="D500" ? ds["D500"][j,day] : mean(ds["D500"][1,:]);
+                par.RHft = var=="RH500" ? ds["RH500"][j,day] : mean(ds["RH500"][1,:]);
+                par.EIS0 = var=="EIS" ? ds["EIS"][j,day] : mean(ds["EIS"][1,:]);
+                try
+                    local _, sol = run_mlm(par, init=1, dt=dt, tspan=(0.0,tmax), quiet=true);
+                    cf_1var[id, i, v] = sol.u[end][5];
+                catch
+                    println("fail! ", day, ", ", loni, ", ", var)
+                end
+            end
+        end
+        println(uf_save[id, :, 5])
     end
-    println(var)
-    println(cf_mean_1var[:,v])
 end
 
-for (id, day) in enumerate(days_indices)
-    println(id, " / ", Ndays)
-    for (i,loni) in enumerate(lon)
-        local j = (i-1)*skipi+1
-        par.SST0 = ds["sst"][j, day];
-        par.V = ds["WS"][j, day];
-        D500 = ds["D500"][j, day];
-        par.RHft = ds["RH500"][j, day];
-        par.EIS0 = ds["EIS"][j, day];
-        dt, tmax = 5, 100; # days
-        u0, sol = run_mlm(par, init=1, dt=3600.0*24.0*dt, tspan=(0.0,3600.0*24.0*tmax), quiet=true);
-        local uf = sol.u[end];
-        # println(par.SST0, ", ", par.EIS0, ", ", par.V, ", ", par.D, ", ", par.RHft)
-        # println(uf);
-        uf_save[id, i, :] = uf;
-    end
-    println(uf_save[id, :, 5])
+cf_mean = fill(NaN, (Nlon))
+for (i,loni) in enumerate(lon)
+    local j = (i-1)*skipi+1
+    par.SST0 = mean(ds["sst"][j, :]);
+    par.V = mean(ds["WS"][j, :]);
+    par.D = mean(ds["D500"][j, :]);
+    par.RHft = mean(ds["RH500"][j, :]);
+    par.EIS0 = mean(ds["EIS"][j, :]);
+    dt, tmax = 5*24*3600, 100*24*3600; # seconds
+    local _, sol = run_mlm(par, init=1, dt=dt, tspan=(0.0,tmax), quiet=true);
+    cf_mean[i] = sol.u[end][5];
 end
 
 # create output netcdf file
-isfile(path*"transect_output.nc") ? rm(path*"transect_output.nc") : "no file"
-ds_save = Dataset(path*"transect_output.nc","c")
+filename = "transect_output_all.nc"
+isfile(path*filename) ? rm(path*filename) : "no file"
+ds_save = Dataset(path*filename,"c")
 
 # Define the dimension "lon" of size Nindex
 defDim(ds_save, "lon", Nlon)
@@ -135,7 +137,7 @@ v = defVar(ds_save,"cf_mean",cf_mean,("lon",))
 v.attrib["units"] = "-"
 v.attrib["long_name"] = "cloud fraction"
 
-v = defVar(ds_save,"cf_mean_1var",cf_mean_1var,("lon","var"))
+v = defVar(ds_save,"cf_1var",cf_1var,("time","lon","var"))
 v.attrib["units"] = "-"
 v.attrib["long_name"] = "cloud fraction"
 

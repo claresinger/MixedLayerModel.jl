@@ -3,10 +3,10 @@ using Plots
 using NCDatasets
 include("mlm_solve_funcs.jl")
 
-exp_path = "experiments/figures/20221206_critical_co2/";
+exp_path = "experiments/figures/20230207_critical_co2/";
 mkpath(exp_path)
 
-function co2_loop(par; co2try=400:100:2500)
+function co2_loop(par; co2try=400:200:3000)
     dt, tmax = 10.0, 100.0; # days
 
     # 400 ppm
@@ -33,66 +33,63 @@ function co2_loop(par; co2try=400:100:2500)
     return NaN
 end
 
-# par = upCO2();
-# par.etype = enBal();
-# par.fttype = co2EIS();
-# par.rtype = varRad();
-# par.stype = fixSST();
+par = upCO2();
+par.etype = enBal();
+par.fttype = co2EIS();
+par.rtype = varRad();
 
-# # adjust tunable parameters
-# par.Cd = 7.9e-4;
-# par.α_vent = 1.69e-3;
-# par.SW_b = 140;
-# # par.EIS0 = 10.0;
-# # par.ECS = 1.5;
-# # par.Eexport = 10.0;
+# adjust tunable parameters
+par.Cd = 7.9e-4;
+par.α_vent = 1.69e-3;
+par.SW_b = 140;
 
-# N = 11
-# x_list = zeros(3,N)
-# co2c_list = zeros(3,N)
+N = 11
+x_list = zeros(3,N)
+co2c_list = zeros(3,N)
 
-# # create output netcdf file
-# isfile(exp_path*"critical_co2.nc") ? rm(exp_path*"critical_co2.nc") : "no file"
-# ds = Dataset(exp_path*"critical_co2.nc","c")
-# defDim(ds,"var",3)
-# defDim(ds,"x",N)
-# defVar(ds,"var",["α_vent","Cd","SW_b"],("var",))
+# create output netcdf file
+isfile(exp_path*"critical_co2.nc") ? rm(exp_path*"critical_co2.nc") : "no file"
+ds = Dataset(exp_path*"critical_co2.nc","c")
+defDim(ds,"var",3)
+defDim(ds,"x",N)
+defVar(ds,"var",["α_vent","Cd","SW_b"],("var",))
 
-# # Cd
-# x_list[2,:] = range(0.95,1.05,N) .* 7.9e-4
-# for (i,x) in enumerate(x_list[2,:])
-#     par.Cd = x
-#     co2c_list[2,i] = co2_loop(par, co2try=400:50:2000)
-# end
-# par.Cd = 7.9e-4
+# Cd
+x_list[2,:] = range(0.95,1.05,N) .* 7.9e-4
+for (i,x) in enumerate(x_list[2,:])
+    par.Cd = x
+    co2c_list[2,i] = co2_loop(par, co2try=500:50:2000)
+end
+par.Cd = 7.9e-4
 
-# # α_vent
-# x_list[1,:] = range(0.85,1.15,N) .* 1.69e-3
-# for (i,x) in enumerate(x_list[1,:])
-#     par.α_vent = x
-#     co2c_list[1,i] = co2_loop(par, co2try=400:50:2000)
-# end
-# par.α_vent = 1.69e-3
+# α_vent
+x_list[1,:] = range(0.85,1.15,N) .* 1.69e-3
+for (i,x) in enumerate(x_list[1,:])
+    par.α_vent = x
+    co2c_list[1,i] = co2_loop(par, co2try=500:50:2000)
+end
+par.α_vent = 1.69e-3
 
-# # SWb
-# x_list[3,:] = range(0.75,1.25,N) .* 140
-# for (i,x) in enumerate(x_list[3,:])
-#     par.SW_b = x
-#     co2c_list[3,i] = co2_loop(par, co2try=unique([400:100:1100; 1100:50:1800; 1800:200:2000]))
-# end
-# par.SW_b = 140
+# SWb
+x_list[3,:] = range(0.75,1.25,N) .* 140
+for (i,x) in enumerate(x_list[3,:])
+    par.SW_b = x
+    co2c_list[3,i] = co2_loop(par, co2try=500:50:2000)
+end
+par.SW_b = 140
 
-# defVar(ds,"Xval",x_list,("var","x"))
-# defVar(ds,"critCO2",co2c_list,("var","x"))
-# print(ds)
-# close(ds)
+defVar(ds,"Xval",x_list,("var","x"))
+defVar(ds,"critCO2",co2c_list,("var","x"))
+print(ds)
+close(ds)
 
 ds = Dataset(exp_path*"critical_co2.nc","r")
-println(ds)
+# println(ds)
 x_list = ds["Xval"]
 co2c_list = ds["critCO2"]
+println(co2c_list[:])
 N = length(co2c_list[1,:])
-println(N)
+# println(N)
 
 # plot
 default = Int(ceil(N/2))

@@ -21,7 +21,7 @@ ax.set_ylim([10, 40])
 ax.set_title("a) Observations, CASCCAD", loc="left")
 ds.close()
 
-path = "experiments/figures/20221221_CFdaily_good/"
+path = "experiments/figures/20230126_CFdaily_parallel_10days/"
 ds = xr.open_dataset(path+"CF_daily.nc")
 print(ds.count())
 ds = ds.where((ds.CF >= 0.09) & (ds.CF <= 0.81))
@@ -37,6 +37,7 @@ gl.top_labels = False
 h = ax.contourf(ds.lon,ds.lat,ds.mean("day").CF * 100,np.linspace(0,100,11),cmap="Greys")
 # x,y = np.meshgrid(ds.lon.values, ds.lat.values)
 # ax.plot(x,y,"o",color="yellow")
+# print(x,y)
 ax.add_feature(cfeature.LAND, zorder=1, facecolor='black', edgecolor='black')
 ax.set_xlim([-160, -110])
 ax.set_ylim([10, 40])

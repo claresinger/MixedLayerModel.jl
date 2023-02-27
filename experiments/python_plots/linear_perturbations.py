@@ -6,7 +6,7 @@ path = "experiments/figures/20221211_linear_perturb/"
 ds = xr.open_dataset(path+"linear_perturbs.nc")
 
 Xname_arr = ["SST", "V", "EIS", "D", "RH", "CO2"]
-Xlabel_arr = ["SST [K]", "$U$ [m s$^{-1}$]", "EIS [K]", "$D \\times 10^6$ [s$^{-1}$]", 
+Xlabel_arr = ["SST [K]", "$U$ [m s$^{-1}$]", "IS [K]", "$D \\times 10^6$ [s$^{-1}$]", 
     "RH$_{\!+}$ [%]", "CO$_2$ [ppmv]"]
 
 Nvar, Ncase = np.size(ds.var), np.size(ds.base)

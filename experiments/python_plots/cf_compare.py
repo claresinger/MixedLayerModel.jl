@@ -3,6 +3,9 @@ import xarray as xr
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import matplotlib.pyplot as plt
+import rioxarray
+# import rioxarray as rxr
+# from rioxarray import interpolate_na as intnan
 
 ## cloud fraction plot
 fig, axes = plt.subplots(nrows = 1, ncols = 2, figsize=(10,3), sharex=True, sharey=True,
@@ -18,30 +21,33 @@ ax.contourf(ds.lon, ds.lat, ds.low * 100, np.linspace(0,100,11), cmap="Greys")
 ax.add_feature(cfeature.LAND, zorder=1, facecolor='black', edgecolor='black')
 ax.set_xlim([-160, -110])
 ax.set_ylim([10, 40])
-ax.set_title("a) Observations, CASCCAD", loc="left")
+ax.set_title("a) CASCCAD Observations", loc="left")
 ds.close()
 
-path = "experiments/figures/20230126_CFdaily_parallel_10days/"
+path = "experiments/figures/20230223_CFdaily_200day_skip20x10/"
 ds = xr.open_dataset(path+"CF_daily.nc")
-print(ds.count())
 ds = ds.where((ds.CF >= 0.09) & (ds.CF <= 0.81))
-print(ds.count())
-# print(ds.min("day").CF)
-# print(ds.mean("day").CF)
-# print(ds.max("day").CF)
+# z = ds.mean("day").CF * 100
+z_nan = ds.mean("day").rename_dims({"lat":"y","lon":"x"}).rename_vars({"lat":"y","lon":"x"}).CF * 100
+z_nan.rio.write_nodata(np.nan, inplace=True)
+z_nan.rio.write_crs(4326, inplace=True)
+z = z_nan.rio.interpolate_na(method="nearest")
+
 ax = axes[1]
 gl = ax.gridlines(draw_labels=True)
 gl.left_labels=False
 gl.right_labels = False
 gl.top_labels = False
-h = ax.contourf(ds.lon,ds.lat,ds.mean("day").CF * 100,np.linspace(0,100,11),cmap="Greys")
+h = ax.contourf(ds.lon,ds.lat,z,np.linspace(0,100,11),cmap="Greys")
+
 # x,y = np.meshgrid(ds.lon.values, ds.lat.values)
+# ax.scatter(x,y,c=ds.mean("day").CF*100,marker="o",edgecolors="k",cmap="Greys",vmin=0,vmax=100)
 # ax.plot(x,y,"o",color="yellow")
-# print(x,y)
+
 ax.add_feature(cfeature.LAND, zorder=1, facecolor='black', edgecolor='black')
 ax.set_xlim([-160, -110])
 ax.set_ylim([10, 40])
-ax.set_title("b) Prediction, bulk model", loc="left")
+ax.set_title("b) Bulk model", loc="left")
 
 cax = fig.add_axes([0.35,-0.05,0.3,0.02])
 cb = plt.colorbar(h, cax=cax, orientation="horizontal", label="Cloud fraction [%]")

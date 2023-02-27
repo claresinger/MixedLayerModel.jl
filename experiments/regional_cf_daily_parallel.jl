@@ -10,7 +10,6 @@ include("mlm_solve_funcs.jl")
 path = "experiments/figures/20230126_CFdaily_parallel_10days/";
 mkpath(path);
 
-# load boundary conditions from file
 # import xarray as xr
 # ds = xr.open_dataset("data/box_BCs_daily_JJA_NEP_subonly.nc")
 # x = ds.where((ds.D500 > 0) & (ds.D500 < 10e-6) 
@@ -19,6 +18,8 @@ mkpath(path);
 #                 & (ds.WS > 0) & (ds.WS < 15)
 #                 & (ds.sst == ds.sst))
 # x.to_netcdf("data/regional_daily_good_BCs_JJA_NEP_subonly.nc")
+
+# load boundary conditions from file
 file = "experiments/data/regional_daily_good_BCs_JJA_NEP_subonly.nc";
 ds = Dataset(file, "r");
 ds = NCDatasets.@select(ds, 10 <= lat <= 40 && -160 <= lon <= -110)

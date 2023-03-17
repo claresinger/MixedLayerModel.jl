@@ -75,14 +75,17 @@ function we(u, p, zb, LWP, etype::bflux)
     Q0 = Q_0(u, p, p.ftype);
     H0 = S0 + L0*Q0; # h = s + Lv*qt
 
-    A0 = H0 - μ*L0*Q0;
+    Ts, ΔT = temp(0, sM, qM), 0.01
+    β = (q_sat(0, Ts+ΔT) - q_sat(0, Ts)) / ΔT;
+    
+    A0 = H0 - (1-δ*ϵ)*L0*Q0;
     B0 = β*H0 - ϵ*L0*Q0;
     I0 = A0 * (zb - (zb^2)/(2*zi)) + B0 * ((zi-zb) + (zi^2 - zb^2)/(2*zi));
     
     sj = sjump(u, p, LWP, p.fttype);
     qj = qjump(u, p, LWP, p.fttype);
     hj = sj + L0*qj; # h = s + Lv*qt
-    A1 = hj - μ*L0*qj;
+    A1 = hj - (1-δ*ϵ)*L0*qj;
     B1 = β*hj- ϵ*L0*qj;
     I1 = A1 * (-(zb^2)/(2*zi)) + B1 * ((-zi^2 + zb^2)/(2*zi));
     

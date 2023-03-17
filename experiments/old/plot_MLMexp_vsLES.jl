@@ -5,7 +5,7 @@ using NCDatasets
 using Plots
 using LaTeXStrings
 using MixedLayerModel
-using MixedLayerModel: Rd, Rv, L0, T0, Cp, δ, ϵ, μ
+using MixedLayerModel: Rd, Rv, L0, T0, Cp, δ, ϵ
 
 ENV["GKSwstype"]="nul"
 
@@ -26,7 +26,7 @@ hplus_les = Float64.(ds["h_plus"][1:max]);
 hM_les = Float64.(ds["hM"][1:max]);
 qplus_les = Float64.(ds["qt_plus"][1:max]);
 qM_les = Float64.(ds["qtM"][1:max]);
-Δs_vli = ((hplus_les-hM_les) - μ*L0*(qplus_les-qM_les))*1e-3;
+Δs_vli = ((hplus_les-hM_les) - (1-δ*ϵ)*L0*(qplus_les-qM_les))*1e-3;
 
 p1 = scatter(co2, zi, marker=:x, markersize=5, label="LES", ylabel="")
 scatter!(co2, zb, marker=:x, color="green", markersize=5, label="", ylabel="Cloud top/base [m]")

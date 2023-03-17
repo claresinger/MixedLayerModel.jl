@@ -22,8 +22,5 @@ S_subtr = 471.0     # solar flux in subtropics (W/m^2)
 α_ocean = 0.1       # surface albedo of ocean water
 
 # thermodynamic constants
-δ = (Rv-Rd)/Rd     
-ϵ = Cp*T0/L0        
-μ = 1 - δ*ϵ   
-β = 0.5         
-σ = β*μ - ϵ
+δ = (Rv-Rd)/Rd
+ϵ = Cp*T0/L0

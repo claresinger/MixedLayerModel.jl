@@ -3,7 +3,7 @@ push!(LOAD_PATH, joinpath(@__DIR__, ".."))
 using FileIO
 using Plots
 using MixedLayerModel
-using MixedLayerModel: Rd, Rv, L0, T0, Cp, δ, ϵ, μ
+using MixedLayerModel: Rd, Rv, L0, T0, Cp, δ, ϵ
 
 ENV["GKSwstype"]="nul"
 Plots.scalefontsizes(2)

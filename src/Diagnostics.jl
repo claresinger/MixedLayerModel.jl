@@ -31,7 +31,9 @@ function calc_bflux(u, p, zarr, etype::bflux)
 
     wh(z) = (1 - z/zi) * H0 + (z/zi) * Hzi;
     wq(z) = (1 - z/zi) * Q0 + (z/zi) * Qzi;
-    wsv_1(z) = wh(z) - (μ*L0) * wq(z);
+    wsv_1(z) = wh(z) - (1-δ*ϵ) * L0 * wq(z);
+    Ts, ΔT = temp(0, sM, qM), 0.01
+    β = (q_sat(0, Ts+ΔT) - q_sat(0, Ts)) / ΔT;
     wsv_2(z) = β * wh(z) - (ϵ*L0) * wq(z);
     
     wsv_z = [wsv_1.(z1); wsv_2.(z2); zeros(length(z3))];

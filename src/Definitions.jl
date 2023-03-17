@@ -4,7 +4,7 @@
 
 # physical constants
 g = 9.8             # gravity (m/s^2)
-T0 = 273.16         # absolute zero (K)
+T0 = 273.16         # zero °C, triple point (K)
 Rd = 287.0          # gas constant dry air (J/K/kg)
 Rv = 461.0          # gas constant water vapor (J/K/kg)
 e0 = 610.78         # reference water vapor partial pressure (Pa = J/m^3)

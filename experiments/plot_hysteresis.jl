@@ -4,7 +4,7 @@ using MixedLayerModel
 using MixedLayerModel: Rd, Rv, L0, T0, Cp, δ, ϵ, μ
 
 ENV["GKSwstype"]="nul"
-Plots.scalefontsizes(1.8)
+Plots.scalefontsizes(1.2)
 
 # plot LES
 co2 = [200,300,400,800,1000,1200,1300,1400,1600];
@@ -20,6 +20,7 @@ ms = 10
 c = "crimson"
 p_dR = scatter(co2, dR, color=c, marker=:x, markersize=ms, label="", 
                 ylabel="ΔR [W/m²]",
+                annotation = (100, 100*1.1, text("a)", fontsize=12)),
                 xticks=([400, 800, 1200, 1600]), xlim=[0,2000], ylim=[0,100])
 p_decoup = scatter(co2, S, color=c, marker=:x, markersize=ms, label="", 
                 xlabel="CO₂ [ppmv]", ylabel="Decoupling, \$\\mathcal{D}\$",
@@ -27,15 +28,18 @@ p_decoup = scatter(co2, S, color=c, marker=:x, markersize=ms, label="",
                 xticks=([400, 800, 1200, 1600]), xlim=[0,2000])
 p_sst = scatter(co2, sst, color=c, marker=:x, markersize=ms, label="", 
                 ylabel="SST [K]",
+                annotation = (100, (312-286)*1.1+286, text("b)", fontsize=12)),
                 xticks=([400, 800, 1200, 1600]), xlim=[0,2000], ylim=[286, 312])
 p_lhf = scatter(co2, lhf, color=c, marker=:x, markersize=ms, label="",
                 xlabel="CO₂ [ppmv]", ylabel="LHF [W/m²]",
+                annotation = (100, (250-50)*1.1+50, text("c)", fontsize=12)),
                 xticks=([400, 800, 1200, 1600]), xlim=[0,2000], ylim=[50, 250])
 p_zi = scatter(co2, zi, color=c, marker=:x, markersize=ms, label="",
                 ylabel="zᵢ [m]",
                 xticks=([400, 800, 1200, 1600]), xlim=[0,2000], ylim=[500, 1500])
 p_cf = scatter(co2, cf*100, color=c, marker=:x, markersize=ms, label="", 
                 xlabel="CO₂ [ppmv]", ylabel="CF [%]",
+                annotation = (100, 110*1.1, text("d)", fontsize=12)),
                 xticks=([400, 800, 1200, 1600]), xlim=[0,2000], ylim=[0,110])
 
 plot!(p_dR, co2, dR, linewidth=2, linestyle=:dot, color=c, label="")
@@ -86,11 +90,7 @@ cf, lwp, sst, lhf = zeros(N), zeros(N), zeros(N), zeros(N);
 dR = zeros(N);
 
 for (i, co2i) in enumerate(co2u)
-    if co2i == 400
-        file = "experiments/output/"*exp_path*"co2_400.jld2"
-    else
-        file = "experiments/output/"*exp_path*"co2_upstep_"*string(co2i)*".jld2"
-    end
+    file = "experiments/output/"*exp_path*"co2_upstep_"*string(co2i)*".jld2"
     dat = load(file);
     uf = dat["uf"];
     par = dat["p"];
@@ -170,4 +170,4 @@ mkpath("experiments/figures/"*exp_path)
 savefig(p, "experiments/figures/"*exp_path*"hystersis_plot_min.png")
 
 # reset fontsizes
-Plots.scalefontsizes(1/1.8)
+Plots.scalefontsizes(1/1.2)

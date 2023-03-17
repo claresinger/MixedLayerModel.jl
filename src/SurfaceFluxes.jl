@@ -21,10 +21,10 @@ function S_0(u, p, ftype::varFlux)
 end
 
 """
-    define the surface enthalpy flux, H_surf
+    define the surface liquid static energy flux, S_surf
     given prescribed sensible and latent heat fluxes
 
-    H_surf = (SHF + LHF) / ρref
+    S_surf = SHF / ρref
 """
 function S_0(u, p, ftype::fixFlux)
     zi, sM, qM, SST, CF = u;

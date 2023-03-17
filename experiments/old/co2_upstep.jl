@@ -1,6 +1,5 @@
 using MixedLayerModel
 using FileIO
-using Plots
 
 include("mlm_solve_funcs.jl")
 include("plot_transient_solution.jl")
@@ -8,7 +7,6 @@ include("plot_transient_solution.jl")
 println()
 # use command line argument to set co2
 newCO2 = parse(Float64,ARGS[1]);
-# newCO2 = 1400.0;
 println(newCO2);
 exp_path = ARGS[2];
 path = "experiments/output/"*exp_path;
@@ -46,7 +44,7 @@ par.OHU = OHU;
 
 # solve and plot
 ENV["GKSwstype"]="nul"
-u0, sol = run_mlm_from_init(u0, par, dt=3600.0*dt, tspan=(0.0,3600.0*24.0*tmax));
+u0, sol = run_mlm_from_init(u0, par, dt=3600.0*24.0*dt, tspan=(0.0,3600.0*24.0*tmax));
 mkpath(replace(path, "output"=>"figures"));
 filename = replace(path, "output"=>"figures")*"up"*string(Int(newCO2))*"_t.png";
 plot_sol(sol, filename);

@@ -4,15 +4,15 @@ using MixedLayerModel
 using MixedLayerModel: Rd, Rv, L0, T0, Cp, δ, ϵ, μ
 
 ENV["GKSwstype"]="nul"
-Plots.scalefontsizes(1.8)
+Plots.scalefontsizes(1.2)
 
 ##############
 #plot modified results
 
-# exp_path = ARGS[1];
-# co2u = ARGS[2];
+exp_path = ARGS[1];
+co2u = ARGS[2];
 co2u = parse.(Int64, split(replace(replace(co2u, "]"=>""), "["=>""),","))
-# co2d = ARGS[3];
+co2d = ARGS[3];
 co2d = parse.(Int64, split(replace(replace(co2d, "]"=>""), "["=>""),","))
 print(co2u)
 println(typeof(co2u))
@@ -23,11 +23,7 @@ cf, lwp, sst, lhf = zeros(N), zeros(N), zeros(N), zeros(N);
 dR = zeros(N);
 
 for (i, co2i) in enumerate(co2u)
-    if co2i == 400
-        file = "experiments/output/"*exp_path*"co2_400.jld2"
-    else
-        file = "experiments/output/"*exp_path*"co2_upstep_"*string(co2i)*".jld2"
-    end
+    file = "experiments/output/"*exp_path*"co2_upstep_"*string(co2i)*".jld2"
     dat = load(file);
     uf = dat["uf"];
     par = dat["p"];
@@ -43,6 +39,7 @@ ms = 8
 c = "crimson"
 p_dR = scatter(co2u, dR, color=c, marker=:circle, markersize=ms, markerstrokewidth=0,
                 label="", ylabel="ΔR [W/m²]",
+                annotation = (xrange[2]*0.05, 100*1.1, text("a)", fontsize=12)),
                 xticks=xtks, xlim=xrange, ylim=[0,100])
 p_decoup = scatter(co2u, S, color=c, marker=:circle, markersize=ms, markerstrokewidth=0,
                 label="", xlabel="CO₂ [ppmv]", ylabel="Decoupling, \$\\mathcal{D}\$",
@@ -50,15 +47,18 @@ p_decoup = scatter(co2u, S, color=c, marker=:circle, markersize=ms, markerstroke
                 xticks=xtks, xlim=xrange)
 p_sst = scatter(co2u, sst, color=c, marker=:circle, markersize=ms, markerstrokewidth=0,
                 label="", ylabel="SST [K]",
+                annotation = (xrange[2]*0.05, (SSTrange[2] - SSTrange[1])*1.1 + SSTrange[1], text("b)", fontsize=12)),
                 xticks=xtks, xlim=xrange, ylim=SSTrange)
 p_lhf = scatter(co2u, lhf, color=c, marker=:circle, markersize=ms, markerstrokewidth=0,
                 label="", xlabel="CO₂ [ppmv]", ylabel="LHF [W/m²]",
+                annotation = (xrange[2]*0.05, (LHFrange[2] - LHFrange[1])*1.1 + LHFrange[1], text("c)", fontsize=12)),
                 xticks=xtks, xlim=xrange, ylim=LHFrange)
 p_zi = scatter(co2u, zi, color=c, marker=:circle, markersize=ms, markerstrokewidth=0,
                 label="", ylabel="zᵢ [m]",
                 xticks=xtks, xlim=xrange, ylim=[0, 1000])
 p_cf = scatter(co2u, cf*100, color=c, marker=:circle, markersize=ms, markerstrokewidth=0,
                 label="", xlabel="CO₂ [ppmv]", ylabel="CF [%]",
+                annotation = (xrange[2]*0.05, 100*1.1, text("d)", fontsize=12)),
                 xticks=xtks, xlim=xrange, ylim=[0,100])
 
 plot!(p_dR, co2u, dR, color=c, linewidth=2, label="")
@@ -191,9 +191,9 @@ savefig(p, "experiments/figures/"*exp_path*"hystersis_plot.png")
 p = plot(p_dR,p_sst,p_lhf,p_cf, layout=(2,2), 
     link=:x, size=(900,500), dpi=300,
     legend=:topright, legendfontsize=10, legendfont=font(10),
-    left_margin=10Plots.mm, bottom_margin=7Plots.mm, top_margin=5Plots.mm);
+    left_margin=7Plots.mm, right_margin=2Plots.mm, bottom_margin=6Plots.mm, top_margin=6Plots.mm);
 mkpath("experiments/figures/"*exp_path)
-savefig(p, "experiments/figures/"*exp_path*"hystersis_plot_min.png")
+savefig(p, "experiments/figures/"*exp_path*"hystersis_plot_"*title*".png")
 
 # reset fontsizes
-Plots.scalefontsizes(1/1.8)
+Plots.scalefontsizes(1/1.2)

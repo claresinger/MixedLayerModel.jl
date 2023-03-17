@@ -22,19 +22,19 @@ function calc_bflux(u, p, zarr, etype::bflux)
                                                                                         
     S0 = S_0(u, p, p.ftype);
     Q0 = Q_0(u, p, p.ftype);
-    H0 = S0 * L0*Q0;
+    H0 = S0 + L0*Q0;
 
     ent = we(u, p, zb, LWP, p.etype);
     Szi = S_zi(u, p, ent, LWP);
     Qzi = Q_zi(u, p, ent, LWP);
     Hzi = Szi + L0*Qzi;
 
-    wh(z) = (1 .- z./zi) .* H0 .+ (z./zi) .* Hzi;
-    wq(z) = (1 .- z./zi) .* Q0 .+ (z./zi) .* Qzi;
-    wsv_1(z) = wh(z) .- (μ*L0) .* wq(z);
-    wsv_2(z) = β .* wh(z) .- (ϵ*L0) .* wq(z);
+    wh(z) = (1 - z/zi) * H0 + (z/zi) * Hzi;
+    wq(z) = (1 - z/zi) * Q0 + (z/zi) * Qzi;
+    wsv_1(z) = wh(z) - (μ*L0) * wq(z);
+    wsv_2(z) = β * wh(z) - (ϵ*L0) * wq(z);
     
-    wsv_z = [wsv_1(z1); wsv_2(z2); zeros(length(z3))];
+    wsv_z = [wsv_1.(z1); wsv_2.(z2); zeros(length(z3))];
     Tsurf =  temp(0.0, sM, qM);
     bflux = wsv_z * (g / Cp / Tsurf);
     

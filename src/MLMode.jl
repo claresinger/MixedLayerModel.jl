@@ -89,7 +89,7 @@ end
     dCFdt(u, p, zb, LWP)
 
     calculation cloud fraction 
-    determined as a logistic function of S, the stability parameter
+    determined as a logistic function of De, the decoupling parameter
 """
 function dCFdt(u, p, zb, LWP)
     zi, sM, qM, SST, CF = u;

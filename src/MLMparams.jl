@@ -6,9 +6,10 @@ export upCO2, climatology
     SW_b::Real = 150; # (W/m2)
 
     # cloud fraction params
-    CFmax::Real = 1.0;       # maximum cloud fraction
-    CFmin::Real = 0.2;       # minimum cloud fraction
-    decoup_slope::Real = 8; # decoupling slope, m
+    CFmax::Real = 1.0;      # maximum cloud fraction
+    CFmin::Real = 0.2;      # minimum cloud fraction
+    Dslope::Real = 8;       # decoupling slope
+    Dcrit::Real = 0.9;      # critical decoupling parameter        
 
     # fixed SST for 400ppm
     SST0::Real = 290.0; # (K)
@@ -52,9 +53,10 @@ end
 
 @with_kw mutable struct climatology
     # cloud fraction params
-    CFmax::Real = 0.8;       # maximum cloud fraction
-    CFmin::Real = 0.1;       # minimum cloud fraction
-    decoup_slope::Real = 8; # decoupling slope (m)
+    CFmax::Real = 0.8;          # maximum cloud fraction
+    CFmin::Real = 0.05;         # minimum cloud fraction
+    Dslope::Real = 8;       # decoupling slope
+    Dcrit::Real = 0.9;      # critical decoupling parameter 
 
     # baseline CO2
     CO2::Real = 400; # (ppm)

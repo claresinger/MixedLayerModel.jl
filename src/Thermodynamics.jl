@@ -1,4 +1,4 @@
-export ρref, pres, q_sat, q_v, q_l, temp, rho
+export ρref, pres, q_sat, q_v, q_l, temp, rho, γ, σ_of_T
 export incloud_LWP, calc_LCL
 export Γs, moist_adiabat, temp_ft
 
@@ -39,6 +39,22 @@ end
 function q_sat(z, T)
     psat = e0 * exp(-L0/Rv * (1 / T - 1/T0));
     return Rd/Rv * psat / (pres(z,T) - psat)
+end
+
+"""
+    CC slope γ = ∂q*/∂T
+"""
+function γ(z, T)
+    ΔT = 0.01;
+    return (L0/Cp)*(q_sat(z,T+ΔT) - q_sat(z,T)) / ΔT
+end
+
+"""
+    thermodynamic σ "constant" 
+    the fraction of LHF that goes into buoyancy flux
+"""
+function σ_of_T(z,T)
+    return ((1 + γ(z,T)*δ*ϵ)*(1 − ϵ − δ*ϵ)) / (1 + γ(z,T))
 end
 
 """

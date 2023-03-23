@@ -24,3 +24,6 @@ S_subtr = 471.0     # solar flux in subtropics (W/m^2)
 # thermodynamic constants
 δ = (Rv-Rd)/Rd
 ϵ = Cp*T0/L0
+σ = 0.35
+# γ = (L0/Cp)*∂q_sat/∂T
+# σ = ((1 + γ*δ*ϵ)*(1 − ϵ − δ*ϵ)) / (1 + γ)

@@ -1,7 +1,7 @@
 using FileIO
 using Plots
 using MixedLayerModel
-using MixedLayerModel: Rd, Rv, L0, T0, Cp, δ, ϵ
+using MixedLayerModel: Rd, Rv, L0, T0, Cp, δ, ϵ, σ
 
 ENV["GKSwstype"]="nul"
 Plots.scalefontsizes(1.2)

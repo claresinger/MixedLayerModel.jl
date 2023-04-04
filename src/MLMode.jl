@@ -1,5 +1,5 @@
 export sst_type, fixSST, varSST
-export mlm
+export mlm, σ_mlm
 
 ## create type for surface energy balance
 ## one where SST is fixed
@@ -131,4 +131,12 @@ function mlm(du, u, p, t)
     #     # println(du)
     #     # println()
     # end
+end
+
+function σ_mlm(du, u, p, t)
+    du[1] = 0
+    du[2] = 0
+    du[3] = 0
+    du[4] = 0
+    du[5] = 2e-4*(p.CFmax - u[5])^4
 end

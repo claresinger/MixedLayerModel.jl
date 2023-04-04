@@ -1,4 +1,4 @@
-exp_path = "20230322_newD/";
+exp_path = "20230324_newD_LWPemissivity/";
 path = "experiments/output/"*exp_path;
 
 using MixedLayerModel
@@ -16,17 +16,20 @@ dt, tmax = 10.0, 100.0; # days
 
 # adjust tunable parameters
 par.Cd = 8e-4; #7.9e-4;
-par.α_vent = 1e-3; #1.69e-3;
+par.α_vent = 1.5e-3; #1.69e-3;
 par.SW_b = 120;
-par.Dcrit = 1;
+par.Dcrit = 1.1;
 
 # 400 ppm
 u0, sol = run_mlm(par, dt=3600.0*24.0*dt, tspan=(0.0,3600.0*24.0*tmax), quiet=true);
+# u0, sol = stochastic_run_mlm(par, dt=3600.0*24.0*dt, tspan=(0.0,3600.0*24.0*tmax), quiet=true);
 uf = sol.u[end];
 zb = calc_LCL(uf);
 LWP = incloud_LWP(uf, zb);
 OHU_400 = calc_OHU(uf,par,LWP,par.stype);
 println(OHU_400)
+
+mkpath(replace(path, "output"=>"figures"));
 plot_sol(sol,replace(path, "output"=>"figures")*"init400.png";)
 
 # upsteps/downsteps
@@ -36,11 +39,11 @@ par.stype = varSST();
 for (i,newCO2) in enumerate(CO2updn_list)
     par.CO2 = newCO2;
     par.OHU = OHU_400;
-    
+
     local u0, sol = run_mlm_from_init(uf, par, dt=3600.0*24.0*dt, tspan=(0.0,3600.0*24.0*tmax), quiet=true);
+    # local u0, sol = stochastic_run_mlm_from_init(uf, par, dt=3600.0*24.0*dt, tspan=(0.0,3600.0*24.0*tmax), quiet=true);
     
     # plot
-    mkpath(replace(path, "output"=>"figures"));
     if i > I
         filename = replace(path, "output"=>"figures")*"down"*string(Int(newCO2))*"_t.png";
     else
@@ -49,11 +52,10 @@ for (i,newCO2) in enumerate(CO2updn_list)
     plot_sol(sol, filename);
 
     # print
-    uarr = sol.u[end-100:end];
-    global uf = mean(uarr);
+    global uf = sol.u[end];
     local zi, sM, qM, SST, CF = uf;
-    local zb = calc_LCL.(uarr);
-    local lwp = incloud_LWP.(uarr, zb);
+    local zb = calc_LCL(uf);
+    local lwp = incloud_LWP(uf, zb);
     println(newCO2, ": ", CF)
 
     # save
@@ -64,16 +66,14 @@ for (i,newCO2) in enumerate(CO2updn_list)
         "u0" => u0, 
         "uf" => uf, 
         "du/u" => du./uf, 
-        "LWP" => mean(lwp),
-        "zb" => mean(zb), 
-        "zc" => zi-mean(zb),
-        "we" => mean(we.(uarr,Ref(par), zb, lwp, Ref(par.etype))), 
-        # "RHsurf" => min(qM / q_sat(0.0, temp(0.0, sM, qM)), 1.0), 
-        "LHF" => mean(calc_LHF.(uarr, Ref(par))), 
-        "SHF" => mean(calc_SHF.(uarr, Ref(par))),
-        "ΔR" => mean(calc_cloudtop_RAD.(uarr, Ref(par), lwp, Ref(par.rtype))), 
-        "OHU" => mean(calc_OHU.(uarr, Ref(par), lwp, Ref(par.stype))),
-        "De" => mean(calc_decoupling.(uarr, Ref(par), zb, lwp)),
+        "LWP" => lwp,
+        "zb" => zb, 
+        "we" => we(uf, par, zb, lwp, par.etype), 
+        "LHF" => calc_LHF(uf, par), 
+        "SHF" => calc_SHF(uf, par),
+        "ΔR" => calc_cloudtop_RAD(uf, par, lwp, par.rtype), 
+        "OHU" => calc_OHU(uf, par, lwp, par.stype),
+        "De" => calc_decoupling(uf, par, zb, lwp),
     )
     if i > I
         save(path*"co2_downstep_"*string(Int(newCO2))*".jld2", output)

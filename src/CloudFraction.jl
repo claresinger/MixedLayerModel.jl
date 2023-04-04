@@ -22,8 +22,10 @@ function calc_decoupling(u, p, zb, LWP)
     # end
 
     # χ = 2^min(max(randn(1)[1], -3), 0)
-    χ = 2^min(randn(1)[1]*1.5, 0)
-    De = De*χ
+    
+    # χ = 2^min(randn(1)[1]*1.5, 0)
+    # De = De*χ
+    
     # if De > p.Dcrit
     #     De = De*χ
     # end

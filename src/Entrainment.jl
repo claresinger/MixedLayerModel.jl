@@ -16,7 +16,12 @@ struct bflux <: ent_type end
     Δsv = Δs + CpΔTv - CpΔT
         = Δs + Cp(Rv/Rd - 1)(Tft*qft - T_zi*qM) + Cp(Rv/Rd)(T_zi*ql_zi)
 
-    Tv = (Rd*(1-qt) + Rv*qv)/Rd * T
+    Tv = (Rd*(1-qt) + Rv*qv)/Rd * T = (Rd + Rv*qv - Rd*qt)/Rd * T
+    = T + (Rv*(qt-ql) - Rd*qt)/Rd * T = T + (Rv-Rd)/Rd * qt * T - Rv/Rd * ql * T
+    = (1 + (Rv-Rd)/Rd*qt - Rv/Rd*ql) * T
+
+    sv = CpTv + gz - Lql = (CpT + gz) + Cp*T*δ*qt - Cp*T*(δ+1)*ql - L*ql
+    = s + Cp*T*δ*qt + L*(-1 - Cp*T/L - Cp*T/L*δ)*ql
 
     jump in virtual liquid static energy across inversion
     proportional to buoyancy jump

@@ -1,8 +1,8 @@
-exp_path = "20230324_newD_LWPemissivity/";
+exp_path = "20230404_newD_AR1/";
 path = "experiments/output/"*exp_path;
 
 using MixedLayerModel
-using JLD2
+using JLD2, Statistics
 include("mlm_solve_funcs.jl")
 include("plot_transient_solution.jl")
 
@@ -12,22 +12,25 @@ par.etype = enBal();
 par.fttype = co2EIS();
 par.rtype = varRad();
 par.stype = fixSST();
-dt, tmax = 10.0, 100.0; # days
+dt, tmax = 0.1, 200.0; # days
 
 # adjust tunable parameters
 par.Cd = 8e-4; #7.9e-4;
 par.α_vent = 1.5e-3; #1.69e-3;
 par.SW_b = 120;
 par.Dcrit = 1.1;
+par.noise = 3e-3;
 
 # 400 ppm
-u0, sol = run_mlm(par, dt=3600.0*24.0*dt, tspan=(0.0,3600.0*24.0*tmax), quiet=true);
-# u0, sol = stochastic_run_mlm(par, dt=3600.0*24.0*dt, tspan=(0.0,3600.0*24.0*tmax), quiet=true);
-uf = sol.u[end];
+# u0, sol = run_mlm(par, dt=3600.0*24.0*dt*100, tspan=(0.0,3600.0*24.0*tmax), quiet=true);
+# uf = sol.u[end];
+u0, sol = stochastic_run_mlm(par, dt=3600.0*24.0*dt, tspan=(0.0,3600.0*24.0*tmax), quiet=true);
+uf = mean(sol.u[end-500:end]);
+println("init 400: ", uf[5])
 zb = calc_LCL(uf);
 LWP = incloud_LWP(uf, zb);
 OHU_400 = calc_OHU(uf,par,LWP,par.stype);
-println(OHU_400)
+println("OHU = ", OHU_400)
 
 mkpath(replace(path, "output"=>"figures"));
 plot_sol(sol,replace(path, "output"=>"figures")*"init400.png";)
@@ -40,8 +43,8 @@ for (i,newCO2) in enumerate(CO2updn_list)
     par.CO2 = newCO2;
     par.OHU = OHU_400;
 
-    local u0, sol = run_mlm_from_init(uf, par, dt=3600.0*24.0*dt, tspan=(0.0,3600.0*24.0*tmax), quiet=true);
-    # local u0, sol = stochastic_run_mlm_from_init(uf, par, dt=3600.0*24.0*dt, tspan=(0.0,3600.0*24.0*tmax), quiet=true);
+    # local u0, sol = run_mlm_from_init(uf, par, dt=3600.0*24.0*dt, tspan=(0.0,3600.0*24.0*tmax), quiet=true);
+    local u0, sol = stochastic_run_mlm_from_init(uf, par, dt=3600.0*24.0*dt, tspan=(0.0,3600.0*24.0*tmax), quiet=true);
     
     # plot
     if i > I
@@ -52,7 +55,7 @@ for (i,newCO2) in enumerate(CO2updn_list)
     plot_sol(sol, filename);
 
     # print
-    global uf = sol.u[end];
+    global uf = mean(sol.u[end-500:end]);
     local zi, sM, qM, SST, CF = uf;
     local zb = calc_LCL(uf);
     local lwp = incloud_LWP(uf, zb);

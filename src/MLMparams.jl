@@ -9,7 +9,8 @@ export upCO2, climatology
     CFmax::Real = 1.0;      # maximum cloud fraction
     CFmin::Real = 0.2;      # minimum cloud fraction
     Dslope::Real = 8;       # decoupling slope
-    Dcrit::Real = 0.9;      # critical decoupling parameter        
+    Dcrit::Real = 0.9;      # critical decoupling parameter       
+    noise::Real = 1e-3; 
 
     # fixed SST for 400ppm
     SST0::Real = 290.0; # (K)
@@ -57,6 +58,7 @@ end
     CFmin::Real = 0.05;         # minimum cloud fraction
     Dslope::Real = 8;       # decoupling slope
     Dcrit::Real = 0.9;      # critical decoupling parameter 
+    noise::Real = 1e-3;
 
     # baseline CO2
     CO2::Real = 400; # (ppm)

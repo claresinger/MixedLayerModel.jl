@@ -86,16 +86,19 @@ function stochastic_run_mlm(params; init=1, dt=3600.0*5.0, tspan=(0.0,3600.0*24.
         zi0 = 1000.0;
         CF0 = params.CFmin;
     end 
+    
+    θ, μ, σ = 0.0, 0.0, 1.0
     u0 = [zi0, sM0, qtM0, params.SST0, CF0]; 
-    prob = SDEProblem(SDEFunction(mlm,σ_mlm,tgrad=(du, u, p, t) -> fill!(du, 0.0)),
-        σ_mlm,
+    prob = SDEProblem(
+        SDEFunction(f_stochastic, g_bounded, tgrad=(du, u, p, t) -> fill!(du, 0.0)),
+        g_bounded,
         u0,
         tspan,
         params,
-        # noise = abs(WienerProcess(0.0, 0.0, 0.0)),
+        seed = 18,
     );
-    # sol = solve(prob, EM(), dt=dt);
-    sol = solve(prob, SOSRI(), abstol=0.0, reltol=steptol, dtmax=dt);
+    sol = solve(prob, EM(), dt=dt);
+    # sol = solve(prob, SOSRI(), abstol=0.0, reltol=steptol, dtmax=dt);
 
     return u0, sol
 end
@@ -109,19 +112,16 @@ end
     and save output to file
 """
 function stochastic_run_mlm_from_init(u0, params; dt=3600.0*5.0, tspan=(0.0,3600.0*24.0*10.0), quiet=false)    
-    ρ = 0.2;
-    Γ = zeros(5,5);
-    Γ[5,5] = ρ;
-    prob = SDEProblem(SDEFunction(mlm,σ_mlm,tgrad=(du, u, p, t) -> fill!(du, 0.0)),
-        σ_mlm,
+    prob = SDEProblem(
+        SDEFunction(f_stochastic, g_bounded, tgrad=(du, u, p, t) -> fill!(du, 0.0)),
+        g_bounded,
         u0,
         tspan,
         params,
-        # noise = CorrelatedWienerProcess(Γ,0.,zeros(5),zeros(5)),
+        seed = round(u0[5]*10000),
     );
-    # sol = solve(prob, EM(), dt=dt);
-    sol = solve(prob, SOSRI(), abstol=0.0, reltol=0.1, dtmax=dt);
+    sol = solve(prob, EM(), dt=dt);
+    # sol = solve(prob, SOSRI(), abstol=0.0, reltol=0.1, dtmax=dt);
     
     return u0, sol
 end
-

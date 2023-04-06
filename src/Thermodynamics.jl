@@ -54,7 +54,7 @@ end
     the fraction of LHF that goes into buoyancy flux
 """
 function σ_of_T(z,T)
-    return ((1 + γ(z,T)*δ*ϵ)*(1 − ϵ − δ*ϵ)) / (1 + γ(z,T))
+    return ((1 + γ(z,T)*δ*Cp*T/L0)*(1 − Cp*T/L0 − δ*Cp*T/L0)) / (1 + γ(z,T))
 end
 
 """

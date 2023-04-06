@@ -112,7 +112,7 @@ end
     cloud_emissivity(LWP)
 
     emissivity of the cloud as a function of LWP in kg/m2
-    ϵ = 1 - exp(-a0 * LWP) with a0 = 0.15 m^2/g
+    ϵc = 1 - exp(-a0 * LWP) with a0 = 0.15 m^2/g
 
     based on Stephens 1978 part II: eq 15 and 16
 """

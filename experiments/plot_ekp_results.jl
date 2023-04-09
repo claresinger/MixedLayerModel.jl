@@ -6,15 +6,16 @@ using Statistics
 using Plots
 using StatsPlots
 using JLD2
+using Printf
 
 include("normalize.jl")
 
 # point to path
-N_ens = 90 # number of ensemble members
-N_iter = 15 # number of EKI iterations
+N_ens = 20 # number of ensemble members
+N_iter = 10 # number of EKI iterations
 N_params = 3; # number of calibrated parameters
 NNstring = "Nens" *string(N_ens) * "_Niter" * string(N_iter)
-save_directory = "experiments/ekp/20221205_LES_10pct_jumps_constraints_3params_" * NNstring * "/"
+save_directory = "experiments/ekp/20230317_newD_" * NNstring * "/"
 
 # load ekiobj data
 @load save_directory * "ekiobj.jld2" ekiobj
@@ -207,6 +208,56 @@ savefig(save_directory * "prior_posterior.png")
 # # plot!(ylims=[50,250], subplot=)
 # # savefig(save_directory * "hysteresis_loop_iterations_ylim.png")
 # ####################
+
+# plot SST and LHF for each iteration
+plot(size=(800,300), layout=(1,2), dpi=200, left_margin=7Plots.mm, bottom_margin=5Plots.mm)
+i = 1
+g_i = get_g(ekiobj, i)
+for j in 1:N_ens
+    ϕ_ij = get_ϕ(priors, ekiobj, i)[:,j]
+    g_ij = unnormalize_data(g_i[1:nd,j], "SST")
+    if g_ij[9] < 300
+        println("no plot")
+    else
+        scatter!(
+            CO2updn_list,
+            g_ij,
+            marker=:o,
+            ms=5,
+            label = @sprintf("%.1f, %.1f, %.1f", ϕ_ij[1]*1e4, ϕ_ij[2]*1e3, ϕ_ij[3]),
+            xaxis="CO2 [ppmv]",
+            yaxis="SST [K]",
+            subplot=1,
+        )  
+        plot!(CO2updn_list, g_ij, linestyle=:dot, subplot=1, label=false)
+        
+        g_ij = unnormalize_data(g_i[nd+1:end,j], "LHF")
+        scatter!(
+            CO2updn_list,
+            g_ij,
+            marker=:o,
+            ms=5,
+            xaxis="CO2 [ppmv]",
+            yaxis="LHF [W/m2]",
+            subplot=2,
+            label=false
+        )            
+        plot!(CO2updn_list, g_ij, linestyle=:dot, subplot=2, label=false)
+    end
+end
+if PERFECT
+    plot!(CO2updn_list, unnormalize_data(truth.mean[1:nd], "SST"), subplot=1,
+        linestyle=:solid, lw=2, color=:black, label="truth", legend=:topleft)
+    plot!(CO2updn_list, unnormalize_data(truth.mean[nd+1:end], "LHF"), subplot=2,
+        linestyle=:solid, lw=2, color=:black, label=false)
+else
+    plot!(CO2updn_list, SSTupdn_list, subplot=1,
+        linestyle=:solid, lw=2, color=:black, label="LES", legend=:topleft)
+    plot!(CO2updn_list, LHFupdn_list, subplot=2,
+        linestyle=:solid, lw=2, color=:black, label=false)
+end
+savefig(save_directory * "hysteresis_loop_first_labeled.png")
+####################
 
 # plot SST and LHF for each iteration
 plot(size=(800,300), layout=(1,2), dpi=200, left_margin=7Plots.mm, bottom_margin=5Plots.mm)

@@ -1,8 +1,9 @@
-exp_path = "20230404_newD_AR1/";
+exp_path = "20230407_OU-ensemble10_noise3_10days/";
 path = "experiments/output/"*exp_path;
 
 using MixedLayerModel
 using JLD2, Statistics
+using SciMLBase.EnsembleAnalysis
 include("mlm_solve_funcs.jl")
 include("plot_transient_solution.jl")
 
@@ -12,7 +13,8 @@ par.etype = enBal();
 par.fttype = co2EIS();
 par.rtype = varRad();
 par.stype = fixSST();
-dt, tmax = 0.1, 200.0; # days
+dt, tmax = 1/6, 100.0; # days
+nhalf = Int(tmax/dt/2);
 
 # adjust tunable parameters
 par.Cd = 8e-4; #7.9e-4;
@@ -24,8 +26,9 @@ par.noise = 3e-3;
 # 400 ppm
 # u0, sol = run_mlm(par, dt=3600.0*24.0*dt*100, tspan=(0.0,3600.0*24.0*tmax), quiet=true);
 # uf = sol.u[end];
-u0, sol = stochastic_run_mlm(par, dt=3600.0*24.0*dt, tspan=(0.0,3600.0*24.0*tmax), quiet=true);
-uf = mean(sol.u[end-500:end]);
+u0, sim, sol = stochastic_run_mlm(par, dt=3600.0*24.0*dt, tspan=(0.0,3600.0*24.0*tmax), quiet=true);
+u = timeseries_steps_mean(sim);
+uf = dropdims(mean(u[end-nhalf:end], dims=2), dims=2);
 println("init 400: ", uf[5])
 zb = calc_LCL(uf);
 LWP = incloud_LWP(uf, zb);
@@ -33,7 +36,7 @@ OHU_400 = calc_OHU(uf,par,LWP,par.stype);
 println("OHU = ", OHU_400)
 
 mkpath(replace(path, "output"=>"figures"));
-plot_sol(sol,replace(path, "output"=>"figures")*"init400.png";)
+plot_sol(sol, replace(path, "output"=>"figures")*"init400.png", ndims(u))
 
 # upsteps/downsteps
 CO2updn_list = [200,300,400,600,800,1000,1200,1300,1400,1600,1600,1400,1300,1200,1000,800,600,400,300,200];
@@ -44,18 +47,19 @@ for (i,newCO2) in enumerate(CO2updn_list)
     par.OHU = OHU_400;
 
     # local u0, sol = run_mlm_from_init(uf, par, dt=3600.0*24.0*dt, tspan=(0.0,3600.0*24.0*tmax), quiet=true);
-    local u0, sol = stochastic_run_mlm_from_init(uf, par, dt=3600.0*24.0*dt, tspan=(0.0,3600.0*24.0*tmax), quiet=true);
-    
+    local u0, sim, sol = stochastic_run_mlm_from_init(uf, par, dt=3600.0*24.0*dt, tspan=(0.0,3600.0*24.0*tmax), quiet=true);
+    local u = timeseries_steps_mean(sim);
+
     # plot
     if i > I
         filename = replace(path, "output"=>"figures")*"down"*string(Int(newCO2))*"_t.png";
     else
         filename = replace(path, "output"=>"figures")*"up"*string(Int(newCO2))*"_t.png";
     end
-    plot_sol(sol, filename);
+    plot_sol(sol, filename, ndims(u));
 
     # print
-    global uf = mean(sol.u[end-500:end]);
+    global uf = dropdims(mean(u[end-nhalf:end], dims=2), dims=2);
     local zi, sM, qM, SST, CF = uf;
     local zb = calc_LCL(uf);
     local lwp = incloud_LWP(uf, zb);

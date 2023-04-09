@@ -86,21 +86,34 @@ function stochastic_run_mlm(params; init=1, dt=3600.0*5.0, tspan=(0.0,3600.0*24.
         zi0 = 1000.0;
         CF0 = params.CFmin;
     end 
-    
-    θ, μ, σ = 0.0, 0.0, 1.0
     u0 = [zi0, sM0, qtM0, params.SST0, CF0]; 
+
+    τsyn = 10*24*3600. # 5 days
+    W = OrnsteinUhlenbeckProcess(1/τsyn, 0., 1., 0., 0.)
     prob = SDEProblem(
-        SDEFunction(f_stochastic, g_bounded, tgrad=(du, u, p, t) -> fill!(du, 0.0)),
+        SDEFunction(mlm, g_bounded, tgrad=(du, u, p, t) -> fill!(du, 0.0)),
         g_bounded,
         u0,
         tspan,
         params,
-        seed = 18,
+        noise = W,
     );
-    sol = solve(prob, EM(), dt=dt);
+    ensembleprob = EnsembleProblem(prob);
+    sim = solve(ensembleprob, EM(), EnsembleThreads(), trajectories=10, dt=dt);
+    sol = EnsembleSummary(sim);
+
+    # prob = SDEProblem(
+    #     SDEFunction(mlm_stochastic, g_bounded, tgrad=(du, u, p, t) -> fill!(du, 0.0)),
+    #     g_bounded,
+    #     u0,
+    #     tspan,
+    #     params,
+    #     seed = 18,
+    # );
+    # sol = solve(prob, EM(), dt=dt);
     # sol = solve(prob, SOSRI(), abstol=0.0, reltol=steptol, dtmax=dt);
 
-    return u0, sol
+    return u0, sim, sol
 end
 
 
@@ -112,16 +125,30 @@ end
     and save output to file
 """
 function stochastic_run_mlm_from_init(u0, params; dt=3600.0*5.0, tspan=(0.0,3600.0*24.0*10.0), quiet=false)    
+    τsyn = 10*24*3600. # 5 days
+    W = OrnsteinUhlenbeckProcess(1/τsyn, 0., 1., 0., 0.)
     prob = SDEProblem(
-        SDEFunction(f_stochastic, g_bounded, tgrad=(du, u, p, t) -> fill!(du, 0.0)),
+        SDEFunction(mlm, g_bounded, tgrad=(du, u, p, t) -> fill!(du, 0.0)),
         g_bounded,
         u0,
         tspan,
         params,
-        seed = round(u0[5]*10000),
+        noise = W,
     );
-    sol = solve(prob, EM(), dt=dt);
+    ensembleprob = EnsembleProblem(prob);
+    sim = solve(ensembleprob, EM(), EnsembleThreads(), trajectories=10, dt=dt);
+    sol = EnsembleSummary(sim);
+    
+    # prob = SDEProblem(
+    #     SDEFunction(mlm_stochastic, g_bounded, tgrad=(du, u, p, t) -> fill!(du, 0.0)),
+    #     g_bounded,
+    #     u0,
+    #     tspan,
+    #     params,
+    #     seed = round(u0[5]*10000),
+    # );
+    # sol = solve(prob, EM(), dt=dt);
     # sol = solve(prob, SOSRI(), abstol=0.0, reltol=0.1, dtmax=dt);
     
-    return u0, sol
+    return u0, sim, sol
 end

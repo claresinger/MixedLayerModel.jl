@@ -125,32 +125,32 @@ function mlm(du, u, p, t)
     end
 end
 
-function dCFdt_synoptic(u, p, zb, LWP)
-    zi, sM, qM, SST, CF = u;
-    CFnew = cloud_fraction(u, p, zb, LWP);
-    τ_CF = 3600.0*24.0*p.τCF; # cloud fraction adjustment timescale [seconds]
-    τsyn = 5*24*3600.;
-    CFnew += (CFnew - u[5]) / τsyn;
-    return (CFnew - CF) / τ_CF
-end
+# function dCFdt_synoptic(u, p, zb, LWP)
+#     zi, sM, qM, SST, CF = u;
+#     CFnew = cloud_fraction(u, p, zb, LWP);
+#     τ_CF = 3600.0*24.0*p.τCF; # cloud fraction adjustment timescale [seconds]
+#     τsyn = 5*24*3600.;
+#     CFnew += (CFnew - u[5]) / τsyn;
+#     return (CFnew - CF) / τ_CF
+# end
 
-function f_stochastic(du, u, p, t)
-    if any(u .<= 0)
-        u = ones(5) .* [1000, 300e6, 6e-6, -1, 1];
-        du = zeros(5)
-    else
-        zb = calc_LCL(u);
-        LWP = incloud_LWP(u, zb);
-        ent = we(u, p, zb, LWP, p.etype);
-        du[1] = dzidt(u, p, ent, zb, LWP)
-        du[2] = dsMdt(u, p, ent, LWP)
-        du[3] = dqMdt(u, p, ent, LWP)
-        du[4] = dSSTdt(u, p, LWP, p.stype)
-        du[5] = dCFdt_synoptic(u, p, zb, LWP)
-    end
-end
+# function mlm_stochastic(du, u, p, t)
+#     if any(u .<= 0)
+#         u = ones(5) .* [1000, 300e6, 6e-6, -1, 1];
+#         du = zeros(5)
+#     else
+#         zb = calc_LCL(u);
+#         LWP = incloud_LWP(u, zb);
+#         ent = we(u, p, zb, LWP, p.etype);
+#         du[1] = dzidt(u, p, ent, zb, LWP)
+#         du[2] = dsMdt(u, p, ent, LWP)
+#         du[3] = dqMdt(u, p, ent, LWP)
+#         du[4] = dSSTdt(u, p, LWP, p.stype)
+#         du[5] = dCFdt_synoptic(u, p, zb, LWP)
+#     end
+# end
 
 function g_bounded(du, u, p, t)
     du[:] .= 0.
-    du[5] = p.noise * (u[5] - 0.1) * (p.CFmax - u[5])
+    du[5] = p.noise * (u[5] - 0) * (1 - u[5])
 end

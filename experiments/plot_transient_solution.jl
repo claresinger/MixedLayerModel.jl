@@ -1,30 +1,55 @@
 using MixedLayerModel
 using Plots
 
-function plot_sol(sol, filename)
+function plot_sol(sol, filename, ndims)
     ## plot and save
-    t = sol.t / 3600.0 / 24.0;
-    zi = getindex.(sol.u,1);
-    sM = getindex.(sol.u,2);
-    qtM = getindex.(sol.u,3);
-    sst = getindex.(sol.u,4);
-    cf = getindex.(sol.u,5);
-    S = zeros(length(t));
-    LHF = zeros(length(t));
-    zb = zeros(length(t));
-    ΔR = zeros(length(t));
-    LWP = zeros(length(t));
-    Δsv = zeros(length(t));
-    ent = zeros(length(t));
-    for (i,si) in enumerate(S)
-        zb[i] = calc_LCL(sol.u[i]);
-        LWP[i] = incloud_LWP(sol.u[i], zb[i]);
-        S[i] = calc_decoupling(sol.u[i], par, zb[i], LWP[i]);
-        LHF[i] = calc_LHF(sol.u[i], par);
-        ΔR[i] = calc_cloudtop_RAD(sol.u[i], par, LWP[i], par.rtype);
-        Δsv[i] = sv_jump(sol.u[i], par, LWP[i]);
-        ent[i] = we(sol.u[i], par, zb[i], LWP[i], par.etype);
-    end 
+    if ndims == 2
+        t = sol.t / 3600.0 / 24.0;
+        zi = sol.u[1,:];
+        sM = sol.u[2,:];
+        qtM = sol.u[3,:];
+        sst = sol.u[4,:];
+        cf = sol.u[5,:];
+        S = zeros(length(t));
+        LHF = zeros(length(t));
+        zb = zeros(length(t));
+        ΔR = zeros(length(t));
+        LWP = zeros(length(t));
+        Δsv = zeros(length(t));
+        ent = zeros(length(t));
+        for (i,si) in enumerate(S)
+            zb[i] = calc_LCL(sol.u[:,i]);
+            LWP[i] = incloud_LWP(sol.u[:,i], zb[i]);
+            S[i] = calc_decoupling(sol.u[:,i], par, zb[i], LWP[i]);
+            LHF[i] = calc_LHF(sol.u[:,i], par);
+            ΔR[i] = calc_cloudtop_RAD(sol.u[:,i], par, LWP[i], par.rtype);
+            Δsv[i] = sv_jump(sol.u[:,i], par, LWP[i]);
+            ent[i] = we(sol.u[:,i], par, zb[i], LWP[i], par.etype);
+        end 
+    elseif ndims == 1
+        t = sol.t / 3600.0 / 24.0;
+        zi = getindex.(sol.u,1);
+        sM = getindex.(sol.u,2);
+        qtM = getindex.(sol.u,3);
+        sst = getindex.(sol.u,4);
+        cf = getindex.(sol.u,5);
+        S = zeros(length(t));
+        LHF = zeros(length(t));
+        zb = zeros(length(t));
+        ΔR = zeros(length(t));
+        LWP = zeros(length(t));
+        Δsv = zeros(length(t));
+        ent = zeros(length(t));
+        for (i,si) in enumerate(S)
+            zb[i] = calc_LCL(sol.u[i]);
+            LWP[i] = incloud_LWP(sol.u[i], zb[i]);
+            S[i] = calc_decoupling(sol.u[i], par, zb[i], LWP[i]);
+            LHF[i] = calc_LHF(sol.u[i], par);
+            ΔR[i] = calc_cloudtop_RAD(sol.u[i], par, LWP[i], par.rtype);
+            Δsv[i] = sv_jump(sol.u[i], par, LWP[i]);
+            ent[i] = we(sol.u[i], par, zb[i], LWP[i], par.etype);
+        end 
+    end
     plot(size=(1200,800), layout=(6,2), dpi=200, left_margin = 5Plots.mm);
     plot!(t, zi, line=2, marker=:circle, legend=false, subplot=1, ylabel="zi, zb [m]");
     plot!(t, zb, line=2, marker=:circle, legend=false, subplot=1);

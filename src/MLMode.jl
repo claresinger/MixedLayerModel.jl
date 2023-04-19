@@ -1,5 +1,6 @@
 export sst_type, fixSST, varSST
 export mlm
+export co2_rate
 
 ## create type for surface energy balance
 ## one where SST is fixed
@@ -110,6 +111,10 @@ end
       dCF/dt = (CF' - CF) / τ_CF
 """
 function mlm(du, u, p, t)
+    if p.stype == varSST()
+        p.CO2 = co2_rate(t)
+    end
+
     if any(u .<= 0)
         u = ones(5) .* [1000, 300e6, 6e-6, -1, 1];
         du = zeros(5)
@@ -131,4 +136,9 @@ function mlm(du, u, p, t)
     #     # println(du)
     #     # println()
     # end
+end
+
+function co2_rate(t)
+    x = 400 * 1.1^(t/3600/24/365) # 10% increase per year
+    return x
 end

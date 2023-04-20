@@ -19,6 +19,8 @@ export upCO2, climatology
     # baseline CO2
     CO2::Real = 400; # (ppm)
     τCF::Real = 2; # (days)
+    CO2_init::Real = 400; # (ppm)
+    CO2_rate::Real = 0.0; 
     
     # subsidence strength
     D::Real = 6.0e-6; # (1/s)
@@ -48,6 +50,7 @@ export upCO2, climatology
     stype::sst_type = fixSST();
     fttype::ft_type = co2EIS();
     wvtype::wvtype = wvON();
+    ctype::co2_type = fixCO2();
 end
 
 @with_kw mutable struct climatology
@@ -94,4 +97,5 @@ end
     stype::sst_type = fixSST();
     fttype::ft_type = fixedFT();
     wvtype::wvtype = wvON();
+    ctype::co2_type = fixCO2();
 end

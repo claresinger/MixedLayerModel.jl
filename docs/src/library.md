@@ -36,6 +36,13 @@ Private = false
 Pages   = ["Entrainment.jl"]
 ```
 
+## Cloud fraction
+```@autodocs
+Modules = [MixedLayerModel]
+Private = false
+Pages   = ["CloudFraction.jl"]
+```
+
 ## MLM ODE
 ```@autodocs
 Modules = [MixedLayerModel]

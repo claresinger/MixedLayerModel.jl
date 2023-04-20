@@ -1,6 +1,7 @@
 export rad_type, varRad, fixRad
 export wvtype, wvON, wvRADOFF
 export calc_surf_RAD, calc_cloudtop_RAD
+export ΔTa, cloud_albedo, cloud_emissivity
 
 ## create type for radiation
 ## one where ΔR is prescribed

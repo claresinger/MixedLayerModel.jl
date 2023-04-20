@@ -6,7 +6,7 @@ plot(size=(1000,600), dpi=300, legend=false, axis=nothing, framestyle=:none);
 plot!([1,80],[0,0],linecolor="black");
 plot!([1,80], [50,50], fillrange = [100,100], color="grey", fillalpha=0.5);
 plot!([1,80], [-30,-30], fillrange = [0,0], color="blue", fillalpha=0.5);
-plot!([15,15,5,5],[0,100,100,150],linecolor="black");
+plot!([5,5,15,15],[0,100,100,150],linecolor="black");
 plot!([45,45,38,33],[0,100,100,150],linecolor="black");
 plot!([62,62,78,62,62],[0,50,100,100,150],linecolor="black");
 
@@ -24,12 +24,12 @@ plot!(RH, z, linecolor="black", linestyle=:dot);
 annotate!(0,50, text(L"$z_b$"));
 annotate!(0,100, text(L"$z_i$"));
 
-annotate!(17,10, text(L"$h_M$"));
+annotate!(7,10, text(L"$s_M$"));
 annotate!(36,10, text(L"$RH(z)$"));
 annotate!(48,10, text(L"$q_{tM}$"));
 annotate!(65,10, text(L"$q_l(z)$"));
 
-annotate!(8,120, text(L"$h_+(z)$"));
+annotate!(11,120, text(L"$s_+(z)$"));
 annotate!(30,120, text(L"$RH_{+}$"));
 annotate!(40,120, text(L"$q_{t+}(z)$"));
 

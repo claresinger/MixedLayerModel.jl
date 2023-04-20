@@ -4,7 +4,7 @@
 
 The mixed-layer model (MLM) is based on the assumption that the boundary layer between the surface and inversion height ``z_i`` is well-mixed. With these assumptions the governing equations simplify to a set of coupled ODEs for the inversion height and two thermodynamic variables for the energy and the water in the system.
 
-The two thermodynamic quantities (``\psi``) we use are ``h = C_p T + gz + L_v q_v``, the moist static energy, and ``q_t = q_v + q_l``, the total water specific humidity. Fig. 1 shows a sketch of the profiles of moist static energy, total water specific humidity, relative humidity, and liquid water specific humidity from the surface into the free-troposphere. The cloud is indicated by the grey shading between altitudes ``z_b`` (diagnosed as the [lifting condensation level](#Lifting-condensation-level,-cloud-base)) and ``z_i`` where relative humidity is equal to 100%.
+The two thermodynamic quantities (``\psi``) we use are ``s = C_p T + gz - L_v q_l``, the moist static energy, and ``q_t = q_v + q_l``, the total water specific humidity. Fig. 1 shows a sketch of the profiles of moist static energy, total water specific humidity, relative humidity, and liquid water specific humidity from the surface into the free-troposphere. The cloud is indicated by the grey shading between altitudes ``z_b`` (diagnosed as the [lifting condensation level](#Lifting-condensation-level,-cloud-base)) and ``z_i`` where relative humidity is equal to 100%.
 
 ```@example
 include("MakeDiagram.jl") #hide
@@ -25,9 +25,9 @@ The sea surface temperature (SST) is found by a enforcing a closed surface energ
 ```math
 \begin{aligned} 
     \frac{dz_i}{dt} &= w_e - Dz_i \\ 
-    z_i \frac{dh_M}{dt} &= V (h_0 - h_{M}) + w_e (h_+ - h_{M}) - \Delta R / \rho \\ 
+    z_i \frac{ds_M}{dt} &= V (s_0 - s_{M}) + w_e (s_+ - s_{M}) - \Delta R / \rho \\ 
     z_i \frac{dq_{tM}}{dt} &= V (q_{t0} - q_{tM}) + w_e (q_{t+} - q_{tM}) \\ 
-    C \frac{dSST}{dt} &= (1-\alpha) \frac{S_0}{4} - LW_{net} - \rho V (h_0 - h_M) - OHU \\
+    C \frac{dSST}{dt} &= (1-\alpha) \frac{S_0}{4} - LW_{net} - LHF - SHF - OHU \\
     \frac{dCF}{dt} &= \frac{CF' - CF}{\tau_{CF}} 
 \end{aligned}
 ```
@@ -60,8 +60,9 @@ The surface energy budget equation can be written as,
 
 ``\frac{d SST}{dt} = SW^{down} - SW^{up} + LW^{down} - LW^{up}- LHF - SHF - OHU.``
 
-We write the shortwave terms as
-``SW_{net} = (1 - \alpha_{cloud})(1 - \alpha_{ocean}) \frac{S_0}{4}``
+We linearize the shortwave terms as
+``SW_{net} = a_{SW} + (1-CF) b_{SW}``
+with ``a_{SW}`` and ``b_{SW}`` fit to the LES results from [Schneider et al. (2019)](https://doi.org/10.1038/s41561-019-0310-1).
 
 We approximate the net longwave radiation as constant ``LW_{net} = -30`` W/m``^2``.
 
@@ -73,57 +74,45 @@ where ``t`` is proportional to the mixed-layer specific humidity because as the 
 more moist, the effective emission level gets closer to the surface. We use a 
 simple fit to LES data and write, ``t = 500 \cdot qM`` where ``qM`` is in kg/kg. 
 
-#### Cloud shortwave albedo
-``\alpha_{cloud} = 1 - \frac{L_{1/2}}{L_{1/2} + LWP}``
-
-where ``L_{1/2}`` is the [liquid water path (LWP)](#Liquid-water-path) value such that ``\alpha_{cloud} = 0.5``.
-This is based on [Stephens (1978b)](https://doi.org/10.1175/1520-0469(1978)035<2123:RPIEWC>2.0.CO;2) equations 1 and 7. 
-We can write ``L_{1/2} = \frac{2 \mu r_e}{3 \beta}`` where ``\mu = \cos\theta`` is the cosine of the solar zenith angle, 
-``r_e`` is the droplet effective radius, and ``\beta`` is the backscatter coefficient.
-We take ``\beta = 0.07`` from Table 2, ``\theta = 60^\circ``, and ``r_e = 10`` ``\mu``m, which yields a value of ``L_{1/2} \approx 71`` g/m``^2``.
-
-Alternatively, the cloud albedo can be parameterized empirically based on the LES results from [Schneider et al. (2019)](https://doi.org/10.1038/s41561-019-0310-1) as,
-
-``\alpha_{cloud} = a \left( 1 - \frac{L_{1/2}}{L_{1/2} + LWP} \right)``
-
-where ``a = 0.795`` and ``L_{1/2} = 19.136`` g/m``^2``.
-
 ### Cloud-top longwave cooling 
 The amount of longwave cooling at the cloud top is dependent on the infrared energy radiating up from the cloud and the infrared energy radiating back down from higher in the atmosphere.
 
-``\Delta R = \epsilon_{cloud} \sigma T(z_i)^4 - \sigma T_{eff}^4``
+``\Delta R = \epsilon_c \sigma T(z_i)^4 - \sigma (T(z_i) - \Delta T_a)^4``
 
 #### Effective emissions temperature of downwelling longwave radiation to cloud-top
-``T_{eff} = a_0 + a_1 \ln \left( \frac{CO_2}{400} \right) = 263.5 + 10.8 \ln \left( \frac{CO_2}{400} \right)``
+``\Delta T_a = a_0 + a_1 \ln \left( \frac{CO_2}{400} \right) + a_2 \ln (q_{t,+})``
 
 This is an empirical fit to the LES results from [Schneider et al. (2019)](https://doi.org/10.1038/s41561-019-0310-1). 
 
 #### Cloud longwave emissivity 
+``\epsilon_c = 0.9`` is assumed to be constant.
+
+It can be made a function of LWP:
 ``\epsilon_{cloud} = 1 - \exp(-LWP/L_\tau)``
 
 where ``LWP_\tau = 7`` g/m``^2`` is the optical thickness of the cloud.
 This is based on [Stephens (1978b)](https://doi.org/10.1175/1520-0469(1978)035<2123:RPIEWC>2.0.CO;2) equations 15 and 16, taking an intermediate value of the parameter ``a_0 = 0.15``.
 
 ## Cloud Fraction
-We parameterize the cloud fraction as a function of the stability parameter (aka decoupling parameter), ``S = \left( \frac{LHF}{\Delta R} \right) \left( \frac{z_i - z_b}{z_i} \right)``, inspired by [Chung and Teixeira (2012)](https://doi.org/10.1175/JCLI-D-11-00105.1).
+We parameterize the cloud fraction as a function of the decoupling parameter, ``\mathscr{D} = \left( \frac{LHF}{\Delta R} \right) \left( \frac{z_i - z_b}{z_i} \right)``, inspired by [Chung and Teixeira (2012)](https://doi.org/10.1175/JCLI-D-11-00105.1).
 
 Specifically, we use a smooth function 
-``CF = 1 - \frac{0.8}{1 + exp(-m(S-S_{crit}))}`` 
-where ``m=10`` is a tunable parameter that sets the strength of the nonlinear feedback and ``S_{crit}=0.7`` is the value of the stability parameter that corresponds to ``CF=0.6``, the halfway point of the transition. The theoretical limit for the stability threshold, where decoupling occurs is at ``S \approx 0.55``.
+``CF = CF_{max} - \frac{CF_{max} - CF_{min}}{1 + (1/9)exp(-m(\mathscr{D}-\mathscr{D}_{crit}))}`` 
+where ``m=8`` is a tunable parameter that sets the strength of the nonlinear feedback and ``\mathscr{D}_{crit}=1`` is the value of the stability parameter that corresponds to when cloud fraction is 90\% depleted towards the minimum value.
 
 ```@example
-include("CloudFrac_vs_S.jl") #hide
+include("CloudFrac_vs_De.jl") #hide
 ```
-![](./figures/cf-vs-s.png)
+![](./figures/cf-vs-de.png)
 
 ## Thermodynamics
 
 ### Saturation adjustment
 The liquid water specific humidity is determined according to a standard saturation adjustment procedure. Simply, the mass of condensed water is the excess total water specific humidity exceeding the saturation specific humidity. 
 
-In this mixed-layer model, all thermodynamic equations are written in terms of moist static energy ``h`` and total water specific humidity ``q_t``. The temperature then is calculated implicitly by requiring that 
+In this mixed-layer model, all thermodynamic equations are written in terms of liquid static energy ``s`` and total water specific humidity ``q_t``. The temperature then is calculated implicitly by requiring that 
 
-``h = C_p T + gz + L_0 q_v``.
+``s = C_p T + gz - L_0 q_l``.
 
 ### Lifting condensation level, cloud base
 The cloud base is calculated as the lifting condensation level (LCL), which is a thermodynamic property depending only on the mixed-layer properties. The LCL is defined as the altitude ``z_b`` such that,

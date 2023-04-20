@@ -9,6 +9,10 @@ using MixedLayerModel:psurf, Cp, L0
     include("test_thermodynamics.jl")
 end
 
+@testset "Rad Tests" begin
+    include("test_radiation.jl")
+end
+
 @testset "Config Tests" begin
     include("test_configs.jl")
 end

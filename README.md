@@ -1,6 +1,10 @@
 # MixedLayerModel.jl
 Atmospheric mixed-layer model for subtropical stratocumulus clouds and their response to increasing CO2
 
+Papers using this code:
+- Singer and Schneider (2023a, submitted). Stratocumulus-cumulus transition explained by bulk boundary layer theory. [https://doi.org/10.22541/essoar.168167352.24863390/v1](https://doi.org/10.22541/essoar.168167352.24863390/v1)
+- Singer and Schneider (2023b, submitted). CO2-driven stratocumulus cloud breakup in a bulk boundary layer model. [https://doi.org/10.22541/essoar.168167204.45220772/v1](https://doi.org/10.22541/essoar.168167204.45220772/v1)
+
 |||
 |---------------------:|:----------------------------------------------|
 | **Docs Build**       | [![docs build][docs-bld-img]][docs-bld-url]   |

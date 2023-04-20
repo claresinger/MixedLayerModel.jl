@@ -20,7 +20,7 @@ export upCO2, climatology
     CO2::Real = 400; # (ppm)
     τCF::Real = 2; # (days)
     CO2_init::Real = 400; # (ppm)
-    rate::Real = 1.0; 
+    CO2_rate::Real = 0.0; 
     
     # subsidence strength
     D::Real = 6.0e-6; # (1/s)

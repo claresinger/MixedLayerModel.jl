@@ -7,8 +7,6 @@ docs/build/
 *.ipynb_checkpoints/
 *.vscode/
 
-experiments/old/
-
 *.csv
 *.txt
 *.jld2

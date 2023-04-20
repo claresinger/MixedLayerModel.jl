@@ -1,7 +1,7 @@
 export sst_type, fixSST, varSST
 export co2_type, fixCO2, varCO2
 export mlm
-export co2_rate
+export co2_of_t
 
 ## create type for surface energy balance
 ## one where SST is fixed
@@ -119,7 +119,7 @@ end
       dCF/dt = (CF' - CF) / τ_CF
 """
 function mlm(du, u, p, t)
-    p.CO2 = co2_rate(t,p,p.ctype)
+    p.CO2 = co2_of_t(t,p,p.ctype)
 
     if any(u .<= 0)
         u = ones(5) .* [1000, 300e6, 6e-6, -1, 1];
@@ -144,10 +144,10 @@ function mlm(du, u, p, t)
     # end
 end
 
-function co2_rate(t, p, ctype::varCO2)
-    return p.CO2_init * p.rate^(t/3600/24/365) # rate% increase per year
+function co2_of_t(t, p, ctype::varCO2)
+    return p.CO2_init * (1 + p.CO2_rate)^(t/3600/24/365) # rate% increase per year
 end
 
-function co2_rate(t, p, ctype::fixCO2)
+function co2_of_t(t, p, ctype::fixCO2)
     return p.CO2
 end

@@ -25,6 +25,7 @@ export upCO2, climatology
     # subsidence strength
     D::Real = 6.0e-6; # (1/s)
     α_vent::Real = 1.0e-3; # (m/s)
+    flux_α::Real = 0.1; # (-)
     
     # params for interactive surface fluxes
     V::Real = 10.0; # (m/s)
@@ -66,6 +67,7 @@ end
     # subsidence strength
     D::Real = 6.0e-6; # (1/s)
     α_vent::Real = 1.0e-3; # (m/s)
+    flux_α::Real = 0.1; # (-)
     
     # params for fixedFT inverson specification
     sft0::Real = 300*Cp; # (K * J/K/kg), Tft0 = 300 (K)

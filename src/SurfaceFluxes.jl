@@ -8,6 +8,13 @@ abstract type flux_type end
 struct varFlux <: flux_type end
 struct fixFlux <: flux_type end
 
+# adjustment factor based on degree of decoupling (or CF)
+# if CF = p.CFmax then flux_adj = 1, if CF = p.CFmin then flux_adj = 1 + p.flux_α
+function flux_adj(u,p)
+    zi, sM, qM, SST, CF = u;
+    return 1 + p.flux_α * ((p.CFmax - CF) / (p.CFmax - p.CFmin));
+end
+
 """
     define surface liquid static energy flux, S_surf
     using bulk aerodynamic formula
@@ -17,7 +24,9 @@ struct fixFlux <: flux_type end
 function S_0(u, p, ftype::varFlux)
     zi, sM, qM, SST, CF = u;
     s0 = Cp * SST;
-    return p.Cd * p.V * (s0 - sM)
+    # S0 = p.Cd * p.V * (s0 - sM);
+    S0 = p.Cd * p.V * flux_adj(u,p) * (s0 - sM);
+    return S0
 end
 
 """
@@ -40,7 +49,8 @@ end
 function Q_0(u, p, ftype::varFlux)
     zi, sM, qM, SST, CF = u;
     qs = q_sat(0.0,SST);
-    Q0 = p.Cd * p.V * (qs - qM);
+    # Q0 = p.Cd * p.V * (qs - qM);
+    Q0 = p.Cd * p.V * flux_adj(u,p) * (qs - qM);
     return Q0
 end
 

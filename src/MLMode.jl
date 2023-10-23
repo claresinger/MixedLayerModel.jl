@@ -33,8 +33,8 @@ function dzidt(u, p, ent, zb, LWP)
     # w_sub = p.D * sub_func;
     
     # TODO: w_vent
-    # w_vent = 0;
-    w_vent = p.α_vent * (p.CFmax - CF) / (p.CFmax - p.CFmin); # m/s
+    w_vent = 0;
+    # w_vent = p.α_vent * (p.CFmax - CF) / (p.CFmax - p.CFmin); # m/s
     
     dzidt = ent - w_sub + w_vent;
     return dzidt

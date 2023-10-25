@@ -1,4 +1,4 @@
-exp_path = "20231023_NOvent_NEWflux_0.45/";
+exp_path = "20231024_NOvent_NEWflux_0.43/";
 path = "experiments/output/"*exp_path;
 
 using MixedLayerModel
@@ -16,7 +16,7 @@ dt, tmax = 10.0, 100.0; # days
 
 # adjust tunable parameters
 par.Cd = 7.9e-4;
-par.flux_α = 0.45;
+par.flux_α = 0.43;
 # par.α_vent = 1.69e-3;
 par.SW_b = 140;
 
@@ -29,7 +29,7 @@ OHU_400 = calc_OHU(uf,par,LWP,par.stype);
 println(OHU_400)
 
 # upsteps/downsteps
-CO2updn_list = [200,300,400,600,800,1000,1200,1300,1400,1600,1600,1400,1300,1200,1000,600,800,400,300,200];
+CO2updn_list = [200,300,400,600,800,1000,1200,1300,1400,1600,1600,1400,1300,1200,1000,800,600,400,300,200];
 I = 10;
 par.stype = varSST();
 for (i,newCO2) in enumerate(CO2updn_list)

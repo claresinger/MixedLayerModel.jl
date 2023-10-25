@@ -60,16 +60,16 @@ truth = Observations.Observation(yt, data_names)
 # prior_Eexport = constrained_gaussian("prior_Eexport", 10, 1, 0.0, Inf)
 # prior_SW = constrained_gaussian("prior_SW", 150, 10, 0.0, Inf)
 # priors = combine_distributions([prior_Cd, prior_α, prior_EIS, prior_ECS, prior_Eexport, prior_SW])
-prior_Cd = ParameterDistribution(Parameterized(Normal(8e-4, 2e-4)), no_constraint(), "prior_Cd")
-prior_α = ParameterDistribution(Parameterized(Normal(1.2e-3, 0.3e-3)), no_constraint(), "prior_α")
-prior_SW = ParameterDistribution(Parameterized(Normal(150, 40)), no_constraint(), "prior_SW")
-priors = combine_distributions([prior_Cd, prior_α, prior_SW])
+prior_Cd = ParameterDistribution(Parameterized(Normal(8e-4, 0.5e-4)), bounded(1e-4, 1e-2), "prior_Cd")
+prior_fluxα = ParameterDistribution(Parameterized(Normal(0.45, 0.05)), bounded(0,1), "prior_α")
+prior_SW = ParameterDistribution(Parameterized(Normal(140, 10)), bounded(50,250), "prior_SW")
+priors = combine_distributions([prior_Cd, prior_fluxα, prior_SW])
 
 ###
 ###  Calibrate: Ensemble Kalman Inversion
 ###
-N_ens = 90 # number of ensemble members
-N_iter = 15 # number of EKI iterations
+N_ens = 50 # number of ensemble members
+N_iter = 3 # number of EKI iterations
 println(N_ens, " ", N_iter)
 # initial parameters: N_params x N_ens
 initial_params = construct_initial_ensemble(priors, N_ens; rng_seed = rng_seed)
@@ -107,7 +107,7 @@ println("ϕ_final: ", ϕ_final)
 # Output figure save directory
 homedir = pwd()
 NNstring = "Nens" *string(N_ens) * "_Niter" * string(N_iter)
-save_directory = homedir * "/experiments/ekp/20221205_LES_10pct_jumps_constraints_3params_" * NNstring * "/"
+save_directory = homedir * "/experiments/ekp/20231024_LES_10pct_jumps_constraints_3params_" * NNstring * "/"
 if ~isdir(save_directory)
     mkpath(save_directory)
 end

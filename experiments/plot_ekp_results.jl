@@ -10,11 +10,11 @@ using JLD2
 include("normalize.jl")
 
 # point to path
-N_ens = 90 # number of ensemble members
-N_iter = 15 # number of EKI iterations
+N_ens = 50 # number of ensemble members
+N_iter = 3 # number of EKI iterations
 N_params = 3; # number of calibrated parameters
 NNstring = "Nens" *string(N_ens) * "_Niter" * string(N_iter)
-save_directory = "experiments/ekp/20221205_LES_10pct_jumps_constraints_3params_" * NNstring * "/"
+save_directory = "experiments/ekp/20231024_LES_10pct_jumps_constraints_3params_" * NNstring * "/"
 
 # load ekiobj data
 @load save_directory * "ekiobj.jld2" ekiobj
@@ -43,7 +43,7 @@ plot!(
     ms=5,
     label=""
 )
-savefig(save_directory * "error_iterations.png")
+savefig(joinpath(save_directory, "error_iterations.png"))
 ####################
 
 # plot prior and posterior on calibrated variables
@@ -90,7 +90,7 @@ plot!(CO2updn_list, SSTf, yerr=σf[:,1], subplot=1, label="Optimal",
     linestyle=:solid, color=:red3, markerstrokecolor=:red3, lw=2)
 plot!(CO2updn_list, LHFf, yerr=σf[:,2], subplot=2, label=false,
     linestyle=:solid, color=:red3, markerstrokecolor=:red3, lw=2)
-savefig(save_directory * "prior_posterior.png")
+savefig(joinpath(save_directory, "prior_posterior.png"))
 ####################
 
 # # plot SST
@@ -262,9 +262,9 @@ savefig(save_directory * "hysteresis_loop_firstlast.png")
 for (i,ϕi) in enumerate(ϕ_list)
     ϕ_all[:,:,i] = ϕi;
 end
-param_name = ["\$V\$ [mm s⁻¹]", "\$\\alpha_{\\mathrm{vent}}\$ [mm s⁻¹]", 
+param_name = ["\$V\$ [mm s⁻¹]", "\$\\alpha\$ [-]", 
     "\$a_T\$ [K]", "\$b_T\$ [K]", "\$c_T\$ [K]", "\$b_{\\mathrm{SW}}\$ [W m⁻²]"]
-scale = [10^4, 10^3, 1, 1, 1, 1]
+scale = [10^4, 1, 1, 1, 1, 1]
 for i in 0:N_iter
     plot(size=(1200, 400), layout=(1,3), dpi=200, left_margin=10Plots.mm, bottom_margin = 10Plots.mm)
     for pl in 1:1
@@ -332,9 +332,9 @@ end
 println(get_ϕ_mean_final(priors, ekiobj))
 
 # plot ϕ parameter convergence
-param_name = ["\$V\$ [mm s⁻¹]", "\$\\alpha_{\\mathrm{vent}}\$ [mm s⁻¹]", 
+param_name = ["\$V\$ [mm s⁻¹]", "\$\\alpha\$ [-]", 
     "\$b_{\\mathrm{SW}}\$ [W m⁻²]"]
-scale = [10^4, 10^3, 1]
+scale = [10^4, 1, 1]
 plot(size=(900, 900), layout=(N_params,N_params), dpi=200,
     left_margin=5Plots.mm, bottom_margin = 5Plots.mm)
 for (i,it) in enumerate([0, N_iter])

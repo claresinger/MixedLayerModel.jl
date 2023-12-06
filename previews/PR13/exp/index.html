@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>CO_2 Perturbation Experiment · MixedLayerModel.jl</title><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.044/juliamono.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.11/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../">MixedLayerModel.jl</a></span></div><form class="docs-search" action="../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li><a class="tocitem" href="../theory/">Mixed Layer Theory</a></li><li><a class="tocitem" href="../ode_solver/">ODE Solver</a></li><li class="is-active"><a class="tocitem" href>CO<span>$_2$</span> Perturbation Experiment</a></li><li><a class="tocitem" href="../library/">APIs</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>CO<span>$_2$</span> Perturbation Experiment</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>CO<span>$_2$</span> Perturbation Experiment</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/claresinger/MixedLayerModel.jl/blob/master/docs/src/exp.md" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="Running-an-experiment"><a class="docs-heading-anchor" href="#Running-an-experiment">Running an experiment</a><a id="Running-an-experiment-1"></a><a class="docs-heading-anchor-permalink" href="#Running-an-experiment" title="Permalink"></a></h1><p>First use the MLM to calculate the steady-state clouds given an atmosphere with 400 ppm CO<span>$_2$</span> and fix the SST at 290 K.</p><pre><code class="language- hljs">using MixedLayerModel
+using OrdinaryDiffEq
+using Plots
+include(&quot;../../experiments/mlm_solve_funcs.jl&quot;)
+
+# run simulation
+par = upCO2();
+par.etype = enBal();
+par.fttype = co2dep();
+par.rtype = varRad();
+par.stype = fixSST();
+dt = 2.0;
+tmax = 40.0;
+ENV[&quot;GKSwstype&quot;]=&quot;nul&quot;
+u0, sol = run_mlm(par, dt=3600.0*dt, tspan=(0.0,3600.0*24.0*tmax));
+
+# plot #hide
+t = sol.t / 3600.0 / 24.0 #hide
+zi = getindex.(sol.u,1) #hide
+zb = calc_LCL.(sol.u) #hide
+sM = getindex.(sol.u,2) * 1e-3 #hide
+qtM = getindex.(sol.u,3) * 1e3 #hide
+SST = getindex.(sol.u,4) #hide
+CF = getindex.(sol.u,5) #hide
+LWP = incloud_LWP.(sol.u, zb) #hide
+plot(size=(600,500), layout=(5,1)) #hide
+plot!(t, zi, marker=&quot;o-&quot;, label=&quot;&quot;, subplot=1, ylabel=&quot;zi, zb [m]&quot;) #hide
+plot!(t, zb, marker=&quot;o-&quot;, subplot=1, label=&quot;&quot;) #hide
+plot!(t, sM, marker=&quot;o-&quot;, label=&quot;&quot;, subplot=2, ylabel=&quot;sM [kJ/kg]&quot;) #hide
+plot!(t, qtM, marker=&quot;o-&quot;, label=&quot;&quot;, subplot=3, ylabel=&quot;qtM [g/kg]&quot;) #hide
+plot!(t, SST, marker=&quot;o-&quot;, label=&quot;&quot;, subplot=4, ylabel=&quot;SST [K]&quot;) #hide
+plot!(t, CF*1e2, marker=&quot;o-&quot;, label=&quot;&quot;, subplot=5, ylabel=&quot;CF [%]&quot;) #hide</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../ode_solver/">« ODE Solver</a><a class="docs-footer-nextpage" href="../library/">APIs »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.18 on <span class="colophon-date" title="Friday 3 June 2022 00:25">Friday 3 June 2022</span>. Using Julia version 1.5.4.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

@@ -53,6 +53,47 @@ fig.text(1.02, 0.5, "In-cloud liquid water path [g m$^2$]",
 plt.savefig(path+"linear_perturb.png",dpi=200,bbox_inches="tight")
 
 
+fig, axes = plt.subplots(len(Xname_arr) // 2, 2, figsize=(6,6), constrained_layout=True)
+letter = ["a","b","c","d","e","f"]
+
+for (i,var) in enumerate(Xname_arr):
+    j = 0
+    case = "Sc"
+    ax = axes.flatten()[i]
+    ax.plot(
+        ds.sel(base=case, var=var).Xval.values * (1e6 if var=="D" else 1) * (100 if var=="RH" else 1),
+        ds.sel(base=case, var=var).CF.values*100,
+        color="k",
+        linestyle=":" if case=="Cu" else "-",
+        label=case,
+    )
+    ax.set_ylim([0,100])
+    ax.set_title(letter[i]+") "+Xlabel_arr[i], loc="left")
+
+    ax2 = ax.twinx()
+    ax2.plot(
+        ds.sel(base=case, var=var).Xval.values * (1e6 if var=="D" else 1) * (100 if var=="RH" else 1),
+        ds.sel(base=case, var=var).inLWP.values*1e3,
+        color="b",
+        linestyle=":" if case=="Cu" else "-",
+        label=case,
+    )
+    ax2.set_ylim([0,250])
+    ax2.spines['right'].set_color("b")
+    ax2.yaxis.label.set_color("b")
+    ax2.tick_params(axis='y', colors="b")
+
+    if i % 2 == 0:
+        ax2.set_yticks([])
+    else:
+        ax.set_yticks([])
+
+fig.supylabel("Cloud fraction [%]", fontsize=10)
+fig.text(1.02, 0.5, "In-cloud liquid water path [g m$^2$]", 
+    va="center", rotation="vertical", color="b", fontsize=10)
+plt.savefig(path+"linear_perturb_Sc.png",dpi=200,bbox_inches="tight")
+
+
 # Nvar, Ncase = np.size(ds.var), np.size(ds.base)
 # fig, axes = plt.subplots(len(Xname_arr), 2, figsize=(6,10))#, constrained_layout=True)
 # letter = [["a","b","c","d","e","f"],["g","h","i","j","k","l"]]

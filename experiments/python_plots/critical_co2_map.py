@@ -36,3 +36,26 @@ cax = fig.add_axes([0.35,-0.02,0.3,0.02])
 cb = plt.colorbar(h, cax=cax, orientation="horizontal", label="Cloud fraction [%]")
 plt.savefig(path+"critical_co2_map.png", dpi=400, bbox_inches="tight", facecolor="w")
 ds.close()
+
+# initial sst plot
+fig, ax = plt.subplots(nrows = 1, ncols = 1, figsize=(8,5),
+                subplot_kw={'extent': [-170, -110, 0, 40], 'projection':ccrs.PlateCarree()},
+                gridspec_kw={'wspace':0.05})
+# file = "experiments/data/crit_co2_map_input.nc"
+file = "experiments/data/regional_daily_good_BCs_JJA_NEP_subonly.nc"
+da = xr.open_dataset(file)
+gl = ax.gridlines(draw_labels=True)
+gl.right_labels = False
+gl.top_labels = False
+h = plt.contourf(da.lon, da.lat, da.mean("time").sst, levels=np.arange(285,300,1), cmap="Reds", extend="both")
+CS = plt.contour(da.lon, da.lat, da.mean("time").sst, levels = [290], colors="k")
+ax.clabel(CS, inline=True, fmt="%.0f", fontsize=14)
+
+ax.add_feature(cfeature.LAND, zorder=1, facecolor='black', edgecolor='black')
+ax.set_xlim([-145, -110])
+ax.set_ylim([15, 40])
+
+cax = fig.add_axes([0.35,-0.02,0.3,0.02])
+cb = plt.colorbar(h, cax=cax, orientation="horizontal", label="SST [K]")
+plt.savefig(path+"initial_sst_map.png", dpi=400, bbox_inches="tight", facecolor="w")
+da.close()

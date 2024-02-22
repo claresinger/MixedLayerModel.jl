@@ -24,8 +24,9 @@ export upCO2, climatology
     
     # subsidence strength
     D::Real = 6.0e-6; # (1/s)
-    α_vent::Real = 1.0e-3; # (m/s)
-    flux_α::Real = 0.1; # (-)
+    # α_vent::Real = 1.0e-3; # (m/s)
+    λsurf::Real = 0.1; # (-)
+    λtop::Real = 0.1; # (-)
     
     # params for interactive surface fluxes
     V::Real = 10.0; # (m/s)
@@ -38,7 +39,7 @@ export upCO2, climatology
     # tropical column params
     RHtrop0::Real = 0.8;
     RHft::Real = 0.2;
-    dTdz::Real = -5e-3; # (decreases by 5 K/km)
+    # dTdz::Real = -5e-3; # (decreases by 5 K/km)
 
     EIS0::Real = 8.0; # (K)
     ECS::Real = 1.5; # (K / co2 doubling)
@@ -66,17 +67,17 @@ end
     
     # subsidence strength
     D::Real = 6.0e-6; # (1/s)
-    α_vent::Real = 1.0e-3; # (m/s)
-    flux_α::Real = 0.1; # (-)
+    # α_vent::Real = 1.0e-3; # (m/s)
+    # flux_α::Real = 0.1; # (-)
     
-    # params for fixedFT inverson specification
-    sft0::Real = 300*Cp; # (K * J/K/kg), Tft0 = 300 (K)
-    Gamma_s::Real = Cp*-5e-3 + g; # (K/m * J/K/kg), dT/dz=-5 K/km
-    RHft::Real = 0.25;
+    # # params for fixedFT inverson specification
+    # sft0::Real = 300*Cp; # (K * J/K/kg), Tft0 = 300 (K)
+    # Gamma_s::Real = Cp*-5e-3 + g; # (K/m * J/K/kg), dT/dz=-5 K/km
+    # RHft::Real = 0.25;
     
     # for fixEIS inversion
     EIS0::Real = 8.0; # (K)
-    dTdz::Real = -5e-3; # (decreases by 5 K/km)
+    # dTdz::Real = -5e-3; # (decreases by 5 K/km)
     
     # params for interactive surface fluxes
     SST0::Real = 290.; # (K)

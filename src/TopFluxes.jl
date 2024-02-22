@@ -9,6 +9,13 @@ struct fixedFT <: ft_type end
 struct fixEIS <: ft_type end
 struct co2EIS <: ft_type end
 
+# adjustment factor based on degree of decoupling (or CF)
+# if CF = p.CFmax then λt = 1, if CF = p.CFmin then λt = 1 - p.λtop
+function λt(u,p)
+    zi, sM, qM, SST, CF = u;
+    return 1 - p.λtop * ((p.CFmax - CF) / (p.CFmax - p.CFmin));
+end
+
 """
     sjump(u, p, LWP, p.fttype::fixedFT)
     defines s+(z) in free troposphere -- given Gamma_s and Gamma_q
@@ -22,11 +29,12 @@ end
 
 """
     sjump(u, p, LWP, p.fttype::fixEIS)
-    defines s+(z) in free troposphere given EIS and dTdz
+    defines s+(z) in free troposphere given fixed EIS
 """
 function sjump(u, p, LWP, fttype::fixEIS)
     zi, sM, qM, SST, CF = u;
-    Tft = SST + p.EIS0 + p.dTdz*zi;
+    Tft = temp(zi, sM, qM) + p.EIS0;
+    # Tft = SST + p.EIS0 + p.dTdz*zi;
     sft = Cp*Tft + g*zi;
     sj = sft - sM;
     return sj
@@ -34,12 +42,13 @@ end
 
 """
     sjump(u, p, LWP, p.fttype::co2EIS)
-    defines s+(z) in free troposphere given EIS and dTdz
+    defines s+(z) in free troposphere given EIS = f(CO2)
 """
 function sjump(u, p, LWP, fttype::co2EIS)
     zi, sM, qM, SST, CF = u;
     EIS = p.EIS0 + (p.ECS/log(2))*log(p.CO2 / 400) - p.Eexport*(p.CFmax - CF);
-    Tft = SST + EIS + p.dTdz*zi;
+    Tft = temp(zi, sM, qM) + EIS;
+    # Tft = SST + EIS + p.dTdz*zi;
     sft = Cp*Tft + g*zi;
     sj = sft - sM;
     return sj
@@ -68,7 +77,7 @@ end
 """
 function S_zi(u, p, ent, LWP)
     sj = sjump(u, p, LWP, p.fttype);
-    return -ent * sj
+    return -ent * λt(u,p) * sj
 end
 
 """
@@ -79,5 +88,5 @@ end
 """
 function Q_zi(u, p, ent, LWP)
     qj = qjump(u, p, LWP, p.fttype);
-    return -ent * qj
+    return -ent * λt(u,p) * qj
 end

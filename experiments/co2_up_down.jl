@@ -1,4 +1,4 @@
-exp_path = "20231024_NOvent_NEWflux_0.43/";
+exp_path = "20231219_CFparLES_0.1_0.4/";
 path = "experiments/output/"*exp_path;
 
 using MixedLayerModel
@@ -12,13 +12,23 @@ par.etype = enBal();
 par.fttype = co2EIS();
 par.rtype = varRad();
 par.stype = fixSST();
-dt, tmax = 10.0, 100.0; # days
+
+# timescales
+par.Hw = 5 * (0.2/10); # (m), 0.2m ~ 10 days
+par.τCF = (1/24)/10; # 2 days
+dt, tmax = 0.5, 100.0; # days
+
+# base state tunable parameters
+par.Cd = 5e-4; #7.9e-4;
+par.SW_a = 120; # 120
+par.EIS0 = 8; # 8
+par.ECS = 1; # 1.5
 
 # adjust tunable parameters
-par.Cd = 7.9e-4;
-par.flux_α = 0.43;
-# par.α_vent = 1.69e-3;
-par.SW_b = 140;
+par.λsurf = 0.1; # 0
+par.λtop = 0.4; # 0
+par.SW_b = 200; # 140
+par.Eexport = 10; # 10
 
 # 400 ppm
 u0, sol = run_mlm(par, dt=3600.0*24.0*dt, tspan=(0.0,3600.0*24.0*tmax), quiet=true);
@@ -29,8 +39,8 @@ OHU_400 = calc_OHU(uf,par,LWP,par.stype);
 println(OHU_400)
 
 # upsteps/downsteps
-CO2updn_list = [200,300,400,600,800,1000,1200,1300,1400,1600,1600,1400,1300,1200,1000,800,600,400,300,200];
-I = 10;
+CO2updn_list = [200,300,400,600,800,1000,1200,1300,1400,1600,2400,3600,6400,10000,3600,2400,1600,1400,1300,1200,1000,800,600,400,300,200];
+I = 14;
 par.stype = varSST();
 for (i,newCO2) in enumerate(CO2updn_list)
     par.CO2 = newCO2;

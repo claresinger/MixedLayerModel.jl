@@ -33,7 +33,7 @@ for (i, co2i) in enumerate(co2u)
     lhf[i], ent[i], dR[i] = dat["LHF"], dat["we"]*1e3, dat["ΔR"];
     lwp[i] = incloud_LWP(uf, zb[i]) * 1e3;
 end
-S = (lhf./dR).*((zi.-zb)./zi);
+S = MixedLayerModel.decoupling_param(lhf, dR, zi, zb);
 
 ms = 8
 c = "crimson"
@@ -84,7 +84,7 @@ for (i, co2i) in enumerate(co2d)
     lhf[i], ent[i], dR[i] = dat["LHF"], dat["we"]*1e3, dat["ΔR"];
     lwp[i] = incloud_LWP(uf, zb[i]) * 1e3;
 end
-S = (lhf./dR).*((zi.-zb)./zi);
+S = MixedLayerModel.decoupling_param(lhf, dR, zi, zb);
 
 c = "royalblue"
 scatter!(p_dR, co2d, dR, color=c, marker=:circle, markersize=ms, markerstrokewidth=0, label="")
@@ -122,7 +122,7 @@ for (i, co2i) in enumerate(orig_co2u)
     lhf[i], ent[i], dR[i] = dat["LHF"], dat["we"]*1e3, dat["ΔR"];
     lwp[i] = incloud_LWP(uf, zb[i]) * 1e3;
 end
-S = (lhf./dR).*((zi.-zb)./zi);
+S = MixedLayerModel.decoupling_param(lhf, dR, zi, zb);
 
 c = "crimson"
 ms = 3
@@ -156,7 +156,7 @@ for (i, co2i) in enumerate(orig_co2d)
     lhf[i], ent[i], dR[i] = dat["LHF"], dat["we"]*1e3, dat["ΔR"];
     lwp[i] = incloud_LWP(uf, zb[i]) * 1e3;
 end
-S = (lhf./dR).*((zi.-zb)./zi);
+S = MixedLayerModel.decoupling_param(lhf, dR, zi, zb);
 
 c = "royalblue"
 ms = 3

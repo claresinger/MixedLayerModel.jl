@@ -1,4 +1,4 @@
-export calc_decoupling, cloud_fraction, cloud_fraction_param
+export calc_decoupling, cloud_fraction, cloud_fraction_param, decoupling_param
 
 """
     calc_decoupling(u, p)
@@ -13,9 +13,17 @@ function calc_decoupling(u, p, zb, LWP)
     zi, sM, qM, SST, CF = u;
     LHF = calc_LHF(u, p);
     ΔR = calc_cloudtop_RAD(u, p, LWP, p.rtype);
-    zc = zi - zb;
-    S = (LHF/ΔR)*(zc/zi);
+    # S = decoupling_param(LHF, ΔR, zi, zb);
+    S = decoupling_param(LHF, ΔR);
     return S
+end
+
+function decoupling_param(LHF, ΔR, zi, zb)
+    return σ * LHF / ΔR
+end
+
+function decoupling_param(LHF, ΔR, zi, zb)
+    return (LHF / ΔR) * (zi - zb) / zi
 end
 
 """
@@ -34,8 +42,15 @@ function cloud_fraction(u, p, zb, LWP)
 end
 
 function cloud_fraction_param(decoup, p)
-    m = p.decoup_slope; # tunable parameter for the slope of the CF nonlinearity
     dcrit = 1;
-    CF = p.CFmax - (p.CFmax - p.CFmin) / (1 + (1/9)*exp(-m*(decoup-dcrit)));
+    mslope = 1/5;
+    CF = min(p.CFmax, p.CFmin + (p.CFmax - p.CFmin) * exp(-mslope * (decoup - dcrit/2)));
     return CF
 end
+
+# function cloud_fraction_param(decoup, p)
+#     m = p.decoup_slope; # tunable parameter for the slope of the CF nonlinearity
+#     dcrit = 1;
+#     CF = p.CFmax - (p.CFmax - p.CFmin) / (1 + (1/9)*exp(-m*(decoup-dcrit)));
+#     return CF
+# end

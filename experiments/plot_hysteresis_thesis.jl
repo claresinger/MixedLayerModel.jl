@@ -32,7 +32,7 @@ for (i, co2i) in enumerate(co2u)
     lhf[i], ent[i], dR[i] = dat["LHF"], dat["we"]*1e3, dat["ΔR"];
     lwp[i] = incloud_LWP(uf, zb[i]) * 1e3;
 end
-S = (lhf./dR).*((zi.-zb)./zi);
+S = MixedLayerModel.decoupling_param(lhf, dR, zi, zb);
 
 ms = 8
 c = "crimson"
@@ -102,7 +102,7 @@ for (i, co2i) in enumerate(co2u)
     lhf[i], ent[i], dR[i] = dat["LHF"], dat["we"]*1e3, dat["ΔR"];
     lwp[i] = incloud_LWP(uf, zb[i]) * 1e3;
 end
-S = (lhf./dR).*((zi.-zb)./zi);
+S = MixedLayerModel.decoupling_param(lhf, dR, zi, zb);
 
 ms = 8
 c = "crimson"
@@ -152,7 +152,7 @@ for (i, co2i) in enumerate(co2d)
     lhf[i], ent[i], dR[i] = dat["LHF"], dat["we"]*1e3, dat["ΔR"];
     lwp[i] = incloud_LWP(uf, zb[i]) * 1e3;
 end
-S = (lhf./dR).*((zi.-zb)./zi);
+S = MixedLayerModel.decoupling_param(lhf, dR, zi, zb);
 
 c = "royalblue"
 scatter!(p_dR, co2d, dR, color=c, marker=:circle, markersize=ms, markerstrokewidth=0, label="")
@@ -185,7 +185,7 @@ zi = [1442,1349,1266,1078,1011,972,834,781,703];
 zb = [996,939,895,717,650,621,429,413,392];
 lhf = [97.8,103.9,107.1,112.8,115.3,120.5,208.7,213.5,220.9];
 dR = [80.2,76.0,74.1,69.6,66.5,61.9,4.7,3.9,2.5];
-S = (lhf./dR).*((zi.-zb)./zi);
+S = MixedLayerModel.decoupling_param(lhf, dR, zi, zb);
 
 ms = 10
 c = "crimson"
@@ -228,7 +228,7 @@ zi = [1416,1340,1230,1013,949,866,826,766];
 zb = [978,589,544,481,462,437,425,410];
 lhf = [96.1,179.1,183.7,195.2,199.7,206.0,209.4,214.4];
 dR = [82.1,9.6,9.7,7.2,6.6,5.1,4.5,3.6];
-S = (lhf./dR).*((zi.-zb)./zi);
+S = MixedLayerModel.decoupling_param(lhf, dR, zi, zb);
 
 c = "royalblue"
 scatter!(p_dR, co2, dR, color=c, marker=:x, markersize=ms, label="")
@@ -271,7 +271,7 @@ for (i, co2i) in enumerate(co2u)
     lhf[i], ent[i], dR[i] = dat["LHF"], dat["we"]*1e3, dat["ΔR"];
     lwp[i] = incloud_LWP(uf, zb[i]) * 1e3;
 end
-S = (lhf./dR).*((zi.-zb)./zi);
+S = MixedLayerModel.decoupling_param(lhf, dR, zi, zb);
 
 ms = 8
 c = "crimson"
@@ -304,7 +304,7 @@ for (i, co2i) in enumerate(co2d)
     lhf[i], ent[i], dR[i] = dat["LHF"], dat["we"]*1e3, dat["ΔR"];
     lwp[i] = incloud_LWP(uf, zb[i]) * 1e3;
 end
-S = (lhf./dR).*((zi.-zb)./zi);
+S = MixedLayerModel.decoupling_param(lhf, dR, zi, zb);
 
 c = "royalblue"
 scatter!(p_dR, co2d, dR, color=c, marker=:circle, markersize=ms, markerstrokewidth=0, label="")

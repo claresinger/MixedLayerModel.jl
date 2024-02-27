@@ -9,7 +9,7 @@ include("plot_transient_solution.jl")
 # create parameters
 par = upCO2();
 par.etype = enBal();
-par.fttype = fixEIS(); # no tropical warming from fixEIS()
+par.fttype = fixEIS(); # same relative tropical/subtropical warming from fixEIS() = zero with fixSST()
 par.rtype = varRad();
 par.stype = fixSST(); # no subtropical warming from fixSST()
 dt, tmax = 10.0, 100.0; # days

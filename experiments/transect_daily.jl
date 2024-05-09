@@ -7,7 +7,7 @@ using Statistics
 using StatsBase
 using Random
 
-path = "experiments/figures/20230215_dailytransect_subonly_100days_skip1_1var/"
+path = "experiments/figures/20240409_dailytransect_SEP_1var/"
 mkpath(path)
 
 include("mlm_solve_funcs.jl")
@@ -20,20 +20,20 @@ par.ftype = varFlux();
 par.fttype = fixEIS();
 par.etype = enBal();
 
-par.decoup_slope = 8;
-par.α_vent = 1.69e-3;
-par.Cd = 6e-4; #7.9e-4;
+# par.decoup_slope = 8;
+# par.α_vent = 1.69e-3;
+# par.Cd = 6e-4; #7.9e-4;
 
 # load boundary conditions from file
-file = "experiments/data/transect_BCs_all_JJA_NEP_subonly.nc";
+file = "experiments/data/transect_daily_DJF_SEP_subonly.nc";
 ds = Dataset(file, "r");
 time = ds["time"]
 
-Ndays = 100
+Ndays = 5 #100
 Random.seed!(1234)
 days_indices = sample(1:length(time), Ndays, replace=false, ordered=true)
 
-skipi = 1
+skipi = 5 #1
 lon = ds["lon"][1:skipi:end]
 Nlon = length(lon)
 println(Nlon, " out of ", length(ds["lon"]), " longitudes")
@@ -141,7 +141,7 @@ v = defVar(ds_save,"cf_1var",cf_1var,("time","lon","var"))
 v.attrib["units"] = "-"
 v.attrib["long_name"] = "cloud fraction"
 
-v = defVar(ds_save,"obs_cf_mean",ds["allsc_mean"][1:skipi:end],("lon",))
+v = defVar(ds_save,"obs_cf_mean",ds["allsc"][1:skipi:end],("lon",))
 v.attrib["units"] = "-"
 v.attrib["long_name"] = "observed cloud fraction mean (CASCCAD)"
 

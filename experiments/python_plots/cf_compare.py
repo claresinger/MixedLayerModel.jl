@@ -3,21 +3,19 @@ import xarray as xr
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import matplotlib.pyplot as plt
-import rioxarray
-# import rioxarray as rxr
-# from rioxarray import interpolate_na as intnan
 
 ## cloud fraction plot
 fig, axes = plt.subplots(nrows = 1, ncols = 2, figsize=(10,3), sharex=True, sharey=True,
                 subplot_kw={'extent': [-170, -110, 0, 40], 'projection':ccrs.PlateCarree()},
                 gridspec_kw={'wspace':0.05})
-ds = xr.open_dataset("experiments/data/climatology_for_MLM_std.nc")
-ds = ds.sel(month=[6,7,8]).mean("month")
+ds = xr.open_dataset("experiments/data/box_BCs_dailystats_JJA_NEP_subonly.nc")
+# ds = xr.open_dataset("experiments/data/box_BCs_daily_JJA_NEP_subonly.nc").mean("time")
 ax = axes[0]
 gl = ax.gridlines(draw_labels=True)
 gl.right_labels = False
 gl.top_labels = False
-ax.contourf(ds.lon, ds.lat, ds.low * 100, np.linspace(0,100,11), cmap="Greys")
+cf = ds.where(ds.allsc > 0, drop=True)
+ax.contourf(cf.lon, cf.lat, cf.allsc * 100, np.linspace(0,100,11), cmap="Greys")
 ax.add_feature(cfeature.LAND, zorder=1, facecolor='black', edgecolor='black')
 ax.set_xlim([-160, -110])
 ax.set_ylim([10, 40])

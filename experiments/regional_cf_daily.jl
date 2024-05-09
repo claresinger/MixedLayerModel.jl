@@ -10,17 +10,8 @@ include("mlm_solve_funcs.jl")
 path = "experiments/figures/20230223_CFdaily_200day_skip20x10/";
 mkpath(path);
 
-# import xarray as xr
-# ds = xr.open_dataset("data/box_BCs_daily_JJA_NEP_subonly.nc")
-# x = ds.where((ds.D500 > 0) & (ds.D500 < 10e-6) 
-#                 & (ds.EIS > 0) & (ds.EIS < 20) 
-#                 & (ds.RH500 < 1) 
-#                 & (ds.WS > 0) & (ds.WS < 15)
-#                 & (ds.sst == ds.sst))
-# x.to_netcdf("data/regional_daily_good_BCs_JJA_NEP_subonly.nc")
-
 # load boundary conditions from file
-file = "experiments/data/regional_daily_good_BCs_JJA_NEP_subonly.nc";
+file = "experiments/data/box_BCs_daily_JJA_NEP_subonly.nc";
 f = Dataset(file, "r");
 ds = NCDatasets.@select(f, 10 <= lat <= 40 && -160 <= lon <= -110);
 time = ds["time"];

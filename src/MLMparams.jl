@@ -69,6 +69,8 @@ end
     D::Real = 6.0e-6; # (1/s)
     # α_vent::Real = 1.0e-3; # (m/s)
     # flux_α::Real = 0.1; # (-)
+    λsurf::Real = 0.1; # (-)
+    λtop::Real = 0.1; # (-)
     
     # # params for fixedFT inverson specification
     # sft0::Real = 300*Cp; # (K * J/K/kg), Tft0 = 300 (K)
@@ -77,6 +79,7 @@ end
     
     # for fixEIS inversion
     EIS0::Real = 8.0; # (K)
+    RHft::Real = 0.2; # (-)
     # dTdz::Real = -5e-3; # (decreases by 5 K/km)
     
     # params for interactive surface fluxes

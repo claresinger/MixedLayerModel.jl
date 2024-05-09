@@ -18,7 +18,7 @@ function calc_decoupling(u, p, zb, LWP)
     return S
 end
 
-function decoupling_param(LHF, ΔR, zi, zb)
+function decoupling_param(LHF, ΔR)
     return σ * LHF / ΔR
 end
 

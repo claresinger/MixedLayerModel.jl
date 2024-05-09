@@ -43,7 +43,7 @@ par.Cd = 7.9e-4;
 par.α_vent = 1.69e-3;
 par.SW_b = 140;
 
-file = "experiments/data/crit_co2_map_input.nc";
+file = "experiments/data/crit_co2_map_input_JJA_NEP.nc";
 ds = Dataset(file, "r");
 SST_list = ds["sst"][:];
 EIS_list = ds["EIS"][:];

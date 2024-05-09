@@ -41,8 +41,7 @@ ds.close()
 fig, ax = plt.subplots(nrows = 1, ncols = 1, figsize=(8,5),
                 subplot_kw={'extent': [-170, -110, 0, 40], 'projection':ccrs.PlateCarree()},
                 gridspec_kw={'wspace':0.05})
-# file = "experiments/data/crit_co2_map_input.nc"
-file = "experiments/data/regional_daily_good_BCs_JJA_NEP_subonly.nc"
+file = "experiments/data/box_BCs_daily_JJA_NEP_subonly.nc"
 da = xr.open_dataset(file)
 gl = ax.gridlines(draw_labels=True)
 gl.right_labels = False

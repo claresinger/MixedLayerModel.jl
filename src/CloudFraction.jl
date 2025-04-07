@@ -19,11 +19,11 @@ function calc_decoupling(u, p, zb, LWP)
 end
 
 function decoupling_param(LHF, ΔR)
-    return σ * LHF / ΔR
+    return σ * LHF ./ ΔR
 end
 
 function decoupling_param(LHF, ΔR, zi, zb)
-    return (LHF / ΔR) * (zi - zb) / zi
+    return (LHF ./ ΔR) .* (zi .- zb) ./ zi
 end
 
 """

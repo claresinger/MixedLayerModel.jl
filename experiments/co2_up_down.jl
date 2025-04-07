@@ -1,4 +1,4 @@
-exp_path = "20231219_CFparLES_0.1_0.4/";
+exp_path = "20240509_CFparLES_0_0/";
 path = "experiments/output/"*exp_path;
 
 using MixedLayerModel
@@ -25,9 +25,9 @@ par.EIS0 = 8; # 8
 par.ECS = 1; # 1.5
 
 # adjust tunable parameters
-par.λsurf = 0.1; # 0
-par.λtop = 0.4; # 0
-par.SW_b = 200; # 140
+par.λsurf = 0; # 0
+par.λtop = 0; # 0
+par.SW_b = 140; # 140
 par.Eexport = 10; # 10
 
 # 400 ppm
@@ -39,8 +39,8 @@ OHU_400 = calc_OHU(uf,par,LWP,par.stype);
 println(OHU_400)
 
 # upsteps/downsteps
-CO2updn_list = [200,300,400,600,800,1000,1200,1300,1400,1600,2400,3600,6400,10000,3600,2400,1600,1400,1300,1200,1000,800,600,400,300,200];
-I = 14;
+CO2updn_list = [200,300,400,600,800,1000,1200,1300,1400,1600,1800,1800,1600,1400,1300,1200,1000,800,600,400,300,200];
+I = 11;
 par.stype = varSST();
 for (i,newCO2) in enumerate(CO2updn_list)
     par.CO2 = newCO2;

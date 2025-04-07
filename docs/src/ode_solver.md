@@ -22,9 +22,9 @@ On the other hand, we sometimes may want to solve the MLM without having an init
 function run_mlm(params; dt=3600.0*5.0, tspan=(0.0,3600.0*24.0*10.0))
     zi0 = 1000.0
     qtM0 = params.RHsurf * q_sat(0.0, params.SST0);
-    sM0 = MixedLayerModel.Cp * params.SST0 + MixedLayerModel.L0 * qtM0;
+    sM0 = MixedLayerModel.Cp * params.SST0;
     CF0 = 1.0;
-    u0 = [zi0, sM0, qtM0, CF0, params.SST0];
+    u0 = [zi0, sM0, qtM0, params.SST0, CF0];
     prob = ODEProblem(mlm, u0, tspan, params);
     @time begin
         sol = solve(prob, Euler(), dt=dt, progress=true, progress_steps=50);

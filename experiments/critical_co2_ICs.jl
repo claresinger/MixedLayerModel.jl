@@ -78,19 +78,19 @@ println(co2c_list[:])
 N = length(co2c_list)
 
 # plot
-isfile(exp_path*"co2_crit_ICs.png") ? rm(exp_path*"co2_crit_ICs.png") : "no file"
+isfile(exp_path*"co2_crit_SST400.png") ? rm(exp_path*"co2_crit_SST400.png") : "no file"
 default = 5
 ms = 6
 p = plot(SST_list, co2c_list, 
     marker=:circle, markersize=ms, color=:black, markerstrokewidth=0, label=false, 
-    xlabel="Initial condition SST [K]", ylabel="Critical CO₂ [ppmv]", ylims=[0,2500],
+    xlabel="Base state SST [K]", ylabel="Critical CO₂ [ppmv]", ylims=[0,2500],
     size=(500,400), dpi=300, left_margin=5Plots.mm, bottom_margin=5Plots.mm, right_margin=2Plots.mm)
 
 plot!([SST_list[default]], [co2c_list[default]], 
     marker=:circle, markersize=ms, color=:red3, markerstrokewidth=0, label=false,
     z_order=:front)
 
-savefig(p, exp_path*"co2_crit_ICs.png")
+savefig(p, exp_path*"co2_crit_SST400.png")
 
 
 

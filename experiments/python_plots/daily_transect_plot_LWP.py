@@ -13,7 +13,7 @@ ds["obs_cf_std"] = ds.obs_cf_std.mean("time")
 
 ###############
 
-fig, axes = plt.subplots(2,1,figsize=(10,8), sharex=True, sharey=True)
+fig, axes = plt.subplots(3,1,figsize=(10,11), sharex=True, sharey=False)
 plt.rcParams.update({"font.size":15})
 
 ax = axes[0]
@@ -24,23 +24,26 @@ ax.fill_between(ds.lon, (ds.obs_cf_mean-ds.obs_cf_std)*100,
 
 ax.plot(ds.lon, ds.cf.mean("time") * 100, lw=3, color="magenta", label="Bulk model, 100 day mean")
 ax.plot(ds.lon, ds.cf_mean.mean("time") * 100, lw=2, color="magenta", ls="--", label="Bulk model, mean forcing")
+ax.set_ylabel("Cloud fraction [%]", fontsize=15)
+ax.set_ylim([0,100])
+ax.grid(which="both")
+ax.set_title("a) Cloud fraction transect comparison", loc="left")
+ax.legend(loc=4, borderaxespad=0.2)
 
-ax2 = ax.twinx()
-ax2.plot(ds.lon, ds.icLWP.mean("time")*1e3, lw=3, color="cyan") # kg/m2 --> g/m2
-ax2.set_ylabel("in-cloud LWP [g m$^{-2}$]", color="cyan")
-ax2.tick_params(axis='y', colors='cyan')
+ax = axes[1]
+ax.plot(ds.lon, ds.icLWP.mean("time")*1e3, lw=3, color="teal") # kg/m2 --> g/m2
+ax.set_ylabel("in-cloud LWP [g m$^{-2}$]", color="teal", fontsize=15)
+ax.tick_params(axis='y', colors='teal', labelsize=15)
+ax.grid(which="both")
+ax.set_title("b) Bulk model transect", loc="left")
 
 ax2 = ax.twinx()
 ax2.plot(ds.lon, ds.zb.mean("time"), lw=3, color="goldenrod")
 ax2.plot(ds.lon, ds.zi.mean("time"), lw=3, color="goldenrod")
-ax2.set_ylabel("Cloud base/top [m]", color="goldenrod")
+ax2.set_ylabel("Cloud base/top [m]", color="goldenrod", fontsize=15)
 ax2.tick_params(axis='y', colors='goldenrod')
 
-ax.grid(which="both")
-ax.set_title("a) Transect comparison", loc="left")
-ax.legend(loc=4, borderaxespad=0.2)
-
-ax = axes[1]
+ax = axes[2]
 ax.tick_params(axis='both', which='major', labelsize=15)
 ax.plot(ds.lon, ds.mean("time").cf * 100, lw=3, color="magenta", label="All")
 labels = {"sst":"SST", "WS":"$U$", "EIS":"EIS", "D500":"$D_{500}$", "RH500":"RH$_{500}$"}
@@ -49,19 +52,71 @@ for i,var in enumerate(["sst", "WS", "EIS", "D500", "RH500"]):
     ax.plot(ds.lon, ds.sel(var=var).mean("time").cf_1var * 100, lw=3, ls=ls[var], color="C"+str(i), label=labels[var])
 
 ax.legend(ncol=2, loc=4, borderaxespad=0.2)
-ax.set_xticks([-150, -140, -130, -120], 
-    ["150°W", "140°W", "130°W", "120°W"])
+ax.set_xticks([-150, -140, -130, -120])
+ax.set_xticklabels(["150°W", "140°W", "130°W", "120°W"])
 ax.xaxis.set_minor_locator(MultipleLocator(5))
 ax.set_xlim(np.min(ds.lon), np.max(ds.lon))
 ax.set_ylim([0,100])
 ax.grid(which="both")
-ax.set_title("b) Single variable forcing transect comparison", loc="left")
+ax.set_title("c) Single variable forcing transect", loc="left")
+ax.set_ylabel("Cloud fraction [%]", fontsize=15)
 
-fig.supylabel("Cloud fraction [%]", x=0.05)
 plt.rcParams.update({"font.size":15})
-plt.savefig(path+"daily_transect_LWP.png", dpi=200, bbox_inches="tight")
+plt.savefig(path+"daily_transect_LWP_3panel.png", dpi=200, bbox_inches="tight")
 
 ds.close()
+
+###############
+
+# fig, axes = plt.subplots(2,1,figsize=(10,8), sharex=True, sharey=True)
+# plt.rcParams.update({"font.size":15})
+
+# ax = axes[0]
+# ax.tick_params(axis='both', which='major', labelsize=15)
+# ax.plot(ds.lon, ds.obs_cf_mean * 100, lw=3, color="k", label="CASCCAD Observations")
+# ax.fill_between(ds.lon, (ds.obs_cf_mean-ds.obs_cf_std)*100, 
+#     (ds.obs_cf_mean+ds.obs_cf_std)*100, alpha=0.2, color="k")
+
+# ax.plot(ds.lon, ds.cf.mean("time") * 100, lw=3, color="magenta", label="Bulk model, 100 day mean")
+# ax.plot(ds.lon, ds.cf_mean.mean("time") * 100, lw=2, color="magenta", ls="--", label="Bulk model, mean forcing")
+
+# ax2 = ax.twinx()
+# ax2.plot(ds.lon, ds.icLWP.mean("time")*1e3, lw=3, color="cyan") # kg/m2 --> g/m2
+# ax2.set_ylabel("in-cloud LWP [g m$^{-2}$]", color="cyan")
+# ax2.tick_params(axis='y', colors='cyan')
+
+# ax2 = ax.twinx()
+# ax2.plot(ds.lon, ds.zb.mean("time"), lw=3, color="goldenrod")
+# ax2.plot(ds.lon, ds.zi.mean("time"), lw=3, color="goldenrod")
+# ax2.set_ylabel("Cloud base/top [m]", color="goldenrod")
+# ax2.tick_params(axis='y', colors='goldenrod')
+
+# ax.grid(which="both")
+# ax.set_title("a) Transect comparison", loc="left")
+# ax.legend(loc=4, borderaxespad=0.2)
+
+# ax = axes[1]
+# ax.tick_params(axis='both', which='major', labelsize=15)
+# ax.plot(ds.lon, ds.mean("time").cf * 100, lw=3, color="magenta", label="All")
+# labels = {"sst":"SST", "WS":"$U$", "EIS":"EIS", "D500":"$D_{500}$", "RH500":"RH$_{500}$"}
+# ls = {"sst":":", "WS":"-", "EIS":"--", "D500":":", "RH500":"-"}
+# for i,var in enumerate(["sst", "WS", "EIS", "D500", "RH500"]):
+#     ax.plot(ds.lon, ds.sel(var=var).mean("time").cf_1var * 100, lw=3, ls=ls[var], color="C"+str(i), label=labels[var])
+
+# ax.legend(ncol=2, loc=4, borderaxespad=0.2)
+# ax.set_xticks([-150, -140, -130, -120], 
+#     ["150°W", "140°W", "130°W", "120°W"])
+# ax.xaxis.set_minor_locator(MultipleLocator(5))
+# ax.set_xlim(np.min(ds.lon), np.max(ds.lon))
+# ax.set_ylim([0,100])
+# ax.grid(which="both")
+# ax.set_title("b) Single variable forcing transect comparison", loc="left")
+
+# fig.supylabel("Cloud fraction [%]", x=0.05)
+# plt.rcParams.update({"font.size":15})
+# plt.savefig(path+"daily_transect_LWP.png", dpi=200, bbox_inches="tight")
+
+# ds.close()
 
 #########################
 

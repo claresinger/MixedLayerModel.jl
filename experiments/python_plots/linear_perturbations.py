@@ -2,7 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import xarray as xr
 
-path = "experiments/figures/20221211_linear_perturb/"
+# path = "../../experiments/figures/20221211_linear_perturb/"
+path = "../../experiments/figures/20260208_linear_perturb/"
 ds = xr.open_dataset(path+"linear_perturbs.nc")
 
 Xname_arr = ["SST", "V", "EIS", "D", "RH", "CO2"]
@@ -24,8 +25,14 @@ for (i,var) in enumerate(Xname_arr):
             linestyle=":" if case=="Cu" else "-",
             label=case,
         )
-        ax.set_ylim([0,100])
+        ax.set_ylim([0,90])
+        ax.axhline(10, color="k", lw=0.3)
+        ax.axhline(80, color="k", lw=0.3)
         ax.set_title(letter[i]+") "+Xlabel_arr[i], loc="left")
+        if var == "CO2":
+            ax.set_xscale("log")
+            ax.set_xticks([100,200,400,800,1600],["100","200","400","800","1600"])
+            ax.xaxis.set_minor_locator(plt.NullLocator())
         if i == 0:
             ax.legend(loc=3, labelspacing=0.2, borderaxespad=0.3, handlelength=1.5)
 
@@ -50,7 +57,7 @@ for (i,var) in enumerate(Xname_arr):
 fig.supylabel("Cloud fraction [%]", fontsize=10)
 fig.text(1.02, 0.5, "In-cloud liquid water path [g m$^2$]", 
     va="center", rotation="vertical", color="b", fontsize=10)
-plt.savefig(path+"linear_perturb.png",dpi=200,bbox_inches="tight")
+plt.savefig(path+"linear_perturb.pdf",dpi=200,bbox_inches="tight")
 
 
 fig, axes = plt.subplots(len(Xname_arr) // 2, 2, figsize=(6,6), constrained_layout=True)
@@ -67,7 +74,9 @@ for (i,var) in enumerate(Xname_arr):
         linestyle=":" if case=="Cu" else "-",
         label=case,
     )
-    ax.set_ylim([0,100])
+    ax.set_ylim([0,90])
+    ax.axhline(10, color="k", lw=0.3)
+    ax.axhline(80, color="k", lw=0.3)
     ax.set_title(letter[i]+") "+Xlabel_arr[i], loc="left")
 
     ax2 = ax.twinx()
@@ -91,7 +100,7 @@ for (i,var) in enumerate(Xname_arr):
 fig.supylabel("Cloud fraction [%]", fontsize=10)
 fig.text(1.02, 0.5, "In-cloud liquid water path [g m$^2$]", 
     va="center", rotation="vertical", color="b", fontsize=10)
-plt.savefig(path+"linear_perturb_Sc.png",dpi=200,bbox_inches="tight")
+plt.savefig(path+"linear_perturb_Sc.pdf",dpi=200,bbox_inches="tight")
 
 
 # Nvar, Ncase = np.size(ds.var), np.size(ds.base)

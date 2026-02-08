@@ -5,17 +5,20 @@ using NCDatasets
 
 include("mlm_solve_funcs.jl")
 
-path = "experiments/figures/20221211_linear_perturb/";
+# path = "experiments/figures/20221211_linear_perturb/";
+path = "experiments/figures/20260208_linear_perturb/";
 mkpath(path);
 
 N = 11
 _p2 = collect(range(98,102,N)) ./ 100;
 _p10 = collect(range(90,110,N)) ./ 100;
 _p20 = collect(range(80,120,N)) ./ 100;
-_p50 = collect(range(50,150,N)) ./ 100;
+_p40 = collect(range(60,140,N)) ./ 100;
+# _p50 = collect(range(50,150,N)) ./ 100;
+_pco2 = collect(range(25,400,N)) ./ 100;
 Xname_arr = ["SST", "V", "D", "RH", "EIS", "CO2"];
 Xlabel_arr = ["SST [K]", "V [m/s]", "D [10⁻⁶ s⁻¹]", "RH₊ [%]", "EIS [K]", "CO₂ [ppm]"];
-perturb = [_p2, _p10, _p10, _p20, _p20, _p50];
+perturb = [_p2, _p20, _p10, _p40, _p20, _pco2];
 Nvar = length(Xname_arr);
 print = false;
 

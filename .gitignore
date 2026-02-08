@@ -12,4 +12,5 @@ experiments/figures/
 *.txt
 *.jld2
 *.png
+*.pdf
 *.nc

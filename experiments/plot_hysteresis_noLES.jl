@@ -179,13 +179,13 @@ plot!(p_cf, orig_co2d, cf*100, color=c, linewidth=1, alpha=0.5, label="")
 # plot!(p_dR, [-1, -1], [-1, -1], color="black", alpha=0.5, label="Orig")
 # scatter!(p_dR, [-1], [-1], color="black", marker=:circle, markersize=1, markerstrokewidth=0, label="WV off")
 
-# save plot
-p = plot(p_dR,p_sst,p_zi,p_decoup,p_lhf,p_cf, layout=(2,3), 
-    link=:x, size=(1300,650), dpi=300,
-    legend=:topright, legendfontsize=12, legendfont=font(12),
-    left_margin=10Plots.mm, bottom_margin=7Plots.mm, top_margin=5Plots.mm);
-mkpath("experiments/figures/"*exp_path)
-savefig(p, "experiments/figures/"*exp_path*"hystersis_plot.png")
+# # save plot
+# p = plot(p_dR,p_sst,p_zi,p_decoup,p_lhf,p_cf, layout=(2,3), 
+#     link=:x, size=(1300,650), dpi=300,
+#     legend=:topright, legendfontsize=12, legendfont=font(12),
+#     left_margin=10Plots.mm, bottom_margin=7Plots.mm, top_margin=5Plots.mm);
+# mkpath("experiments/figures/"*exp_path)
+# savefig(p, "experiments/figures/"*exp_path*"hystersis_plot.png")
 
 # save another plot
 p = plot(p_dR,p_sst,p_lhf,p_cf, layout=(2,2), 
@@ -193,7 +193,9 @@ p = plot(p_dR,p_sst,p_lhf,p_cf, layout=(2,2),
     legend=:topright, legendfontsize=10, legendfont=font(10),
     left_margin=7Plots.mm, right_margin=2Plots.mm, bottom_margin=6Plots.mm, top_margin=6Plots.mm);
 mkpath("experiments/figures/"*exp_path)
-savefig(p, "experiments/figures/"*exp_path*"hystersis_plot_"*title*".png")
+# savefig(p, "experiments/figures/"*exp_path*"hystersis_plot_"*title*".png")
+savefig(p, "experiments/figures/"*exp_path*"hystersis_plot_"*title*".pdf")
+
 
 # reset fontsizes
 Plots.scalefontsizes(1/1.2)

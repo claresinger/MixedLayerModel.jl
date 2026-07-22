@@ -43,7 +43,8 @@ plot!(
     ms=5,
     label=""
 )
-savefig(save_directory * "error_iterations.png")
+# savefig(save_directory * "error_iterations.png")
+savefig(save_directory * "error_iterations.pdf")
 ####################
 
 # plot prior and posterior on calibrated variables
@@ -90,7 +91,8 @@ plot!(CO2updn_list, SSTf, yerr=σf[:,1], subplot=1, label="Optimal",
     linestyle=:solid, color=:red3, markerstrokecolor=:red3, lw=2)
 plot!(CO2updn_list, LHFf, yerr=σf[:,2], subplot=2, label=false,
     linestyle=:solid, color=:red3, markerstrokecolor=:red3, lw=2)
-savefig(save_directory * "prior_posterior.png")
+# savefig(save_directory * "prior_posterior.png")
+savefig(save_directory * "prior_posterior.pdf")
 ####################
 
 # # plot SST
@@ -253,7 +255,8 @@ else
     plot!(CO2updn_list, LHFupdn_list, subplot=2,
         linestyle=:solid, lw=2, color=:black, label=false)
 end
-savefig(save_directory * "hysteresis_loop_firstlast.png")
+# savefig(save_directory * "hysteresis_loop_firstlast.png")
+savefig(save_directory * "hysteresis_loop_firstlast.pdf")
 ####################
 
 # plot ϕ parameter convergence
@@ -301,7 +304,8 @@ for i in 0:N_iter
             )
         end
     end
-    figpath = joinpath(save_directory, "parameters_EKP_it_$(i).png")
+    # figpath = joinpath(save_directory, "parameters_EKP_it_$(i).png")
+    figpath = joinpath(save_directory, "parameters_EKP_it_$(i).pdf")
     savefig(figpath)
 end
 
@@ -324,7 +328,8 @@ for (i,it) in enumerate([0, N_iter])
             ylabel = param_name[pl*2-1],
         )
     end
-    savefig(save_directory * "parameters_EKP_firstlast.png")
+    # savefig(save_directory * "parameters_EKP_firstlast.png")
+    savefig(save_directory * "parameters_EKP_firstlast.pdf")
 end
 
 ####################
@@ -372,7 +377,8 @@ for (i,it) in enumerate([0, N_iter])
             end
         end
     end
-    savefig(save_directory * "parameters_EKP_corner.png")
+    # savefig(save_directory * "parameters_EKP_corner.png")
+    savefig(save_directory * "parameters_EKP_corner.pdf")
 end
 
 ####################

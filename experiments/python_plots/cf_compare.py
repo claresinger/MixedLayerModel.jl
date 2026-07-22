@@ -11,13 +11,17 @@ import rioxarray
 fig, axes = plt.subplots(nrows = 1, ncols = 2, figsize=(10,3), sharex=True, sharey=True,
                 subplot_kw={'extent': [-170, -110, 0, 40], 'projection':ccrs.PlateCarree()},
                 gridspec_kw={'wspace':0.05})
-ds = xr.open_dataset("experiments/data/climatology_for_MLM_std.nc")
-ds = ds.sel(month=[6,7,8]).mean("month")
+# ds = xr.open_dataset("experiments/data/climatology_for_MLM_std.nc")
+# ds = ds.sel(month=[6,7,8]).mean("month")
+ds = xr.open_dataset("experiments/data/box_BCs_dailystats_JJA_NEP_subonly.nc")
+ds = ds[["allsc"]].dropna(dim="lat",how="all").dropna(dim="lon",how="all")
+print(ds)
 ax = axes[0]
 gl = ax.gridlines(draw_labels=True)
 gl.right_labels = False
 gl.top_labels = False
-ax.contourf(ds.lon, ds.lat, ds.low * 100, np.linspace(0,100,11), cmap="Greys")
+# ax.contourf(ds.lon, ds.lat, ds.low * 100, np.linspace(0,100,11), cmap="Greys")
+ax.contourf(ds.lon, ds.lat, ds.allsc * 100, np.linspace(0,100,11), cmap="Greys")
 ax.add_feature(cfeature.LAND, zorder=1, facecolor='black', edgecolor='black')
 ax.set_xlim([-160, -110])
 ax.set_ylim([10, 40])
@@ -51,5 +55,6 @@ ax.set_title("b) Bulk model", loc="left")
 
 cax = fig.add_axes([0.35,-0.05,0.3,0.02])
 cb = plt.colorbar(h, cax=cax, orientation="horizontal", label="Cloud fraction [%]")
-plt.savefig(path+"baseline_cloud_fraction.png", dpi=400, bbox_inches="tight", facecolor="w")
+# plt.savefig(path+"baseline_cloud_fraction.png", dpi=400, bbox_inches="tight", facecolor="w")
+plt.savefig(path+"baseline_cloud_fraction.pdf", dpi=400, bbox_inches="tight", facecolor="w")
 ds.close()

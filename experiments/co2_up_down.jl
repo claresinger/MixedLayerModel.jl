@@ -73,6 +73,6 @@ par.SW_b = 140;
 co2u = "[200, 300, 400, 600, 800, 1000, 1200, 1300, 1400, 1600]";
 co2d = "[1600, 1400, 1300, 1200, 1000, 800, 600, 400, 300, 200]";
 ARGS = [exp_path, co2u, co2d];
-# include("plot_hysteresis.jl")
+include("plot_hysteresis.jl")
 # include("plot_hysteresis_thesis.jl")
-include("plot_hysteresis_lwp.jl")
+# include("plot_hysteresis_lwp.jl")

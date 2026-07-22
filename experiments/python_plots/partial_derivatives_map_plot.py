@@ -49,7 +49,8 @@ for i, var in enumerate(keys):
         gl.left_labels = False
     if i == 0:
         cb = plt.colorbar(h,cax=cax,label="$\\Delta$ All-sky LWP [g m$^{-2}$]", orientation="horizontal")
-plt.savefig(path+"box_linear_perturb_JJA_NEP.png", dpi=200, bbox_inches="tight", facecolor="w")
+# plt.savefig(path+"box_linear_perturb_JJA_NEP.png", dpi=200, bbox_inches="tight", facecolor="w")
+plt.savefig(path+"box_linear_perturb_JJA_NEP.pdf", dpi=200, bbox_inches="tight", facecolor="w")
 ds.close()
 
 # ########################################################
